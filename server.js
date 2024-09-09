@@ -90,8 +90,10 @@ app.post('/sefer-kaydet', (req, res) => {
         ayaklar.push(ayak);
     }
 
+    // Yeni sea_consumption sütunları ve sea_day sütunları ekleniyor
     const tableName = `sefer_${Date.now()}`;
     const seaDayColumns = yakitlar.map(yakit => `\`${yakit.replace(/\s+/g, '_')}_sea_day\` FLOAT`).join(', ');
+    const seaConsumptionColumns = yakitlar.map(yakit => `\`${yakit.replace(/\s+/g, '_')}_sea_consumption\` FLOAT`).join(', ');
 
     const createTableQuery = `
         CREATE TABLE IF NOT EXISTS \`${tableName}\` (
@@ -104,7 +106,10 @@ app.post('/sefer-kaydet', (req, res) => {
             speed FLOAT NOT NULL,
             denizde_kalinan_sure FLOAT NOT NULL,
             status VARCHAR(255) NOT NULL,
+            gunluk_tuketim_liman FLOAT NOT NULL,
+            gunluk_tuketim_port FLOAT NOT NULL,
             ${seaDayColumns},
+            ${seaConsumptionColumns},
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
     `;
@@ -145,12 +150,15 @@ app.post('/sefer-kaydet', (req, res) => {
                         }
                     });
 
+                    // Her yakıt için sea_consumption hesaplanması (sea_day * gunluk_tuketim_liman)
+                    const seaConsumptions = seaDays.map(seaDay => seaDay * seferBilgisi.gunluk_tuketim_liman);
+
                     const insertAyakQuery = `
-                        INSERT INTO \`${tableName}\` (from_liman, to_liman, distance, distance_eca, port_day, speed, denizde_kalinan_sure, status, ${yakitlar.map(yakit => `\`${yakit.replace(/\s+/g, '_')}_sea_day\``).join(', ')})
-                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ${seaDays.map(() => '?').join(', ')})
+                        INSERT INTO \`${tableName}\` (from_liman, to_liman, distance, distance_eca, port_day, speed, denizde_kalinan_sure, status, gunluk_tuketim_liman, gunluk_tuketim_port, ${yakitlar.map(yakit => `\`${yakit.replace(/\s+/g, '_')}_sea_day\``).join(', ')}, ${yakitlar.map(yakit => `\`${yakit.replace(/\s+/g, '_')}_sea_consumption\``).join(', ')})
+                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ${seaDays.map(() => '?').join(', ')}, ${seaConsumptions.map(() => '?').join(', ')})
                     `;
 
-                    const ayakValues = [ayak.from, ayak.to, ayak.distance, ayak.distance_eca, ayak.port_day, ayak.speed, ayak.denizde_kalinan_sure, status, ...seaDays];
+                    const ayakValues = [ayak.from, ayak.to, ayak.distance, ayak.distance_eca, ayak.port_day, ayak.speed, ayak.denizde_kalinan_sure, status, seferBilgisi.gunluk_tuketim_liman, seferBilgisi.gunluk_tuketim_port, ...seaDays, ...seaConsumptions];
 
                     db.query(insertAyakQuery, ayakValues, (err) => {
                         if (err) {
