@@ -22,6 +22,11 @@ const adminFilePath = path.join(__dirname, "view", "index.html");
 app.get('/', (req, res) => {
     res.sendFile(adminFilePath);
 });
+const adminFilePath2 = path.join(__dirname, "view", "tables.html");
+app.get('/tables', (req, res) => {
+    res.sendFile(adminFilePath2);
+});
+
 
 // Rota verilerini alma (rota_data endpoint'i)
 app.get('/rota_data', (req, res) => {
@@ -174,5 +179,21 @@ app.post('/sefer-kaydet', (req, res) => {
         });
 
         res.send('Sefer bilgileri başarıyla kaydedildi.');
+    });
+});
+app.get('/get-tables', (req, res) => {
+    const query = `
+        SELECT table_name AS name, create_time AS created_at
+        FROM information_schema.tables
+        WHERE table_schema = 'arkas'  
+        ORDER BY create_time DESC
+    `;
+
+    db.query(query, (err, result) => {
+        if (err) {
+            console.error('Tablolar alınırken hata oluştu:', err.message);
+            return res.status(500).send('Tablolar alınırken hata oluştu.');
+        }
+        res.json(result);
     });
 });
