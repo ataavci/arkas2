@@ -106,7 +106,7 @@ app.post('/sefer-kaydet', (req, res) => {
             speed FLOAT NOT NULL,
             denizde_kalinan_sure FLOAT NOT NULL,
             status VARCHAR(255) NOT NULL,
-            gunluk_tuketim_liman FLOAT NOT NULL,
+            gunluk_tuketim_sea FLOAT NOT NULL,
             gunluk_tuketim_port FLOAT NOT NULL,
             ${seaDayColumns},
             ${seaConsumptionColumns},
@@ -154,7 +154,7 @@ app.post('/sefer-kaydet', (req, res) => {
                     const seaConsumptions = seaDays.map(seaDay => seaDay * seferBilgisi.gunluk_tuketim_liman);
 
                     const insertAyakQuery = `
-                        INSERT INTO \`${tableName}\` (from_liman, to_liman, distance, distance_eca, port_day, speed, denizde_kalinan_sure, status, gunluk_tuketim_liman, gunluk_tuketim_port, ${yakitlar.map(yakit => `\`${yakit.replace(/\s+/g, '_')}_sea_day\``).join(', ')}, ${yakitlar.map(yakit => `\`${yakit.replace(/\s+/g, '_')}_sea_consumption\``).join(', ')})
+                        INSERT INTO \`${tableName}\` (from_liman, to_liman, distance, distance_eca, port_day, speed, denizde_kalinan_sure, status, gunluk_tuketim_sea, gunluk_tuketim_port, ${yakitlar.map(yakit => `\`${yakit.replace(/\s+/g, '_')}_sea_day\``).join(', ')}, ${yakitlar.map(yakit => `\`${yakit.replace(/\s+/g, '_')}_sea_consumption\``).join(', ')})
                         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ${seaDays.map(() => '?').join(', ')}, ${seaConsumptions.map(() => '?').join(', ')})
                     `;
 
