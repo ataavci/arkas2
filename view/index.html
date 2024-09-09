@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gemi Yakıt Verileri</title>
+  <!-- Bootstrap CSS -->
+  <link rel="stylesheet" href="/static/css/style.css">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+</head>
+
+<body>
+  <!-- =============== Navigation ================ -->
+  <div class="container">
+    <div class="navigation">
+      <ul>
+        <li>
+          <a href="#"><span class="title">arkas</span></a>
+        </li>
+        <li><a href="#"><span class="icon"><ion-icon name="home-outline"></ion-icon></span><span class="title">Dashboard</span></a></li>
+        <li><a href="#"><span class="icon"><ion-icon name="people-outline"></ion-icon></span><span class="title">ETS</span></a></li>
+        <li><a href="#"><span class="icon"><ion-icon name="chatbubble-outline"></ion-icon></span><span class="title">Messages</span></a></li>
+        <li><a href="#"><span class="icon"><ion-icon name="help-outline"></ion-icon></span><span class="title">Help</span></a></li>
+        <li><a href="#"><span class="icon"><ion-icon name="settings-outline"></ion-icon></span><span class="title">Settings</span></a></li>
+        <li><a href="#"><span class="icon"><ion-icon name="lock-closed-outline"></ion-icon></span><span class="title">Password</span></a></li>
+        <li><a href="#"><span class="icon"><ion-icon name="log-out-outline"></ion-icon></span><span class="title">Sign Out</span></a></li>
+      </ul>
+    </div>
+
+    <!-- ========================= Main ==================== -->
+    <div class="main">
+      <div class="topbar">
+        <div class="toggle"><ion-icon name="menu-outline"></ion-icon></div>
+        <div class="search"><label><input type="text" placeholder="Search here"><ion-icon name="search-outline"></ion-icon></label></div>
+        <div class="user"><img src="assets/imgs/customer01.jpg" alt=""></div>
+      </div>
+
+      <!-- ======================= Cards ================== -->
+      <div class="cardBox">
+        <div class="card"><div><div class="numbers">1,504</div><div class="cardName">Daily Views</div></div><div class="iconBx"><ion-icon name="eye-outline"></ion-icon></div></div>
+        <div class="card"><div><div class="numbers">80</div><div class="cardName">Sales</div></div><div class="iconBx"><ion-icon name="cart-outline"></ion-icon></div></div>
+        <div class="card"><div><div class="numbers">284</div><div class="cardName">Comments</div></div><div class="iconBx"><ion-icon name="chatbubbles-outline"></ion-icon></div></div>
+        <div class="card"><div><div class="numbers">$7,842</div><div class="cardName">Earning</div></div><div class="iconBx"><ion-icon name="cash-outline"></ion-icon></div></div>
+      </div>
+
+      <h2>Sefer Bilgileri Girişi</h2>
+      <form action="/sefer-kaydet" method="post" id="seferForm">
+          <label for="ayak_sayisi">Seferin Kaç Ayağı Var?</label>
+          <input type="number" id="ayak_sayisi" name="ayak_sayisi" required><br><br>
+
+          <div id="ayakInputs">
+              <!-- Dinamik olarak eklenen from-to-distance-distance_eca-port_day inputları buraya gelecek -->
+          </div>
+
+          <label for="speed">Hız (km/saat):</label>
+          <input type="number" id="speed" name="speed" step="any" required><br><br>
+
+          <label for="gunluk_tuketim_liman">Günlük Tüketim Liman (ton):</label>
+          <input type="number" id="gunluk_tuketim_liman" name="gunluk_tuketim_liman" step="any" required><br><br>
+
+          <label for="gunluk_tuketim_port">Günlük Tüketim Port (ton):</label>
+          <input type="number" id="gunluk_tuketim_port" name="gunluk_tuketim_port" step="any" required><br><br>
+
+          <div id="yakitler">
+              <div id="yakitInputs">
+                  <label>Yakıt Türleri:</label>
+                  <div id="yakitInputsContainer">
+                      <div class="yakitInput">
+                          <label for="yakit_1_adi">Yakıt 1 Adı:</label>
+                          <select id="yakit_1_adi" name="yakit_1_adi">
+                              <!-- Yakıt türleri buraya dinamik olarak eklenecek -->
+                          </select><br><br>
+                      </div>
+                  </div>
+                  <button type="button" id="addFuelInput">Yakıt Ekle</button>
+              </div>
+          </div>
+
+          <button type="submit">Seferi Kaydet</button>
+      </form>
+    </div>
+  </div>
+
+  <script>
+      let rota_data = [];
+      let fuelCount = 1;
+
+      // Liman ve yakıt verilerini almak için backend'den veri çek
+      document.addEventListener('DOMContentLoaded', () => {
+          // Liman verilerini fetch ile al
+          fetch('/rota_data')
+              .then(response => response.json())
+              .then(data => {
+                  rota_data = data; // Liman verilerini kaydet
+                  document.getElementById('ayak_sayisi').addEventListener('change', addWaypointInputs);
+              })
+              .catch(err => console.error('Liman verileri alınırken hata oluştu:', err));
+
+          // Yakıt türlerini fetch ile al
+          fetch('/fuel_data')
+              .then(response => response.json())
+              .then(data => {
+                  const firstSelect = document.getElementById('yakit_1_adi');
+                  fillFuelOptions(firstSelect, data);
+              })
+              .catch(err => console.error('Yakıt verileri alınırken hata oluştu:', err));
+      });
+
+      function fillFuelOptions(selectElement, data) {
+          data.forEach(fuel => {
+              const option = document.createElement('option');
+              option.value = fuel.Pathway_Name;
+              option.text = fuel.Pathway_Name;
+              selectElement.add(option);
+          });
+      }
+
+      function addFuelInput() {
+          fuelCount++;
+
+          const container = document.getElementById('yakitInputsContainer');
+          const fuelInput = `
+              <div class="yakitInput">
+                  <label for="yakit_${fuelCount}_adi">Yakıt ${fuelCount} Adı:</label>
+                  <select id="yakit_${fuelCount}_adi" name="yakit_${fuelCount}_adi"></select><br><br>
+              </div>
+          `;
+          container.innerHTML += fuelInput;
+
+          // Yeni eklenen yakıt select öğesine de yakıt türlerini ekle
+          fetch('/fuel_data')
+              .then(response => response.json())
+              .then(data => {
+                  const newSelect = document.querySelector(`#yakit_${fuelCount}_adi`);
+                  fillFuelOptions(newSelect, data);
+              })
+              .catch(err => console.error('Yakıt verileri alınırken hata oluştu:', err));
+      }
+
+      function addWaypointInputs() {
+          const ayakSayisi = document.getElementById('ayak_sayisi').value;
+          const ayakInputs = document.getElementById('ayakInputs');
+
+          let newInputs = '';
+
+          for (let i = 1; i <= ayakSayisi; i++) {
+              const fromOptions = rota_data.map(rota => `<option value="${rota.port}">${rota.port}</option>`).join('');
+              const toOptions = rota_data.map(rota => `<option value="${rota.port}">${rota.port}</option>`).join('');
+
+              const fromInput = `
+                  <label for="from_${i}">From Ayak ${i}:</label>
+                  <select id="from_${i}" name="from_${i}" required>${fromOptions}</select><br><br>
+              `;
+              const toInput = `
+                  <label for="to_${i}">To Ayak ${i}:</label>
+                  <select id="to_${i}" name="to_${i}" required>${toOptions}</select><br><br>
+              `;
+              const distanceInput = `
+                  <label for="distance_${i}">Distance Ayak ${i} (km):</label>
+                  <input type="number" id="distance_${i}" name="distance_${i}" step="any" required><br><br>
+              `;
+              const distanceECAInput = `
+                  <label for="distance_eca_${i}">Distance ECA Ayak ${i} (km):</label>
+                  <input type="number" id="distance_eca_${i}" name="distance_eca_${i}" step="any" required><br><br>
+              `;
+              const portDayInput = `
+                  <label for="port_day_${i}">Port Day Ayak ${i} (gün):</label>
+                  <input type="number" id="port_day_${i}" name="port_day_${i}" step="any" required><br><br>
+              `;
+
+              newInputs += fromInput + toInput + distanceInput + distanceECAInput + portDayInput;
+          }
+
+          ayakInputs.innerHTML = newInputs;
+      }
+  </script>
+
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
+  <script nomodule src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>
+</body>
+</html>

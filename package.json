@@ -1,0 +1,30 @@
+{
+  "name": "arkas_web",
+  "version": "1.0.0",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "arkas_web": "file:",
+    "axios": "^1.7.7",
+    "body-parser": "^1.20.2",
+    "chart": "^0.1.2",
+    "chats": "^0.0.1",
+    "cheerio": "^1.0.0",
+    "cors": "^2.8.5",
+    "ejs": "^3.1.10",
+    "express": "^4.19.2",
+    "mysql": "^2.18.1",
+    "nodemon": "^3.1.4",
+    "path": "^0.12.7",
+    "punycode": "^2.3.1",
+    "puppeteer": "^23.3.0",
+    "request": "^2.88.2"
+  },
+  "description": ""
+}
