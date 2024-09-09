@@ -148,7 +148,7 @@ app.post('/sefer-kaydet', (req, res) => {
 
                     const status = `${fromStatus}/${toStatus}`;
 
-                    // Her yakıt için sea_day hesaplanması
+                    
                     const seaDays = yakitlar.map(yakit => {
                         if (yakit === 'MGO') {
                             return (ayak.distance_eca / (ayak.speed * 24));
@@ -157,7 +157,7 @@ app.post('/sefer-kaydet', (req, res) => {
                         }
                     });
 
-                    // Her yakıt için sea_consumption hesaplanması (sea_day * gunluk_tuketim_sea)
+                    
                     const seaConsumptions = seaDays.map(seaDay => seaDay * seferBilgisi.gunluk_tuketim_sea);
 
                     const insertAyakQuery = `

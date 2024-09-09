@@ -79,26 +79,48 @@
           </div>
 
           <button type="submit">Seferi Kaydet</button>
+          <br>
+          <button id="detayTableButton">Detay Tablosunu Oluştur</button>
       </form>
     </div>
   </div>
+ 
+
+
+  
 
   <script>
+
+
+
+document.getElementById('detayTableButton').addEventListener('click', () => {
+        fetch('/create-detail-table', {
+            method: 'POST'
+        })
+        .then(response => response.text())
+        .then(data => {
+            alert(data);  // İşlem tamamlandığında kullanıcıya mesaj gösterir
+        })
+        .catch(err => {
+            console.error('Hata oluştu:', err);
+            alert('Tablo oluşturulurken hata oluştu.');
+        });
+    });
       let rota_data = [];
       let fuelCount = 1;
 
-      // Liman ve yakıt verilerini almak için backend'den veri çek
+     
       document.addEventListener('DOMContentLoaded', () => {
-          // Liman verilerini fetch ile al
+       
           fetch('/rota_data')
               .then(response => response.json())
               .then(data => {
-                  rota_data = data; // Liman verilerini kaydet
+                  rota_data = data; 
                   document.getElementById('ayak_sayisi').addEventListener('change', addWaypointInputs);
               })
               .catch(err => console.error('Liman verileri alınırken hata oluştu:', err));
 
-          // Yakıt türlerini fetch ile al
+          
           fetch('/fuel_data')
               .then(response => response.json())
               .then(data => {
@@ -117,7 +139,7 @@
           });
       }
 
-      // Yakıt ekleme fonksiyonu
+      
       document.getElementById('addFuelInput').addEventListener('click', addFuelInput);
 
       function addFuelInput() {
@@ -133,7 +155,7 @@
           
           container.appendChild(fuelInput);
 
-          // Yeni eklenen yakıt select öğesine yakıt türlerini ekle
+          
           fetch('/fuel_data')
               .then(response => response.json())
               .then(data => {
