@@ -115,19 +115,23 @@
           });
       }
 
+      // Yakıt ekleme fonksiyonu
+      document.getElementById('addFuelInput').addEventListener('click', addFuelInput);
+
       function addFuelInput() {
           fuelCount++;
 
           const container = document.getElementById('yakitInputsContainer');
-          const fuelInput = `
-              <div class="yakitInput">
-                  <label for="yakit_${fuelCount}_adi">Yakıt ${fuelCount} Adı:</label>
-                  <select id="yakit_${fuelCount}_adi" name="yakit_${fuelCount}_adi"></select><br><br>
-              </div>
+          const fuelInput = document.createElement('div');
+          fuelInput.classList.add('yakitInput');
+          fuelInput.innerHTML = `
+              <label for="yakit_${fuelCount}_adi">Yakıt ${fuelCount} Adı:</label>
+              <select id="yakit_${fuelCount}_adi" name="yakit_${fuelCount}_adi"></select><br><br>
           `;
-          container.innerHTML += fuelInput;
+          
+          container.appendChild(fuelInput);
 
-          // Yeni eklenen yakıt select öğesine de yakıt türlerini ekle
+          // Yeni eklenen yakıt select öğesine yakıt türlerini ekle
           fetch('/fuel_data')
               .then(response => response.json())
               .then(data => {
