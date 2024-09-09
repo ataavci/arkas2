@@ -63,10 +63,13 @@ app.get('/fuel_data', (req, res) => {
 
 // Sefer kaydetme (POST request)
 app.post('/sefer-kaydet', (req, res) => {
+    const vesselName = req.body.vessel_name.trim().replace(/\s+/g, '_');  // Vessel name'i al, boşlukları alt çizgi ile değiştir
+    const tableName = `sefer_${vesselName}`;  // Tablo adını vessel name'e göre oluştur
+
     const seferBilgisi = {
         ayak_sayisi: parseInt(req.body.ayak_sayisi),
         hiz: parseFloat(req.body.speed),
-        gunluk_tuketim_liman: parseFloat(req.body.gunluk_tuketim_liman),
+        gunluk_tuketim_sea: parseFloat(req.body.gunluk_tuketim_sea),
         gunluk_tuketim_port: parseFloat(req.body.gunluk_tuketim_port)
     };
 
@@ -91,7 +94,6 @@ app.post('/sefer-kaydet', (req, res) => {
     }
 
     // Yeni sea_consumption sütunları ve sea_day sütunları ekleniyor
-    const tableName = `sefer_${Date.now()}`;
     const seaDayColumns = yakitlar.map(yakit => `\`${yakit.replace(/\s+/g, '_')}_sea_day\` FLOAT`).join(', ');
     const seaConsumptionColumns = yakitlar.map(yakit => `\`${yakit.replace(/\s+/g, '_')}_sea_consumption\` FLOAT`).join(', ');
 
@@ -150,15 +152,15 @@ app.post('/sefer-kaydet', (req, res) => {
                         }
                     });
 
-                    // Her yakıt için sea_consumption hesaplanması (sea_day * gunluk_tuketim_liman)
-                    const seaConsumptions = seaDays.map(seaDay => seaDay * seferBilgisi.gunluk_tuketim_liman);
+                    // Her yakıt için sea_consumption hesaplanması (sea_day * gunluk_tuketim_sea)
+                    const seaConsumptions = seaDays.map(seaDay => seaDay * seferBilgisi.gunluk_tuketim_sea);
 
                     const insertAyakQuery = `
                         INSERT INTO \`${tableName}\` (from_liman, to_liman, distance, distance_eca, port_day, speed, denizde_kalinan_sure, status, gunluk_tuketim_sea, gunluk_tuketim_port, ${yakitlar.map(yakit => `\`${yakit.replace(/\s+/g, '_')}_sea_day\``).join(', ')}, ${yakitlar.map(yakit => `\`${yakit.replace(/\s+/g, '_')}_sea_consumption\``).join(', ')})
                         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ${seaDays.map(() => '?').join(', ')}, ${seaConsumptions.map(() => '?').join(', ')})
                     `;
 
-                    const ayakValues = [ayak.from, ayak.to, ayak.distance, ayak.distance_eca, ayak.port_day, ayak.speed, ayak.denizde_kalinan_sure, status, seferBilgisi.gunluk_tuketim_liman, seferBilgisi.gunluk_tuketim_port, ...seaDays, ...seaConsumptions];
+                    const ayakValues = [ayak.from, ayak.to, ayak.distance, ayak.distance_eca, ayak.port_day, ayak.speed, ayak.denizde_kalinan_sure, status, seferBilgisi.gunluk_tuketim_sea, seferBilgisi.gunluk_tuketim_port, ...seaDays, ...seaConsumptions];
 
                     db.query(insertAyakQuery, ayakValues, (err) => {
                         if (err) {
