@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gemi Yakıt Verileri</title>
+  <!-- Bootstrap CSS -->
+  <link rel="stylesheet" href="/static/css/style.css">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+</head>
+
+<body>
+  <!-- =============== Navigation ================ -->
+  <div class="container">
+    <div class="navigation">
+      <ul>
+        <li>
+          <a href="#"><span class="title">arkas</span></a>
+        </li>
+        <li><a href="#"><span class="icon"><ion-icon name="home-outline"></ion-icon></span><span class="title">Dashboard</span></a></li>
+        <li><a href="./index.html"><span class="icon"><ion-icon name="people-outline"></ion-icon></span><span class="title">ETS</span></a></li>
+        <li><a href="/static/view/tables.html"><span class="icon"><ion-icon name="chatbubble-outline"></ion-icon></span><span class="title">ets_tables</span></a></li>
+        <li><a href="#"><span class="icon"><ion-icon name="help-outline"></ion-icon></span><span class="title">Help</span></a></li>
+        <li><a href="#"><span class="icon"><ion-icon name="settings-outline"></ion-icon></span><span class="title">Settings</span></a></li>
+        <li><a href="#"><span class="icon"><ion-icon name="lock-closed-outline"></ion-icon></span><span class="title">Password</span></a></li>
+        <li><a href="#"><span class="icon"><ion-icon name="log-out-outline"></ion-icon></span><span class="title">Sign Out</span></a></li>
+      </ul>
+    </div>
+
+    <!-- ========================= Main ==================== -->
+    <div class="main">
+      <div class="topbar">
+        <div class="toggle"><ion-icon name="menu-outline"></ion-icon></div>
+        <div class="search"><label><input type="text" placeholder="Search here"><ion-icon name="search-outline"></ion-icon></label></div>
+        <div class="user"><img src="assets/imgs/customer01.jpg" alt=""></div>
+      </div>
+
+      <!-- ======================= Cards ================== -->
+      <div class="cardBox">
+        <div class="card"><div><div class="numbers">1,504</div><div class="cardName">Daily Views</div></div><div class="iconBx"><ion-icon name="eye-outline"></ion-icon></div></div>
+        <div class="card"><div><div class="numbers">80</div><div class="cardName">Sales</div></div><div class="iconBx"><ion-icon name="cart-outline"></ion-icon></div></div>
+        <div class="card"><div><div class="numbers">284</div><div class="cardName">Comments</div></div><div class="iconBx"><ion-icon name="chatbubbles-outline"></ion-icon></div></div>
+        <div class="card"><div><div class="numbers">$7,842</div><div class="cardName">Earning</div></div><div class="iconBx"><ion-icon name="cash-outline"></ion-icon></div></div>
+      </div>
+
+      <h2>Sefer Bilgileri Girişi</h2>
+<form action="/sefer-kaydet" method="post" id="seferForm">
+    <label for="vessel_name">Vessel Name:</label>
+    <input type="text" id="vessel_name" name="vessel_name" required><br><br>
+
+    <div id="ayakInputs">
+        <!-- Dinamik olarak eklenen from-to-distance-distance_eca-port_day inputları buraya gelecek -->
+    </div>
+    <button type="button" id="addWaypointInput">Ayak Ekle</button><br><br>
+
+    <label for="speed">Hız (km/saat):</label>
+    <input type="number" id="speed" name="speed" step="any" required><br><br>
+
+    <label for="gunluk_tuketim_sea">Günlük Tüketim Sea (ton):</label>
+    <input type="number" id="gunluk_tuketim_sea" name="gunluk_tuketim_sea" step="any" required><br><br>
+
+    <label for="gunluk_tuketim_port">Günlük Tüketim Port (ton):</label>
+    <input type="number" id="gunluk_tuketim_port" name="gunluk_tuketim_port" step="any" required><br><br>
+
+    <div id="yakitler">
+        <div id="yakitInputs">
+            <label>Yakıt Türleri:</label>
+            <div id="yakitInputsContainer">
+                <div class="yakitInput">
+                    <label for="yakit_1_adi">Yakıt 1 Adı:</label>
+                    <select id="yakit_1_adi" name="yakit_1_adi">
+                        <!-- Yakıt türleri buraya dinamik olarak eklenecek -->
+                    </select><br><br>
+                </div>
+            </div>
+            <button type="button" id="addFuelInput">Yakıt Ekle</button>
+        </div>
+    </div>
+
+    <button type="submit">Seferi Kaydet</button><br><br>
+    <button type="button" id="detayTableButton">Detay Tablosunu Oluştur</button>
+
+</form>
+
+
+  <script>
+
+
+
+document.getElementById('detayTableButton').addEventListener('click', () => {
+        fetch('/create-detail-table', {
+            method: 'POST'
+        })
+        .then(response => response.text())
+        .then(data => {
+            alert(data);  // İşlem tamamlandığında kullanıcıya mesaj gösterir
+        })
+        .catch(err => {
+            console.error('Hata oluştu:', err);
+            alert('Tablo oluşturulurken hata oluştu.');
+        });
+    });
+      let rota_data = [];
+      let fuelCount = 1;
+
+     
+      document.addEventListener('DOMContentLoaded', () => {
+       
+          fetch('/rota_data')
+              .then(response => response.json())
+              .then(data => {
+                  rota_data = data; 
+                  document.getElementById('ayak_sayisi').addEventListener('change', addWaypointInputs);
+              })
+              .catch(err => console.error('Liman verileri alınırken hata oluştu:', err));
+
+          
+          fetch('/fuel_data')
+              .then(response => response.json())
+              .then(data => {
+                  const firstSelect = document.getElementById('yakit_1_adi');
+                  fillFuelOptions(firstSelect, data);
+              })
+              .catch(err => console.error('Yakıt verileri alınırken hata oluştu:', err));
+      });
+
+      function fillFuelOptions(selectElement, data) {
+          data.forEach(fuel => {
+              const option = document.createElement('option');
+              option.value = fuel.Pathway_Name;
+              option.text = fuel.Pathway_Name;
+              selectElement.add(option);
+          });
+      }
+
+      
+      document.getElementById('addFuelInput').addEventListener('click', addFuelInput);
+
+      function addFuelInput() {
+          fuelCount++;
+
+          const container = document.getElementById('yakitInputsContainer');
+          const fuelInput = document.createElement('div');
+          fuelInput.classList.add('yakitInput');
+          fuelInput.innerHTML = `
+              <label for="yakit_${fuelCount}_adi">Yakıt ${fuelCount} Adı:</label>
+              <select id="yakit_${fuelCount}_adi" name="yakit_${fuelCount}_adi"></select><br><br>
+          `;
+          
+          container.appendChild(fuelInput);
+
+          
+          fetch('/fuel_data')
+              .then(response => response.json())
+              .then(data => {
+                  const newSelect = document.querySelector(`#yakit_${fuelCount}_adi`);
+                  fillFuelOptions(newSelect, data);
+              })
+              .catch(err => console.error('Yakıt verileri alınırken hata oluştu:', err));
+      }
+
+      
+
+      let waypointCount = 0; // Kaçıncı ayak eklendiğini saymak için
+
+    document.getElementById('addWaypointInput').addEventListener('click', () => {
+        addWaypointInputs();
+    });
+
+    function addWaypointInputs() {
+        waypointCount++;
+
+        const ayakInputs = document.getElementById('ayakInputs');
+        const fromOptions = rota_data.map(rota => `<option value="${rota.port}">${rota.port}</option>`).join('');
+        const toOptions = rota_data.map(rota => `<option value="${rota.port}">${rota.port}</option>`).join('');
+
+        const fromInput = `
+            <label for="from_${waypointCount}">From Ayak ${waypointCount}:</label>
+            <select id="from_${waypointCount}" name="from_${waypointCount}" required>${fromOptions}</select><br><br>
+        `;
+        const toInput = `
+            <label for="to_${waypointCount}">To Ayak ${waypointCount}:</label>
+            <select id="to_${waypointCount}" name="to_${waypointCount}" required>${toOptions}</select><br><br>
+        `;
+        const distanceInput = `
+            <label for="distance_${waypointCount}">Distance Ayak ${waypointCount} (km):</label>
+            <input type="number" id="distance_${waypointCount}" name="distance_${waypointCount}" step="any" required><br><br>
+        `;
+        const distanceECAInput = `
+            <label for="distance_eca_${waypointCount}">Distance ECA Ayak ${waypointCount} (km):</label>
+            <input type="number" id="distance_eca_${waypointCount}" name="distance_eca_${waypointCount}" step="any" required><br><br>
+        `;
+        const portDayInput = `
+            <label for="port_day_${waypointCount}">Port Day Ayak ${waypointCount} (gün):</label>
+            <input type="number" id="port_day_${waypointCount}" name="port_day_${waypointCount}" step="any" required><br><br>
+        `;
+
+        const newInputs = fromInput + toInput + distanceInput + distanceECAInput + portDayInput;
+        const newDiv = document.createElement('div');
+        newDiv.classList.add('ayakInputsItem');
+        newDiv.innerHTML = newInputs;
+        ayakInputs.appendChild(newDiv);
+
+        if (waypointCount > 1) {
+            // İlk ayak dışındaki ayaklarda from değerini bir önceki ayak to değeri olarak atıyoruz
+            const lastTo = document.getElementById(`to_${waypointCount - 1}`);
+            const currentFrom = document.getElementById(`from_${waypointCount}`);
+            currentFrom.value = lastTo.value;
+            currentFrom.disabled = true; // From değerini değiştirilemez yap
+        }
+    }
+
+    // Yakıt ekleme işlevselliği buraya eklenecek
+  </script>
+
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
+  <script nomodule src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>
+</body>
+</html>
