@@ -103,23 +103,27 @@ app.post('/sefer-kaydet', (req, res) => {
     const seaConsumptionColumns = yakitlar.map(yakit => `\`${yakit.replace(/\s+/g, '_')}_sea_consumption\` FLOAT`).join(', ');
 
     const createTableQuery = `
-        CREATE TABLE IF NOT EXISTS \`${tableName}\` (
-            id INT AUTO_INCREMENT PRIMARY KEY,
-            from_liman VARCHAR(255) NOT NULL,
-            to_liman VARCHAR(255) NOT NULL,
-            distance FLOAT NOT NULL,
-            distance_eca FLOAT NOT NULL,
-            port_day FLOAT NOT NULL,
-            speed FLOAT NOT NULL,
-            denizde_kalinan_sure FLOAT NOT NULL,
-            status VARCHAR(255) NOT NULL,
-            gunluk_tuketim_sea FLOAT NOT NULL,
-            gunluk_tuketim_port FLOAT NOT NULL,
-            ${seaDayColumns},
-            ${seaConsumptionColumns},
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        )
-    `;
+    CREATE TABLE IF NOT EXISTS \`${tableName}\` (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        company_id INT DEFAULT 1,
+        from_liman VARCHAR(255) NOT NULL,
+        to_liman VARCHAR(255) NOT NULL,
+        distance FLOAT NOT NULL,
+        distance_eca FLOAT NOT NULL,
+        port_day FLOAT NOT NULL,
+        speed FLOAT NOT NULL,
+        denizde_kalinan_sure FLOAT NOT NULL,
+        status VARCHAR(255) NOT NULL,
+        gunluk_tuketim_sea FLOAT NOT NULL,
+        gunluk_tuketim_port FLOAT NOT NULL,
+        ${seaDayColumns},
+        ${seaConsumptionColumns},
+        \`100_percent_consumption\` FLOAT,  -- Daha önce eklenen sütun
+        \`100_eca_consumption\` FLOAT,  -- Yeni sütun
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (company_id) REFERENCES arkas_ships(company_id)
+    )
+`;
 
     db.query(createTableQuery, (err, result) => {
         if (err) {
@@ -148,7 +152,6 @@ app.post('/sefer-kaydet', (req, res) => {
 
                     const status = `${fromStatus}/${toStatus}`;
 
-                    
                     const seaDays = yakitlar.map(yakit => {
                         if (yakit === 'MGO') {
                             return (ayak.distance_eca / (ayak.speed * 24));
@@ -157,15 +160,31 @@ app.post('/sefer-kaydet', (req, res) => {
                         }
                     });
 
-                    
                     const seaConsumptions = seaDays.map(seaDay => seaDay * seferBilgisi.gunluk_tuketim_sea);
 
+                    // MGO dışındaki yakıtların sea consumption toplamını hesaplıyoruz
+                    const nonMGOSeaConsumptionTotal = yakitlar.reduce((total, yakit, i) => {
+                        if (yakit !== 'MGO') {
+                            return total + seaConsumptions[i];
+                        }
+                        return total;
+                    }, 0);
+
+                    // Status 'EU/EU' ise %100 tüketimi hesapla
+                    const consumption100Percent = (status === 'EU/EU') ? nonMGOSeaConsumptionTotal * 1 : nonMGOSeaConsumptionTotal;
+
+                    // MGO_sea_consumption değerini al
+                    const mgoConsumption = seaConsumptions[yakitlar.indexOf('MGO')] || 0;
+
+                    // Status 'EU/EU' ise MGO tüketimi %100 ECA tüketim olarak hesapla
+                    const consumption100Eca = (status === 'EU/EU') ? mgoConsumption * 1 : mgoConsumption;
+
                     const insertAyakQuery = `
-                        INSERT INTO \`${tableName}\` (from_liman, to_liman, distance, distance_eca, port_day, speed, denizde_kalinan_sure, status, gunluk_tuketim_sea, gunluk_tuketim_port, ${yakitlar.map(yakit => `\`${yakit.replace(/\s+/g, '_')}_sea_day\``).join(', ')}, ${yakitlar.map(yakit => `\`${yakit.replace(/\s+/g, '_')}_sea_consumption\``).join(', ')})
-                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ${seaDays.map(() => '?').join(', ')}, ${seaConsumptions.map(() => '?').join(', ')})
+                        INSERT INTO \`${tableName}\` (from_liman, to_liman, distance, distance_eca, port_day, speed, denizde_kalinan_sure, status, gunluk_tuketim_sea, gunluk_tuketim_port, ${yakitlar.map(yakit => `\`${yakit.replace(/\s+/g, '_')}_sea_day\``).join(', ')}, ${yakitlar.map(yakit => `\`${yakit.replace(/\s+/g, '_')}_sea_consumption\``).join(', ')}, \`100_percent_consumption\`, \`100_eca_consumption\`)
+                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ${seaDays.map(() => '?').join(', ')}, ${seaConsumptions.map(() => '?').join(', ')}, ?, ?)
                     `;
 
-                    const ayakValues = [ayak.from, ayak.to, ayak.distance, ayak.distance_eca, ayak.port_day, ayak.speed, ayak.denizde_kalinan_sure, status, seferBilgisi.gunluk_tuketim_sea, seferBilgisi.gunluk_tuketim_port, ...seaDays, ...seaConsumptions];
+                    const ayakValues = [ayak.from, ayak.to, ayak.distance, ayak.distance_eca, ayak.port_day, ayak.speed, ayak.denizde_kalinan_sure, status, seferBilgisi.gunluk_tuketim_sea, seferBilgisi.gunluk_tuketim_port, ...seaDays, ...seaConsumptions, consumption100Percent, consumption100Eca];
 
                     db.query(insertAyakQuery, ayakValues, (err) => {
                         if (err) {
@@ -181,6 +200,8 @@ app.post('/sefer-kaydet', (req, res) => {
         res.send('Sefer bilgileri başarıyla kaydedildi.');
     });
 });
+
+
 app.get('/get-tables', (req, res) => {
     const query = `
         SELECT table_name AS name, create_time AS created_at
