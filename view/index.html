@@ -14,9 +14,7 @@
   <div class="container">
     <div class="navigation">
       <ul>
-        <li>
-          <a href="#"><span class="title">arkas</span></a>
-        </li>
+        <li><a href="#"><span class="title">arkas</span></a></li>
         <li><a href="#"><span class="icon"><ion-icon name="home-outline"></ion-icon></span><span class="title">Dashboard</span></a></li>
         <li><a href="./index.html"><span class="icon"><ion-icon name="people-outline"></ion-icon></span><span class="title">ETS</span></a></li>
         <li><a href="/static/view/tables.html"><span class="icon"><ion-icon name="chatbubble-outline"></ion-icon></span><span class="title">ets_tables</span></a></li>
@@ -47,80 +45,40 @@
       <form action="/sefer-kaydet" method="post" id="seferForm">
         <label for="vessel_name">Vessel Name:</label>
         <input type="text" id="vessel_name" name="vessel_name" required><br><br>
-          <label for="ayak_sayisi">Seferin Kaç Ayağı Var?</label>
-          <input type="number" id="ayak_sayisi" name="ayak_sayisi" required><br><br>
 
-          <div id="ayakInputs">
-              <!-- Dinamik olarak eklenen from-to-distance-distance_eca-port_day inputları buraya gelecek -->
-          </div>
+        <label for="ayak_sayisi">Seferin Kaç Ayağı Var?</label>
+        <input type="number" id="ayak_sayisi" name="ayak_sayisi" required><br><br>
 
-          <label for="speed">Hız (km/saat):</label>
-          <input type="number" id="speed" name="speed" step="any" required><br><br>
+        <div id="ayakInputs">
+            <!-- Dinamik olarak eklenen from-to-distance-distance_eca-port_day inputları buraya gelecek -->
+        </div>
 
-          <label for="gunluk_tuketim_sea">Günlük Tüketim Sea (ton):</label>
-          <input type="number" id="gunluk_tuketim_sea" name="gunluk_tuketim_sea" step="any" required><br><br>
+        <label for="speed">Hız (km/saat):</label>
+        <input type="number" id="speed" name="speed" step="any" required><br><br>
 
-          <label for="gunluk_tuketim_port">Günlük Tüketim Port (ton):</label>
-          <input type="number" id="gunluk_tuketim_port" name="gunluk_tuketim_port" step="any" required><br><br>
+        <label for="gunluk_tuketim_sea">Günlük Tüketim Sea (ton):</label>
+        <input type="number" id="gunluk_tuketim_sea" name="gunluk_tuketim_sea" step="any" required><br><br>
 
-          <div id="yakitler">
-              <div id="yakitInputs">
-                  <label>Yakıt Türleri:</label>
-                  <div id="yakitInputsContainer">
-                      <div class="yakitInput">
-                          <label for="yakit_1_adi">Yakıt 1 Adı:</label>
-                          <select id="yakit_1_adi" name="yakit_1_adi">
-                              <!-- Yakıt türleri buraya dinamik olarak eklenecek -->
-                          </select><br><br>
-                      </div>
-                  </div>
-                  <button type="button" id="addFuelInput">Yakıt Ekle</button>
-              </div>
-          </div>
+        <label for="gunluk_tuketim_port">Günlük Tüketim Port (ton):</label>
+        <input type="number" id="gunluk_tuketim_port" name="gunluk_tuketim_port" step="any" required><br><br>
 
-          <button type="submit">Seferi Kaydet</button>
-          <br>
-          <button id="detayTableButton">Detay Tablosunu Oluştur</button>
+        <button type="submit">Seferi Kaydet</button>
       </form>
     </div>
   </div>
- 
-
-
-  
 
   <script>
-
-
-
-document.getElementById('detayTableButton').addEventListener('click', () => {
-        fetch('/create-detail-table', {
-            method: 'POST'
-        })
-        .then(response => response.text())
-        .then(data => {
-            alert(data);  // İşlem tamamlandığında kullanıcıya mesaj gösterir
-        })
-        .catch(err => {
-            console.error('Hata oluştu:', err);
-            alert('Tablo oluşturulurken hata oluştu.');
-        });
-    });
       let rota_data = [];
-      let fuelCount = 1;
 
-     
       document.addEventListener('DOMContentLoaded', () => {
-       
           fetch('/rota_data')
               .then(response => response.json())
               .then(data => {
-                  rota_data = data; 
+                  rota_data = data;
                   document.getElementById('ayak_sayisi').addEventListener('change', addWaypointInputs);
               })
               .catch(err => console.error('Liman verileri alınırken hata oluştu:', err));
 
-          
           fetch('/fuel_data')
               .then(response => response.json())
               .then(data => {
@@ -139,67 +97,50 @@ document.getElementById('detayTableButton').addEventListener('click', () => {
           });
       }
 
-      
-      document.getElementById('addFuelInput').addEventListener('click', addFuelInput);
-
-      function addFuelInput() {
-          fuelCount++;
-
-          const container = document.getElementById('yakitInputsContainer');
-          const fuelInput = document.createElement('div');
-          fuelInput.classList.add('yakitInput');
-          fuelInput.innerHTML = `
-              <label for="yakit_${fuelCount}_adi">Yakıt ${fuelCount} Adı:</label>
-              <select id="yakit_${fuelCount}_adi" name="yakit_${fuelCount}_adi"></select><br><br>
-          `;
-          
-          container.appendChild(fuelInput);
-
-          
-          fetch('/fuel_data')
-              .then(response => response.json())
-              .then(data => {
-                  const newSelect = document.querySelector(`#yakit_${fuelCount}_adi`);
-                  fillFuelOptions(newSelect, data);
-              })
-              .catch(err => console.error('Yakıt verileri alınırken hata oluştu:', err));
-      }
-
       function addWaypointInputs() {
           const ayakSayisi = document.getElementById('ayak_sayisi').value;
           const ayakInputs = document.getElementById('ayakInputs');
-
-          let newInputs = '';
+          ayakInputs.innerHTML = '';  // Önceki inputları temizle
 
           for (let i = 1; i <= ayakSayisi; i++) {
               const fromOptions = rota_data.map(rota => `<option value="${rota.port}">${rota.port}</option>`).join('');
               const toOptions = rota_data.map(rota => `<option value="${rota.port}">${rota.port}</option>`).join('');
 
-              const fromInput = `
-                  <label for="from_${i}">From Ayak ${i}:</label>
-                  <select id="from_${i}" name="from_${i}" required>${fromOptions}</select><br><br>
-              `;
-              const toInput = `
-                  <label for="to_${i}">To Ayak ${i}:</label>
-                  <select id="to_${i}" name="to_${i}" required>${toOptions}</select><br><br>
-              `;
-              const distanceInput = `
-                  <label for="distance_${i}">Distance Ayak ${i} (km):</label>
-                  <input type="number" id="distance_${i}" name="distance_${i}" step="any" required><br><br>
-              `;
-              const distanceECAInput = `
-                  <label for="distance_eca_${i}">Distance ECA Ayak ${i} (km):</label>
-                  <input type="number" id="distance_eca_${i}" name="distance_eca_${i}" step="any" required><br><br>
-              `;
-              const portDayInput = `
-                  <label for="port_day_${i}">Port Day Ayak ${i} (gün):</label>
-                  <input type="number" id="port_day_${i}" name="port_day_${i}" step="any" required><br><br>
+              const newInputs = `
+                  <div>
+                      <label for="from_${i}">From Ayak ${i}:</label>
+                      <select id="from_${i}" name="from_${i}" required>${fromOptions}</select><br><br>
+                      <label for="to_${i}">To Ayak ${i}:</label>
+                      <select id="to_${i}" name="to_${i}" required>${toOptions}</select><br><br>
+                      <label for="distance_${i}">Distance Ayak ${i} (km):</label>
+                      <input type="number" id="distance_${i}" name="distance_${i}" step="any" required><br><br>
+                      <label for="distance_eca_${i}">Distance ECA Ayak ${i} (km):</label>
+                      <input type="number" id="distance_eca_${i}" name="distance_eca_${i}" step="any" required><br><br>
+                      <label for="port_day_${i}">Port Day Ayak ${i} (gün):</label>
+                      <input type="number" id="port_day_${i}" name="port_day_${i}" step="any" required><br><br>
+                      <label for="port_fuel_${i}">Port Yakıt Ayak ${i}:</label>
+                      <select id="port_fuel_${i}" name="port_fuel_${i}" required></select><br><br>
+                      <label for="sea_fuel_${i}">Sea Yakıt Ayak ${i}:</label>
+                      <select id="sea_fuel_${i}" name="sea_fuel_${i}" required></select><br><br>
+                      <label for="eca_fuel_${i}">ECA Sea Yakıt Ayak ${i}:</label>
+                      <select id="eca_fuel_${i}" name="eca_fuel_${i}" required></select><br><br>
+                  </div>
               `;
 
-              newInputs += fromInput + toInput + distanceInput + distanceECAInput + portDayInput;
+              ayakInputs.innerHTML += newInputs;
           }
 
-          ayakInputs.innerHTML = newInputs;
+          // Yakıt türlerini dinamik olarak doldur
+          fetch('/fuel_data')
+              .then(response => response.json())
+              .then(data => {
+                  for (let i = 1; i <= ayakSayisi; i++) {
+                      fillFuelOptions(document.getElementById(`port_fuel_${i}`), data);
+                      fillFuelOptions(document.getElementById(`sea_fuel_${i}`), data);
+                      fillFuelOptions(document.getElementById(`eca_fuel_${i}`), data);
+                  }
+              })
+              .catch(err => console.error('Yakıt verileri alınırken hata oluştu:', err));
       }
   </script>
 
