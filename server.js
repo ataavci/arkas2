@@ -112,6 +112,8 @@ app.post('/sefer-kaydet', (req, res) => {
             consumption_0_port FLOAT DEFAULT 0,
             0_sea_consumption FLOAT DEFAULT 0,
             0_eca_consumption FLOAT DEFAULT 0,
+            ets FLOAT DEFAULT 0,
+            Fuel_Consumption_Total FLOAT DEFAULT 0, -- Yeni sütun
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY (company_id) REFERENCES arkas_ships(company_id)
         )
@@ -157,34 +159,74 @@ app.post('/sefer-kaydet', (req, res) => {
                     const consumption100Port = (toStatus === 'EU') ? portConsumption : 0;
                     const consumption0Port = (toStatus === 'NON-EU') ? portConsumption * 0 : 0;
 
-                    // NON-EU/NON-EU koşuluna göre 0_sea_consumption ve 0_eca_consumption kolonlarını dolduruyoruz.
                     const zeroSeaConsumption = (status === 'NON-EU/NON-EU') ? seaConsumption : 0;
                     const zeroEcaConsumption = (status === 'NON-EU/NON-EU') ? ecaConsumption : 0;
 
-                    const insertAyakQuery = `
-                        INSERT INTO ${tableName} (
-                            from_liman, to_liman, status, distance, distance_eca, port_day, speed, denizde_kalinan_sure, 
-                            gunluk_tuketim_sea, gunluk_tuketim_port, sea_consumption, eca_consumption, port_consumption,
-                            consumption_100_sea, consumption_50_sea, consumption_100_eca, consumption_50_eca, consumption_100_port, consumption_0_port,
-                            sea_fuel, eca_fuel, port_fuel, 0_sea_consumption, 0_eca_consumption
-                        )
-                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                    `;
+                    // Yakıt verilerini çekme
+                    const fuelQuery = `SELECT Cf_CO2_ggFuel FROM fuel_data WHERE Pathway_Name = ?`;
 
-                    const ayakValues = [
-                        ayak.from, ayak.to, status, ayak.distance, ayak.distance_eca, ayak.port_day, ayak.speed, ayak.denizde_kalinan_sure,
-                        seferBilgisi.gunluk_tuketim_sea, seferBilgisi.gunluk_tuketim_port,
-                        seaConsumption, ecaConsumption, portConsumption,
-                        consumption100Sea, consumption50Sea, consumption100Eca, consumption50Eca, consumption100Port, consumption0Port,
-                        ayak.sea_fuel, ayak.eca_fuel, ayak.port_fuel, zeroSeaConsumption, zeroEcaConsumption
-                    ];
-
-                    db.query(insertAyakQuery, ayakValues, (err) => {
-                        if (err) {
-                            console.error(`Ayak ${index + 1} bilgisi eklenirken hata oluştu:`, err.message);
+                    // 100 ve 50 sea tüketimlerini topla ve Cf_CO2_ggFuel ile çarp
+                    db.query(fuelQuery, [ayak.sea_fuel], (err, seaFuelResult) => {
+                        if (err || seaFuelResult.length === 0) {
+                            console.error('Yakıt verisi alınırken hata:', err ? err.message : 'Yakıt bulunamadı');
                             return;
                         }
-                        console.log(`Ayak ${index + 1} bilgisi başarıyla eklendi.`);
+                        const seaCfCO2 = seaFuelResult[0].Cf_CO2_ggFuel;
+                        const seaTotalConsumption = (consumption100Sea + consumption50Sea) * seaCfCO2;
+
+                        // 100 port tüketimini Cf_CO2_ggFuel ile çarp
+                        db.query(fuelQuery, [ayak.port_fuel], (err, portFuelResult) => {
+                            if (err || portFuelResult.length === 0) {
+                                console.error('Yakıt verisi alınırken hata:', err ? err.message : 'Yakıt bulunamadı');
+                                return;
+                            }
+                            const portCfCO2 = portFuelResult[0].Cf_CO2_ggFuel;
+                            const portTotalConsumption = consumption100Port * portCfCO2;
+
+                            // 100 ve 50 eca tüketimlerini topla ve Cf_CO2_ggFuel ile çarp
+                            db.query(fuelQuery, [ayak.eca_fuel], (err, ecaFuelResult) => {
+                                if (err || ecaFuelResult.length === 0) {
+                                    console.error('Yakıt verisi alınırken hata:', err ? err.message : 'Yakıt bulunamadı');
+                                    return;
+                                }
+                                const ecaCfCO2 = ecaFuelResult[0].Cf_CO2_ggFuel;
+                                const ecaTotalConsumption = (consumption100Eca + consumption50Eca) * ecaCfCO2;
+
+                                // Tüm sonuçları topla ve 0,4 ile çarp
+                                const etsValue = 0.4 * (seaTotalConsumption + portTotalConsumption + ecaTotalConsumption);
+
+                                // Fuel Consumption Total hesapla
+                                const fuelConsumptionTotal = consumption100Sea + consumption50Sea + zeroSeaConsumption +
+                                                             consumption100Eca + consumption50Eca + zeroEcaConsumption +
+                                                             consumption100Port + consumption0Port;
+
+                                const insertAyakQuery = `
+                                    INSERT INTO ${tableName} (
+                                        from_liman, to_liman, status, distance, distance_eca, port_day, speed, denizde_kalinan_sure, 
+                                        gunluk_tuketim_sea, gunluk_tuketim_port, sea_consumption, eca_consumption, port_consumption,
+                                        consumption_100_sea, consumption_50_sea, consumption_100_eca, consumption_50_eca, consumption_100_port, consumption_0_port,
+                                        sea_fuel, eca_fuel, port_fuel, 0_sea_consumption, 0_eca_consumption, ets, Fuel_Consumption_Total
+                                    )
+                                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                                `;
+
+                                const ayakValues = [
+                                    ayak.from, ayak.to, status, ayak.distance, ayak.distance_eca, ayak.port_day, ayak.speed, ayak.denizde_kalinan_sure,
+                                    seferBilgisi.gunluk_tuketim_sea, seferBilgisi.gunluk_tuketim_port,
+                                    seaConsumption, ecaConsumption, portConsumption,
+                                    consumption100Sea, consumption50Sea, consumption100Eca, consumption50Eca, consumption100Port, consumption0Port,
+                                    ayak.sea_fuel, ayak.eca_fuel, ayak.port_fuel, zeroSeaConsumption, zeroEcaConsumption, etsValue, fuelConsumptionTotal
+                                ];
+
+                                db.query(insertAyakQuery, ayakValues, (err) => {
+                                    if (err) {
+                                        console.error(`Ayak ${index + 1} bilgisi eklenirken hata oluştu:`, err.message);
+                                        return;
+                                    }
+                                    console.log(`Ayak ${index + 1} bilgisi başarıyla eklendi.`);
+                                });
+                            });
+                        });
                     });
                 });
             });
