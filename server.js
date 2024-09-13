@@ -27,7 +27,6 @@ app.get('/tables', (req, res) => {
     res.sendFile(adminFilePath2);
 });
 
-
 // Rota verilerini alma (rota_data endpoint'i)
 app.get('/rota_data', (req, res) => {
     const limanlarQuery = 'SELECT port, status FROM rota_data';
@@ -110,6 +109,7 @@ app.post('/sefer-kaydet', (req, res) => {
             company_id INT DEFAULT 1,
             from_liman VARCHAR(255) NOT NULL,
             to_liman VARCHAR(255) NOT NULL,
+            status VARCHAR(255),
             distance FLOAT NOT NULL,
             distance_eca FLOAT NOT NULL,
             port_day FLOAT NOT NULL,
@@ -160,16 +160,16 @@ app.post('/sefer-kaydet', (req, res) => {
 
                     const insertAyakQuery = `
                         INSERT INTO ${tableName} (
-                            from_liman, to_liman, distance, distance_eca, port_day, speed, denizde_kalinan_sure, gunluk_tuketim_sea, gunluk_tuketim_port,
+                            from_liman, to_liman, status, distance, distance_eca, port_day, speed, denizde_kalinan_sure, gunluk_tuketim_sea, gunluk_tuketim_port,
                             ${Array.from(allSeaFuels).map(fuel => `${fuel.replace(/\s+/g, '_')}_sea_consumption`).join(', ')},
                             ${Array.from(allPortFuels).map(fuel => `${fuel.replace(/\s+/g, '_')}_port_consumption`).join(', ')},
                             ${Array.from(allEcaFuels).map(fuel => `${fuel.replace(/\s+/g, '_')}_eca_consumption`).join(', ')}
                         )
-                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ${seaConsumptions.map(() => '?').join(', ')}, ${portConsumptions.map(() => '?').join(', ')}, ${ecaConsumptions.map(() => '?').join(', ')})
+                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ${seaConsumptions.map(() => '?').join(', ')}, ${portConsumptions.map(() => '?').join(', ')}, ${ecaConsumptions.map(() => '?').join(', ')})
                     `;
 
                     const ayakValues = [
-                        ayak.from, ayak.to, ayak.distance, ayak.distance_eca, ayak.port_day, ayak.speed, ayak.denizde_kalinan_sure, 
+                        ayak.from, ayak.to, status, ayak.distance, ayak.distance_eca, ayak.port_day, ayak.speed, ayak.denizde_kalinan_sure, 
                         seferBilgisi.gunluk_tuketim_sea, seferBilgisi.gunluk_tuketim_port, 
                         ...seaConsumptions, ...portConsumptions, ...ecaConsumptions
                     ];
