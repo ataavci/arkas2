@@ -88,24 +88,12 @@ app.post('/sefer-kaydet', (req, res) => {
             speed: seferBilgisi.hiz,
             sea_fuel: req.body[`sea_fuel_${i}`],
             port_fuel: req.body[`port_fuel_${i}`],
-            eca_fuel: req.body[`eca_fuel_${i}`]  // ECA yakıtı ekleniyor
+            eca_fuel: req.body[`eca_fuel_${i}`]
         };
 
         ayak.denizde_kalinan_sure = (ayak.distance + ayak.distance_eca) / (ayak.speed * 24);
         ayaklar.push(ayak);
     }
-
-    const allSeaFuels = new Set(ayaklar.map(ayak => ayak.sea_fuel));
-    const allPortFuels = new Set(ayaklar.map(ayak => ayak.port_fuel));
-    const allEcaFuels = new Set(ayaklar.map(ayak => ayak.eca_fuel));
-
-    const seaConsumptionColumns = Array.from(allSeaFuels).map(fuel => `${fuel.replace(/\s+/g, '_')}_sea_consumption FLOAT DEFAULT 0`).join(', ');
-    const portConsumptionColumns = Array.from(allPortFuels).map(fuel => `${fuel.replace(/\s+/g, '_')}_port_consumption FLOAT DEFAULT 0`).join(', ');
-    const ecaConsumptionColumns = Array.from(allEcaFuels).map(fuel => `${fuel.replace(/\s+/g, '_')}_eca_consumption FLOAT DEFAULT 0`).join(', ');
-
-    // Yeni 100 sea, 100 eca ve port consumption sütunları ekleniyor
-    const consumption100SeaColumn = `100_sea_consumption FLOAT DEFAULT 0`;
-    const consumption100EcaColumn = `100_eca_consumption FLOAT DEFAULT 0`;
 
     const createTableQuery = `
         CREATE TABLE IF NOT EXISTS ${tableName} (
@@ -121,11 +109,14 @@ app.post('/sefer-kaydet', (req, res) => {
             denizde_kalinan_sure FLOAT NOT NULL,
             gunluk_tuketim_sea FLOAT NOT NULL,
             gunluk_tuketim_port FLOAT NOT NULL,
-            ${seaConsumptionColumns},
-            ${portConsumptionColumns},  -- Port consumption sütunları burada dinamik olarak oluşturuluyor
-            ${ecaConsumptionColumns},
-            ${consumption100SeaColumn},  -- Yeni 100 sea consumption sütunu
-            ${consumption100EcaColumn},  -- Yeni 100 eca consumption sütunu
+            sea_consumption FLOAT DEFAULT 0,
+            eca_consumption FLOAT DEFAULT 0,
+            port_consumption FLOAT DEFAULT 0,
+            consumption_100_sea FLOAT DEFAULT 0,
+            consumption_50_sea FLOAT DEFAULT 0,
+            consumption_100_eca FLOAT DEFAULT 0,
+            consumption_50_eca FLOAT DEFAULT 0,
+            consumption_100_port FLOAT DEFAULT 0,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY (company_id) REFERENCES arkas_ships(company_id)
         )
@@ -159,32 +150,34 @@ app.post('/sefer-kaydet', (req, res) => {
 
                     const status = `${fromStatus}/${toStatus}`;
 
-                    // Sea, port ve ECA yakıt tüketimi hesaplama
-                    const seaConsumptions = Array.from(allSeaFuels).map(fuel => ayak.sea_fuel === fuel ? ayak.denizde_kalinan_sure * seferBilgisi.gunluk_tuketim_sea : 0);
-                    const portConsumptions = Array.from(allPortFuels).map(fuel => ayak.port_fuel === fuel ? ayak.port_day * seferBilgisi.gunluk_tuketim_port : 0);
-                    const ecaConsumptions = Array.from(allEcaFuels).map(fuel => ayak.eca_fuel === fuel ? ayak.distance_eca / (ayak.speed * 24) * seferBilgisi.gunluk_tuketim_sea : 0);
+                    // Sea, ECA ve port yakıt tüketimi hesaplama
+                    const seaConsumption = ayak.denizde_kalinan_sure * seferBilgisi.gunluk_tuketim_sea;
+                    const ecaConsumption = ayak.distance_eca / (ayak.speed * 24) * seferBilgisi.gunluk_tuketim_sea;
+                    const portConsumption = ayak.port_day * seferBilgisi.gunluk_tuketim_port;
 
-                    // Eğer status EU/EU ise sea, port ve eca consumption değerlerini 1 ile çarp ve 100% sütunlarına ekle
-                    const consumption100Sea = seaConsumptions.map(consumption => status === 'EU/EU' ? consumption : 0);
-                    const consumption100Eca = ecaConsumptions.map(consumption => status === 'EU/EU' ? consumption : 0);
+                    // 100%, 50% ve 0% consumption hesaplama
+                    const consumption100Sea = (status === 'EU/EU') ? seaConsumption : 0;
+                    const consumption50Sea = (status === 'EU/NON-EU' || status === 'NON-EU/EU') ? seaConsumption * 0.5 : 0;
+
+                    const consumption100Eca = (status === 'EU/EU') ? ecaConsumption : 0;
+                    const consumption50Eca = (status === 'EU/NON-EU' || status === 'NON-EU/EU') ? ecaConsumption * 0.5 : 0;
+
+                    const consumption100Port = (status === 'EU/EU') ? portConsumption : 0;
 
                     const insertAyakQuery = `
                         INSERT INTO ${tableName} (
-                            from_liman, to_liman, status, distance, distance_eca, port_day, speed, denizde_kalinan_sure, gunluk_tuketim_sea, gunluk_tuketim_port,
-                            ${Array.from(allSeaFuels).map(fuel => `${fuel.replace(/\s+/g, '_')}_sea_consumption`).join(', ')},
-                            ${Array.from(allPortFuels).map(fuel => `${fuel.replace(/\s+/g, '_')}_port_consumption`).join(', ')},
-                            ${Array.from(allEcaFuels).map(fuel => `${fuel.replace(/\s+/g, '_')}_eca_consumption`).join(', ')},
-                            100_sea_consumption, 100_eca_consumption
+                            from_liman, to_liman, status, distance, distance_eca, port_day, speed, denizde_kalinan_sure, 
+                            gunluk_tuketim_sea, gunluk_tuketim_port, sea_consumption, eca_consumption, port_consumption,
+                            consumption_100_sea, consumption_50_sea, consumption_100_eca, consumption_50_eca, consumption_100_port
                         )
-                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ${seaConsumptions.map(() => '?').join(', ')}, ${portConsumptions.map(() => '?').join(', ')}, ${ecaConsumptions.map(() => '?').join(', ')}, ?, ?)
+                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                     `;
 
                     const ayakValues = [
                         ayak.from, ayak.to, status, ayak.distance, ayak.distance_eca, ayak.port_day, ayak.speed, ayak.denizde_kalinan_sure, 
                         seferBilgisi.gunluk_tuketim_sea, seferBilgisi.gunluk_tuketim_port, 
-                        ...seaConsumptions, ...portConsumptions, ...ecaConsumptions,
-                        consumption100Sea[0],  // 100% sea consumption değeri
-                        consumption100Eca[0]   // 100% eca consumption değeri
+                        seaConsumption, ecaConsumption, portConsumption,
+                        consumption100Sea, consumption50Sea, consumption100Eca, consumption50Eca, consumption100Port
                     ];
 
                     db.query(insertAyakQuery, ayakValues, (err) => {
