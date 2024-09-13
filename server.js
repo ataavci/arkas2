@@ -1,15 +1,18 @@
 const express = require("express");
 const path = require("path");
 const bodyParser = require("body-parser");
-const app = express();
-const db = require("./data/db"); // Veritabanı bağlantısı
 const cors = require('cors');
+const db = require("./data/db"); // Veritabanı bağlantısı
+
+const app = express();
+const port = 3000;
+
+// Middleware ayarları
 app.use(cors());
 app.use(express.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-const port = 3000;
 app.listen(port, () => {
     console.log(`Sunucu ${port} portunda başlatıldı`);
 });
@@ -17,15 +20,9 @@ app.listen(port, () => {
 // Static dosyalar (CSS, JS vs.)
 app.use("/static", express.static(path.join(__dirname, "public")));
 
-// Ana sayfa (index.html)
-const adminFilePath = path.join(__dirname, "view", "index.html");
-app.get('/', (req, res) => {
-    res.sendFile(adminFilePath);
-});
-const adminFilePath2 = path.join(__dirname, "view", "tables.html");
-app.get('/tables', (req, res) => {
-    res.sendFile(adminFilePath2);
-});
+// Ana sayfalar (index.html, tables.html)
+app.get('/', (req, res) => res.sendFile(path.join(__dirname, "view", "index.html")));
+app.get('/tables', (req, res) => res.sendFile(path.join(__dirname, "view", "tables.html")));
 
 // Rota verilerini alma (rota_data endpoint'i)
 app.get('/rota_data', (req, res) => {
@@ -36,12 +33,9 @@ app.get('/rota_data', (req, res) => {
             console.error('Veritabanı sorgusu sırasında hata oluştu:', err.message);
             return res.status(500).send('Liman verileri alınırken veritabanı hatası oluştu.');
         }
-
         if (results.length === 0) {
-            console.error('Veritabanı boş sonuç döndürdü.');
             return res.status(404).send('Liman verileri bulunamadı.');
         }
-
         res.json(results);
     });
 });
@@ -55,12 +49,9 @@ app.get('/fuel_data', (req, res) => {
             console.error('Veritabanı sorgusu sırasında hata oluştu:', err.message);
             return res.status(500).send('Yakıt verileri alınırken veritabanı hatası oluştu.');
         }
-
         if (results.length === 0) {
-            console.error('Veritabanı boş sonuç döndürdü.');
             return res.status(404).send('Yakıt türleri bulunamadı.');
         }
-
         res.json(results);
     });
 });
@@ -69,7 +60,6 @@ app.get('/fuel_data', (req, res) => {
 app.post('/sefer-kaydet', (req, res) => {
     const vesselName = req.body.vessel_name.trim().replace(/\s+/g, '_');
     const tableName = `sefer_${vesselName}`;
-
     const seferBilgisi = {
         ayak_sayisi: parseInt(req.body.ayak_sayisi),
         hiz: parseFloat(req.body.speed),
@@ -90,7 +80,6 @@ app.post('/sefer-kaydet', (req, res) => {
             port_fuel: req.body[`port_fuel_${i}`],
             eca_fuel: req.body[`eca_fuel_${i}`]
         };
-
         ayak.denizde_kalinan_sure = (ayak.distance + ayak.distance_eca) / (ayak.speed * 24);
         ayaklar.push(ayak);
     }
@@ -117,6 +106,7 @@ app.post('/sefer-kaydet', (req, res) => {
             consumption_100_eca FLOAT DEFAULT 0,
             consumption_50_eca FLOAT DEFAULT 0,
             consumption_100_port FLOAT DEFAULT 0,
+            consumption_0_port FLOAT DEFAULT 0,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY (company_id) REFERENCES arkas_ships(company_id)
         )
@@ -136,48 +126,46 @@ app.post('/sefer-kaydet', (req, res) => {
 
             db.query(fromStatusQuery, [ayak.from], (err, fromResult) => {
                 if (err || fromResult.length === 0) {
-                    console.error(`From limanı statüsü alınırken hata:`, err ? err.message : 'Liman bulunamadı');
+                    console.error('From limanı statüsü alınırken hata:', err ? err.message : 'Liman bulunamadı');
                     return;
                 }
                 const fromStatus = fromResult[0].status;
 
                 db.query(toStatusQuery, [ayak.to], (err, toResult) => {
                     if (err || toResult.length === 0) {
-                        console.error(`To limanı statüsü alınırken hata:`, err ? err.message : 'Liman bulunamadı');
+                        console.error('To limanı statüsü alınırken hata:', err ? err.message : 'Liman bulunamadı');
                         return;
                     }
                     const toStatus = toResult[0].status;
-
                     const status = `${fromStatus}/${toStatus}`;
 
-                    // Sea, ECA ve port yakıt tüketimi hesaplama
                     const seaConsumption = ayak.denizde_kalinan_sure * seferBilgisi.gunluk_tuketim_sea;
                     const ecaConsumption = ayak.distance_eca / (ayak.speed * 24) * seferBilgisi.gunluk_tuketim_sea;
                     const portConsumption = ayak.port_day * seferBilgisi.gunluk_tuketim_port;
 
-                    // 100%, 50% ve 0% consumption hesaplama
                     const consumption100Sea = (status === 'EU/EU') ? seaConsumption : 0;
                     const consumption50Sea = (status === 'EU/NON-EU' || status === 'NON-EU/EU') ? seaConsumption * 0.5 : 0;
 
                     const consumption100Eca = (status === 'EU/EU') ? ecaConsumption : 0;
                     const consumption50Eca = (status === 'EU/NON-EU' || status === 'NON-EU/EU') ? ecaConsumption * 0.5 : 0;
 
-                    const consumption100Port = (status === 'EU/EU') ? portConsumption : 0;
+                    const consumption100Port = (toStatus === 'EU') ? portConsumption : 0;
+                    const consumption0Port = (toStatus === 'NON-EU') ? portConsumption * 0 : 0;
 
                     const insertAyakQuery = `
                         INSERT INTO ${tableName} (
                             from_liman, to_liman, status, distance, distance_eca, port_day, speed, denizde_kalinan_sure, 
                             gunluk_tuketim_sea, gunluk_tuketim_port, sea_consumption, eca_consumption, port_consumption,
-                            consumption_100_sea, consumption_50_sea, consumption_100_eca, consumption_50_eca, consumption_100_port
+                            consumption_100_sea, consumption_50_sea, consumption_100_eca, consumption_50_eca, consumption_100_port, consumption_0_port
                         )
-                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                     `;
 
                     const ayakValues = [
-                        ayak.from, ayak.to, status, ayak.distance, ayak.distance_eca, ayak.port_day, ayak.speed, ayak.denizde_kalinan_sure, 
-                        seferBilgisi.gunluk_tuketim_sea, seferBilgisi.gunluk_tuketim_port, 
+                        ayak.from, ayak.to, status, ayak.distance, ayak.distance_eca, ayak.port_day, ayak.speed, ayak.denizde_kalinan_sure,
+                        seferBilgisi.gunluk_tuketim_sea, seferBilgisi.gunluk_tuketim_port,
                         seaConsumption, ecaConsumption, portConsumption,
-                        consumption100Sea, consumption50Sea, consumption100Eca, consumption50Eca, consumption100Port
+                        consumption100Sea, consumption50Sea, consumption100Eca, consumption50Eca, consumption100Port, consumption0Port
                     ];
 
                     db.query(insertAyakQuery, ayakValues, (err) => {
