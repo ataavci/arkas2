@@ -76,9 +76,9 @@ app.post('/sefer-kaydet', (req, res) => {
             distance_eca: parseFloat(req.body[`distance_eca_${i}`]),
             port_day: parseFloat(req.body[`port_day_${i}`]),
             speed: seferBilgisi.hiz,
-            sea_fuel: req.body[`sea_fuel_${i}`],
-            port_fuel: req.body[`port_fuel_${i}`],
-            eca_fuel: req.body[`eca_fuel_${i}`]
+            sea_fuel: req.body[`sea_fuel_${i}`], // sea fuel
+            port_fuel: req.body[`port_fuel_${i}`], // port fuel
+            eca_fuel: req.body[`eca_fuel_${i}`] // eca fuel
         };
         ayak.denizde_kalinan_sure = (ayak.distance + ayak.distance_eca) / (ayak.speed * 24);
         ayaklar.push(ayak);
@@ -98,6 +98,9 @@ app.post('/sefer-kaydet', (req, res) => {
             denizde_kalinan_sure FLOAT NOT NULL,
             gunluk_tuketim_sea FLOAT NOT NULL,
             gunluk_tuketim_port FLOAT NOT NULL,
+            sea_fuel VARCHAR(255),  -- Sea fuel türü
+            eca_fuel VARCHAR(255),  -- ECA fuel türü
+            port_fuel VARCHAR(255),  -- Port fuel türü
             sea_consumption FLOAT DEFAULT 0,
             eca_consumption FLOAT DEFAULT 0,
             port_consumption FLOAT DEFAULT 0,
@@ -156,16 +159,18 @@ app.post('/sefer-kaydet', (req, res) => {
                         INSERT INTO ${tableName} (
                             from_liman, to_liman, status, distance, distance_eca, port_day, speed, denizde_kalinan_sure, 
                             gunluk_tuketim_sea, gunluk_tuketim_port, sea_consumption, eca_consumption, port_consumption,
-                            consumption_100_sea, consumption_50_sea, consumption_100_eca, consumption_50_eca, consumption_100_port, consumption_0_port
+                            consumption_100_sea, consumption_50_sea, consumption_100_eca, consumption_50_eca, consumption_100_port, consumption_0_port,
+                            sea_fuel, eca_fuel, port_fuel
                         )
-                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                     `;
 
                     const ayakValues = [
                         ayak.from, ayak.to, status, ayak.distance, ayak.distance_eca, ayak.port_day, ayak.speed, ayak.denizde_kalinan_sure,
                         seferBilgisi.gunluk_tuketim_sea, seferBilgisi.gunluk_tuketim_port,
                         seaConsumption, ecaConsumption, portConsumption,
-                        consumption100Sea, consumption50Sea, consumption100Eca, consumption50Eca, consumption100Port, consumption0Port
+                        consumption100Sea, consumption50Sea, consumption100Eca, consumption50Eca, consumption100Port, consumption0Port,
+                        ayak.sea_fuel, ayak.eca_fuel, ayak.port_fuel
                     ];
 
                     db.query(insertAyakQuery, ayakValues, (err) => {
