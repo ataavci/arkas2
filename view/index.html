@@ -42,9 +42,13 @@
       </div>
 
       <h2>Sefer Bilgileri Girişi</h2>
-      <form action="/sefer-kaydet" method="post" id="seferForm">
+      <form action="/sefer-kaydet" method="POST" id="seferForm">
         <label for="vessel_name">Vessel Name:</label>
         <input type="text" id="vessel_name" name="vessel_name" required><br><br>
+
+        <!-- Seferin başlayacağı tarih alanı -->
+        <label for="start_date">Start Date:</label>
+        <input type="date" id="start_date" name="start_date" required><br><br>
 
         <div id="ayakInputs">
           <!-- İlk ayak için form inputları -->
@@ -93,7 +97,7 @@
       ayakCount++;
       const ayakInputs = document.getElementById("ayakInputs");
 
-      // Bir önceki ayaktaki to değerini alıyoruz
+      // Bir önceki ayaktaki 'to' değerini alıyoruz
       const previousTo = document.getElementById(`to_${ayakCount - 1}`).value;
 
       // Yeni ayak inputlarını ekliyoruz
@@ -120,7 +124,7 @@
 
       ayakInputs.appendChild(newAyak); // Yeni ayak inputlarını DOM'a ekliyoruz
 
-      // Yeni ayak için from alanını bir önceki to değeri ile otomatik dolduruyoruz
+      // Yeni ayak için from alanını bir önceki 'to' değeri ile otomatik dolduruyoruz
       document.getElementById(`from_${ayakCount}`).value = previousTo;
     }
 
