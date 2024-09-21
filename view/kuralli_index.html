@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vessel Dashboard</title>
+    <link rel="stylesheet" href="/static/css/style2.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <h2>Arkas Line Operational Excellence</h2>
+            <ul>
+                <li>Dashboard</li>
+                <li>ETS</li>
+                <li>CII</li>
+                <li>FuelEU</li>
+                <li>Settings</li>
+                <li>Help</li>
+            </ul>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Top Metrics -->
+            <div class="metrics">
+                <div class="metric-item">
+                    <h3>Total Consumption</h3>
+                    <p>5,423</p>
+                </div>
+                <div class="metric-item">
+                    <h3>Compliance Balance</h3>
+                    <p>-3852</p>
+                </div>
+                <div class="metric-item">
+                    <h3>GHG Intensity</h3>
+                    <p>1,893</p>
+                </div>
+                <div class="metric-item">
+                    <h3>FuelEU Cost</h3>
+                    <p>12,152</p>
+                </div>
+                <div class="metric-item">
+                    <h3>ETS Cost</h3>
+                    <p>$94,127</p>
+                </div>
+                <div class="metric-item">
+                    <h3>Total Cost</h3>
+                    <p>168,540</p>
+                </div>
+            </div>
+
+            <!-- Vessels Table -->
+            <div class="vessels-table">
+                <h3>All Vessels</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Vessel</th>
+                            <th>VLSFO</th>
+                            <th>MGO</th>
+                            <th>Biofuel B24</th>
+                            <th>Biodiesel 24</th>
+                            <th>CII Rating</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Vessel 1</td>
+                            <td>1913</td>
+                            <td>4686</td>
+                            <td>75</td>
+                            <td>0</td>
+                            <td class="rating c">C</td>
+                        </tr>
+                        <tr>
+                            <td>Vessel 2</td>
+                            <td>6685</td>
+                            <td>682</td>
+                            <td>100</td>
+                            <td>0</td>
+                            <td class="rating c">C</td>
+                        </tr>
+                        <tr>
+                            <td>Vessel 3</td>
+                            <td>2626</td>
+                            <td>571</td>
+                            <td>0</td>
+                            <td>0</td>
+                            <td class="rating d">D</td>
+                        </tr>
+                        <tr>
+                            <td>Vessel 4</td>
+                            <td>1481</td>
+                            <td>5262</td>
+                            <td>450</td>
+                            <td>0</td>
+                            <td class="rating e">E</td>
+                        </tr>
+                        <!-- Add more rows as needed -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Graph Section -->
+            <div class="graphs">
+                <div class="graph-item">
+                    <h4>ETS</h4>
+                    <div class="graph-placeholder"></div>
+                </div>
+                <div class="graph-item">
+                    <h4>CO2 Emissions</h4>
+                    <div class="graph-placeholder"></div>
+                </div>
+                <div class="graph-item">
+                    <h4>Fuel Consumption</h4>
+                    <div class="graph-placeholder"></div>
+                </div>
+                <div class="graph-item">
+                    <h4>Carbon Footprint</h4>
+                    <div class="graph-placeholder"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

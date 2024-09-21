@@ -20,10 +20,11 @@ app.listen(port, () => {
 // Static dosyalar (CSS, JS vs.)
 app.use("/static", express.static(path.join(__dirname, "public")));
 
-// Ana sayfalar (index.html, tables.html)
-app.get('/', (req, res) => res.sendFile(path.join(__dirname, "view", "index.html")));
-app.get('/tables', (req, res) => res.sendFile(path.join(__dirname, "view", "tables.html")));
-
+// Serve HTML files
+app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'view', 'index.html')));
+app.get('/kuralli_index.html', (req, res) => {
+    res.sendFile(path.join(__dirname, '/view', 'kuralli_index.html'));
+  });
 // Rota verilerini alma (rota_data endpoint'i)
 app.get('/rota_data', (req, res) => {
     const limanlarQuery = 'SELECT port, status FROM rota_data';
