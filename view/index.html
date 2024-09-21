@@ -46,12 +46,29 @@
         <label for="vessel_name">Vessel Name:</label>
         <input type="text" id="vessel_name" name="vessel_name" required><br><br>
 
-        <label for="ayak_sayisi">Seferin Kaç Ayağı Var?</label>
-        <input type="number" id="ayak_sayisi" name="ayak_sayisi" required><br><br>
-
         <div id="ayakInputs">
-            <!-- Dinamik olarak eklenen from-to-distance-distance_eca-port_day inputları buraya gelecek -->
+          <!-- Dinamik olarak eklenen from-to-distance-distance_eca-port_day inputları buraya gelecek -->
+          <div class="ayakInput">
+            <label for="from_1">From Ayak 1:</label>
+            <select id="from_1" name="from_1" required></select><br><br>
+            <label for="to_1">To Ayak 1:</label>
+            <select id="to_1" name="to_1" required></select><br><br>
+            <label for="distance_1">Distance Ayak 1 (km):</label>
+            <input type="number" id="distance_1" name="distance_1" step="any" required><br><br>
+            <label for="distance_eca_1">Distance ECA Ayak 1 (km):</label>
+            <input type="number" id="distance_eca_1" name="distance_eca_1" step="any" required><br><br>
+            <label for="port_day_1">Port Day Ayak 1 (gün):</label>
+            <input type="number" id="port_day_1" name="port_day_1" step="any" required><br><br>
+            <label for="port_fuel_1">Port Yakıt Ayak 1:</label>
+            <select id="port_fuel_1" name="port_fuel_1" required></select><br><br>
+            <label for="sea_fuel_1">Sea Yakıt Ayak 1:</label>
+            <select id="sea_fuel_1" name="sea_fuel_1" required></select><br><br>
+            <label for="eca_fuel_1">ECA Sea Yakıt Ayak 1:</label>
+            <select id="eca_fuel_1" name="eca_fuel_1" required></select><br><br>
+          </div>
         </div>
+
+        <button type="button" onclick="addAyak()">Add Ayak</button><br><br>
 
         <label for="speed">Hız (km/saat):</label>
         <input type="number" id="speed" name="speed" step="any" required><br><br>
@@ -68,80 +85,73 @@
   </div>
 
   <script>
-      let rota_data = [];
+    let ayakCount = 1;
+    let rotaData = [];
+    let fuelData = [];
 
-      document.addEventListener('DOMContentLoaded', () => {
-          fetch('/rota_data')
-              .then(response => response.json())
-              .then(data => {
-                  rota_data = data;
-                  document.getElementById('ayak_sayisi').addEventListener('change', addWaypointInputs);
-              })
-              .catch(err => console.error('Liman verileri alınırken hata oluştu:', err));
+    function addAyak() {
+      ayakCount++;
+      const ayakInputs = document.getElementById('ayakInputs');
+      const newAyak = `
+        <div class="ayakInput">
+          <label for="from_${ayakCount}">From Ayak ${ayakCount}:</label>
+          <select id="from_${ayakCount}" name="from_${ayakCount}" required>${generateOptions(rotaData)}</select><br><br>
+          <label for="to_${ayakCount}">To Ayak ${ayakCount}:</label>
+          <select id="to_${ayakCount}" name="to_${ayakCount}" required>${generateOptions(rotaData)}</select><br><br>
+          <label for="distance_${ayakCount}">Distance Ayak ${ayakCount} (km):</label>
+          <input type="number" id="distance_${ayakCount}" name="distance_${ayakCount}" step="any" required><br><br>
+          <label for="distance_eca_${ayakCount}">Distance ECA Ayak ${ayakCount} (km):</label>
+          <input type="number" id="distance_eca_${ayakCount}" name="distance_eca_${ayakCount}" step="any" required><br><br>
+          <label for="port_day_${ayakCount}">Port Day Ayak ${ayakCount} (gün):</label>
+          <input type="number" id="port_day_${ayakCount}" name="port_day_${ayakCount}" step="any" required><br><br>
+          <label for="port_fuel_${ayakCount}">Port Yakıt Ayak ${ayakCount}:</label>
+          <select id="port_fuel_${ayakCount}" name="port_fuel_${ayakCount}" required>${generateOptions(fuelData)}</select><br><br>
+          <label for="sea_fuel_${ayakCount}">Sea Yakıt Ayak ${ayakCount}:</label>
+          <select id="sea_fuel_${ayakCount}" name="sea_fuel_${ayakCount}" required>${generateOptions(fuelData)}</select><br><br>
+          <label for="eca_fuel_${ayakCount}">ECA Sea Yakıt Ayak ${ayakCount}:</label>
+          <select id="eca_fuel_${ayakCount}" name="eca_fuel_${ayakCount}" required>${generateOptions(fuelData)}</select><br><br>
+        </div>
+      `;
+      ayakInputs.innerHTML += newAyak;
+    }
 
-          fetch('/fuel_data')
-              .then(response => response.json())
-              .then(data => {
-                  const firstSelect = document.getElementById('yakit_1_adi');
-                  fillFuelOptions(firstSelect, data);
-              })
-              .catch(err => console.error('Yakıt verileri alınırken hata oluştu:', err));
-      });
+    function generateOptions(data) {
+      return data.map(item => `<option value="${item.port || item.Pathway_Name}">${item.port || item.Pathway_Name}</option>`).join('');
+    }
 
-      function fillFuelOptions(selectElement, data) {
-          data.forEach(fuel => {
-              const option = document.createElement('option');
-              option.value = fuel.Pathway_Name;
-              option.text = fuel.Pathway_Name;
-              selectElement.add(option);
-          });
-      }
+    document.addEventListener('DOMContentLoaded', () => {
+        fetch('/rota_data')
+            .then(response => response.json())
+            .then(data => {
+                rotaData = data;
+                fillInitialAyak();
+            })
+            .catch(err => console.error('Liman verileri alınırken hata oluştu:', err));
 
-      function addWaypointInputs() {
-          const ayakSayisi = document.getElementById('ayak_sayisi').value;
-          const ayakInputs = document.getElementById('ayakInputs');
-          ayakInputs.innerHTML = '';  // Önceki inputları temizle
+        fetch('/fuel_data')
+            .then(response => response.json())
+            .then(data => {
+                fuelData = data;
+                fillInitialAyak();
+            })
+            .catch(err => console.error('Yakıt verileri alınırken hata oluştu:', err));
+    });
 
-          for (let i = 1; i <= ayakSayisi; i++) {
-              const fromOptions = rota_data.map(rota => `<option value="${rota.port}">${rota.port}</option>`).join('');
-              const toOptions = rota_data.map(rota => `<option value="${rota.port}">${rota.port}</option>`).join('');
+    function fillInitialAyak() {
+        if (rotaData.length > 0 && fuelData.length > 0) {
+            const fromSelect = document.getElementById('from_1');
+            const toSelect = document.getElementById('to_1');
+            const portFuelSelect = document.getElementById('port_fuel_1');
+            const seaFuelSelect = document.getElementById('sea_fuel_1');
+            const ecaFuelSelect = document.getElementById('eca_fuel_1');
 
-              const newInputs = `
-                  <div>
-                      <label for="from_${i}">From Ayak ${i}:</label>
-                      <select id="from_${i}" name="from_${i}" required>${fromOptions}</select><br><br>
-                      <label for="to_${i}">To Ayak ${i}:</label>
-                      <select id="to_${i}" name="to_${i}" required>${toOptions}</select><br><br>
-                      <label for="distance_${i}">Distance Ayak ${i} (km):</label>
-                      <input type="number" id="distance_${i}" name="distance_${i}" step="any" required><br><br>
-                      <label for="distance_eca_${i}">Distance ECA Ayak ${i} (km):</label>
-                      <input type="number" id="distance_eca_${i}" name="distance_eca_${i}" step="any" required><br><br>
-                      <label for="port_day_${i}">Port Day Ayak ${i} (gün):</label>
-                      <input type="number" id="port_day_${i}" name="port_day_${i}" step="any" required><br><br>
-                      <label for="port_fuel_${i}">Port Yakıt Ayak ${i}:</label>
-                      <select id="port_fuel_${i}" name="port_fuel_${i}" required></select><br><br>
-                      <label for="sea_fuel_${i}">Sea Yakıt Ayak ${i}:</label>
-                      <select id="sea_fuel_${i}" name="sea_fuel_${i}" required></select><br><br>
-                      <label for="eca_fuel_${i}">ECA Sea Yakıt Ayak ${i}:</label>
-                      <select id="eca_fuel_${i}" name="eca_fuel_${i}" required></select><br><br>
-                  </div>
-              `;
-
-              ayakInputs.innerHTML += newInputs;
-          }
-
-          // Yakıt türlerini dinamik olarak doldur
-          fetch('/fuel_data')
-              .then(response => response.json())
-              .then(data => {
-                  for (let i = 1; i <= ayakSayisi; i++) {
-                      fillFuelOptions(document.getElementById(`port_fuel_${i}`), data);
-                      fillFuelOptions(document.getElementById(`sea_fuel_${i}`), data);
-                      fillFuelOptions(document.getElementById(`eca_fuel_${i}`), data);
-                  }
-              })
-              .catch(err => console.error('Yakıt verileri alınırken hata oluştu:', err));
-      }
+            fromSelect.innerHTML = generateOptions(rotaData);
+            toSelect.innerHTML = generateOptions(rotaData);
+            portFuelSelect.innerHTML = generateOptions(fuelData);
+            seaFuelSelect.innerHTML = generateOptions(fuelData);
+            ecaFuelSelect.innerHTML = generateOptions(fuelData);
+        }
+    }
   </script>
 
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>

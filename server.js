@@ -57,31 +57,35 @@ app.get('/fuel_data', (req, res) => {
 });
 
 // Sefer kaydetme (POST request)
-app.post('/sefer-kaydet', (req, res) => {
-    const vesselName = req.body.vessel_name.trim().replace(/\s+/g, '_');
+app.post("/sefer-kaydet", (req, res) => {
+    const vesselName = req.body.vessel_name.trim().replace(/\s+/g, "_");
     const tableName = `sefer_${vesselName}`;
     const seferBilgisi = {
-        ayak_sayisi: parseInt(req.body.ayak_sayisi),
-        hiz: parseFloat(req.body.speed),
-        gunluk_tuketim_sea: parseFloat(req.body.gunluk_tuketim_sea),
-        gunluk_tuketim_port: parseFloat(req.body.gunluk_tuketim_port)
+      hiz: parseFloat(req.body.speed),
+      gunluk_tuketim_sea: parseFloat(req.body.gunluk_tuketim_sea),
+      gunluk_tuketim_port: parseFloat(req.body.gunluk_tuketim_port),
     };
-
+  
+    // Dinamik ayak sayısını yakalıyoruz
+    let ayakCount = 1;
     const ayaklar = [];
-    for (let i = 1; i <= seferBilgisi.ayak_sayisi; i++) {
-        const ayak = {
-            from: req.body[`from_${i}`],
-            to: req.body[`to_${i}`],
-            distance: parseFloat(req.body[`distance_${i}`]),
-            distance_eca: parseFloat(req.body[`distance_eca_${i}`]),
-            port_day: parseFloat(req.body[`port_day_${i}`]),
-            speed: seferBilgisi.hiz,
-            sea_fuel: req.body[`sea_fuel_${i}`], // sea fuel
-            port_fuel: req.body[`port_fuel_${i}`], // port fuel
-            eca_fuel: req.body[`eca_fuel_${i}`] // eca fuel
-        };
-        ayak.denizde_kalinan_sure = (ayak.distance + ayak.distance_eca) / (ayak.speed * 24);
-        ayaklar.push(ayak);
+  
+    // İlgili tüm ayak verilerini alıyoruz
+    while (req.body[`from_${ayakCount}`]) {
+      const ayak = {
+        from: req.body[`from_${ayakCount}`],
+        to: req.body[`to_${ayakCount}`],
+        distance: parseFloat(req.body[`distance_${ayakCount}`]),
+        distance_eca: parseFloat(req.body[`distance_eca_${ayakCount}`]),
+        port_day: parseFloat(req.body[`port_day_${ayakCount}`]),
+        speed: seferBilgisi.hiz,
+        sea_fuel: req.body[`sea_fuel_${ayakCount}`],
+        port_fuel: req.body[`port_fuel_${ayakCount}`],
+        eca_fuel: req.body[`eca_fuel_${ayakCount}`],
+      };
+      ayak.denizde_kalinan_sure = (ayak.distance + ayak.distance_eca) / (ayak.speed * 24);
+      ayaklar.push(ayak);
+      ayakCount++;
     }
 
     const createTableQuery = `
