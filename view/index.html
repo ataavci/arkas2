@@ -93,6 +93,9 @@
       ayakCount++;
       const ayakInputs = document.getElementById("ayakInputs");
 
+      // Bir önceki ayaktaki to değerini alıyoruz
+      const previousTo = document.getElementById(`to_${ayakCount - 1}`).value;
+
       // Yeni ayak inputlarını ekliyoruz
       const newAyak = document.createElement("div");
       newAyak.classList.add("ayakInput");
@@ -116,6 +119,9 @@
       `;
 
       ayakInputs.appendChild(newAyak); // Yeni ayak inputlarını DOM'a ekliyoruz
+
+      // Yeni ayak için from alanını bir önceki to değeri ile otomatik dolduruyoruz
+      document.getElementById(`from_${ayakCount}`).value = previousTo;
     }
 
     // Rota ve yakıt verilerini doldurmak için helper fonksiyon
