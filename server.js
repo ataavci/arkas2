@@ -27,6 +27,24 @@ app.get("/", (req, res) =>
 app.get("/kuralli_index.html", (req, res) => {
   res.sendFile(path.join(__dirname, "/view", "kuralli_index.html"));
 });
+app.get("/ets.html", (req, res) => {
+    res.sendFile(path.join(__dirname, "/view", "ets.html"));
+  });
+app.get("/sefer-tablolari", (req, res) => {
+    const query = `SHOW TABLES LIKE 'sefer%'`;
+
+    db.query(query, (err, results) => {
+        if (err) {
+            console.error("Veritabanı sorgusu sırasında hata oluştu:", err.message);
+            return res.status(500).json({ error: "Veritabanı hatası oluştu." });
+        }
+
+        // Tabloları HTML olarak döndürelim
+        res.json(results.map(row => Object.values(row)[0])); // Tablo isimlerini listele
+    });
+});
+
+
 
 // Rota verilerini alma (rota_data endpoint'i)
 app.get("/rota_data", (req, res) => {
