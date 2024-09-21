@@ -47,8 +47,8 @@
         <input type="text" id="vessel_name" name="vessel_name" required><br><br>
 
         <div id="ayakInputs">
-          <!-- Dinamik olarak eklenen from-to-distance-distance_eca-port_day inputları buraya gelecek -->
-          <div class="ayakInput">
+          <!-- İlk ayak için form inputları -->
+          <div class="ayakInput" id="ayak_1">
             <label for="from_1">From Ayak 1:</label>
             <select id="from_1" name="from_1" required></select><br><br>
             <label for="to_1">To Ayak 1:</label>
@@ -91,66 +91,65 @@
 
     function addAyak() {
       ayakCount++;
-      const ayakInputs = document.getElementById('ayakInputs');
-      const newAyak = `
-        <div class="ayakInput">
-          <label for="from_${ayakCount}">From Ayak ${ayakCount}:</label>
-          <select id="from_${ayakCount}" name="from_${ayakCount}" required>${generateOptions(rotaData)}</select><br><br>
-          <label for="to_${ayakCount}">To Ayak ${ayakCount}:</label>
-          <select id="to_${ayakCount}" name="to_${ayakCount}" required>${generateOptions(rotaData)}</select><br><br>
-          <label for="distance_${ayakCount}">Distance Ayak ${ayakCount} (km):</label>
-          <input type="number" id="distance_${ayakCount}" name="distance_${ayakCount}" step="any" required><br><br>
-          <label for="distance_eca_${ayakCount}">Distance ECA Ayak ${ayakCount} (km):</label>
-          <input type="number" id="distance_eca_${ayakCount}" name="distance_eca_${ayakCount}" step="any" required><br><br>
-          <label for="port_day_${ayakCount}">Port Day Ayak ${ayakCount} (gün):</label>
-          <input type="number" id="port_day_${ayakCount}" name="port_day_${ayakCount}" step="any" required><br><br>
-          <label for="port_fuel_${ayakCount}">Port Yakıt Ayak ${ayakCount}:</label>
-          <select id="port_fuel_${ayakCount}" name="port_fuel_${ayakCount}" required>${generateOptions(fuelData)}</select><br><br>
-          <label for="sea_fuel_${ayakCount}">Sea Yakıt Ayak ${ayakCount}:</label>
-          <select id="sea_fuel_${ayakCount}" name="sea_fuel_${ayakCount}" required>${generateOptions(fuelData)}</select><br><br>
-          <label for="eca_fuel_${ayakCount}">ECA Sea Yakıt Ayak ${ayakCount}:</label>
-          <select id="eca_fuel_${ayakCount}" name="eca_fuel_${ayakCount}" required>${generateOptions(fuelData)}</select><br><br>
-        </div>
+      const ayakInputs = document.getElementById("ayakInputs");
+
+      // Yeni ayak inputlarını ekliyoruz
+      const newAyak = document.createElement("div");
+      newAyak.classList.add("ayakInput");
+      newAyak.innerHTML = `
+        <label for="from_${ayakCount}">From Ayak ${ayakCount}:</label>
+        <select id="from_${ayakCount}" name="from_${ayakCount}" required>${generateOptions(rotaData)}</select><br><br>
+        <label for="to_${ayakCount}">To Ayak ${ayakCount}:</label>
+        <select id="to_${ayakCount}" name="to_${ayakCount}" required>${generateOptions(rotaData)}</select><br><br>
+        <label for="distance_${ayakCount}">Distance Ayak ${ayakCount} (km):</label>
+        <input type="number" id="distance_${ayakCount}" name="distance_${ayakCount}" step="any" required><br><br>
+        <label for="distance_eca_${ayakCount}">Distance ECA Ayak ${ayakCount} (km):</label>
+        <input type="number" id="distance_eca_${ayakCount}" name="distance_eca_${ayakCount}" step="any" required><br><br>
+        <label for="port_day_${ayakCount}">Port Day Ayak ${ayakCount} (gün):</label>
+        <input type="number" id="port_day_${ayakCount}" name="port_day_${ayakCount}" step="any" required><br><br>
+        <label for="port_fuel_${ayakCount}">Port Yakıt Ayak ${ayakCount}:</label>
+        <select id="port_fuel_${ayakCount}" name="port_fuel_${ayakCount}" required>${generateOptions(fuelData)}</select><br><br>
+        <label for="sea_fuel_${ayakCount}">Sea Yakıt Ayak ${ayakCount}:</label>
+        <select id="sea_fuel_${ayakCount}" name="sea_fuel_${ayakCount}" required>${generateOptions(fuelData)}</select><br><br>
+        <label for="eca_fuel_${ayakCount}">ECA Sea Yakıt Ayak ${ayakCount}:</label>
+        <select id="eca_fuel_${ayakCount}" name="eca_fuel_${ayakCount}" required>${generateOptions(fuelData)}</select><br><br>
       `;
-      ayakInputs.innerHTML += newAyak;
+
+      ayakInputs.appendChild(newAyak); // Yeni ayak inputlarını DOM'a ekliyoruz
     }
 
+    // Rota ve yakıt verilerini doldurmak için helper fonksiyon
     function generateOptions(data) {
-      return data.map(item => `<option value="${item.port || item.Pathway_Name}">${item.port || item.Pathway_Name}</option>`).join('');
+      return data.map(item => `<option value="${item.port || item.Pathway_Name}">${item.port || item.Pathway_Name}</option>`).join("");
     }
 
-    document.addEventListener('DOMContentLoaded', () => {
-        fetch('/rota_data')
-            .then(response => response.json())
-            .then(data => {
-                rotaData = data;
-                fillInitialAyak();
-            })
-            .catch(err => console.error('Liman verileri alınırken hata oluştu:', err));
+    // Sayfa yüklendiğinde rota ve yakıt verilerini doldur
+    document.addEventListener("DOMContentLoaded", () => {
+      fetch("/rota_data")
+        .then(response => response.json())
+        .then(data => {
+          rotaData = data;
+          fillInitialAyak(); // İlk ayak verilerini doldur
+        })
+        .catch(err => console.error("Liman verileri alınırken hata oluştu:", err));
 
-        fetch('/fuel_data')
-            .then(response => response.json())
-            .then(data => {
-                fuelData = data;
-                fillInitialAyak();
-            })
-            .catch(err => console.error('Yakıt verileri alınırken hata oluştu:', err));
+      fetch("/fuel_data")
+        .then(response => response.json())
+        .then(data => {
+          fuelData = data;
+          fillInitialAyak(); // İlk ayak verilerini doldur
+        })
+        .catch(err => console.error("Yakıt verileri alınırken hata oluştu:", err));
     });
 
     function fillInitialAyak() {
-        if (rotaData.length > 0 && fuelData.length > 0) {
-            const fromSelect = document.getElementById('from_1');
-            const toSelect = document.getElementById('to_1');
-            const portFuelSelect = document.getElementById('port_fuel_1');
-            const seaFuelSelect = document.getElementById('sea_fuel_1');
-            const ecaFuelSelect = document.getElementById('eca_fuel_1');
-
-            fromSelect.innerHTML = generateOptions(rotaData);
-            toSelect.innerHTML = generateOptions(rotaData);
-            portFuelSelect.innerHTML = generateOptions(fuelData);
-            seaFuelSelect.innerHTML = generateOptions(fuelData);
-            ecaFuelSelect.innerHTML = generateOptions(fuelData);
-        }
+      if (rotaData.length > 0 && fuelData.length > 0) {
+        document.getElementById("from_1").innerHTML = generateOptions(rotaData);
+        document.getElementById("to_1").innerHTML = generateOptions(rotaData);
+        document.getElementById("port_fuel_1").innerHTML = generateOptions(fuelData);
+        document.getElementById("sea_fuel_1").innerHTML = generateOptions(fuelData);
+        document.getElementById("eca_fuel_1").innerHTML = generateOptions(fuelData);
+      }
     }
   </script>
 
