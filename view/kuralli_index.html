@@ -39,8 +39,23 @@
                 </div>
                 <div class="metric-item">
                     <h3>FuelEU Cost</h3>
-                    <p>12,152</p>
+                    <p id="fuel-eu-cost">Yükleniyor...</p>
                 </div>
+                
+                <script>
+                  // Sunucudan FuelEU Cost verisini almak ve HTML'e eklemek
+                  fetch('http://localhost:3000/sefer-fuel-toplami')
+                    .then(response => response.json())
+                    .then(data => {
+                      // FuelEU toplamını sayfaya direkt ekle
+                      document.getElementById('fuel-eu-cost').textContent = data.totalFuel.toLocaleString('en-US');
+                    })
+                    .catch(error => {
+                      console.error("FuelEU verisi alınırken hata:", error);
+                      document.getElementById('fuel-eu-cost').textContent = "Veri alınamadı";
+                    });
+                </script>
+                
                 <div class="metric-item">
                     <h3>ETS Cost</h3>
                     <p>$94,127</p>

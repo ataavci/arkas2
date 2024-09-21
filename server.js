@@ -339,3 +339,37 @@ app.post("/sefer-kaydet", (req, res) => {
     res.send("Sefer bilgileri başarıyla kaydedildi.");
   });
 });
+app.get("/sefer-fuel-toplami", (req, res) => {
+  const query = `SHOW TABLES LIKE 'sefer%'`;
+  
+  db.query(query, (err, results) => {
+    if (err) {
+      console.error("Tablo sorgusu sırasında hata:", err.message);
+      return res.status(500).json({ error: "Veritabanı hatası oluştu." });
+    }
+
+    let totalFuel = 0;
+    let completed = 0;
+
+    results.forEach((row) => {
+      const tableName = Object.values(row)[0];
+      const fuelQuery = `SELECT IFNULL(SUM(fuel_eu), 0) AS fuel_sum FROM ${tableName}`;
+
+      db.query(fuelQuery, (err, fuelResults) => {
+        if (err) {
+          console.error(`Tablo ${tableName} için sorgu hatası:`, err.message);
+          return res.status(500).json({ error: "Fuel sorgusu sırasında hata oluştu." });
+        }
+
+        totalFuel += fuelResults[0].fuel_sum;
+        completed++;
+
+        // Tüm tablolar işlendiğinde sonucu döndür
+        if (completed === results.length) {
+          console.log(`Toplam fuel_eu: ${totalFuel}`);
+          res.json({ totalFuel });
+        }
+      });
+    });
+  });
+});
