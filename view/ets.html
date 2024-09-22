@@ -3,106 +3,82 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sefer Bilgileri Dashboard</title>
-    <link rel="stylesheet" href="/static/css/deneme.css">
+    <title>Vessel Dashboard</title>
+    <link rel="stylesheet" href="/static/css/style2.css">
 </head>
 <body>
     <div class="container">
-        <h1>Sefer Bilgileri</h1>
-
-        <!-- Tarih seçim alanları -->
-        <form id="seferForm">
-            <label for="start_date">Başlangıç Tarihi:</label>
-            <input type="date" id="start_date" name="start_date" required>
-
-            <label for="end_date">Bitiş Tarihi:</label>
-            <input type="date" id="end_date" name="end_date" required>
-
-            <button type="submit">Sonuçları Göster</button>
-        </form>
-
-        <!-- Sefer tabloları listesi -->
-        <div id="sefer-tablolari">
-            <h2>Sefer Tabloları Listesi</h2>
-            <ul id="seferList">
-                <!-- Dinamik olarak buraya tablolar yüklenecek -->
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <h2>Arkas Line Operational Excellence</h2>
+            <ul>
+                
+                <li><a href="./"><span class="icon"><ion-icon name="home-outline"></ion-icon></span><span class="title">Dashboard</span></a></li>
+                <li><a href="./ets.html"><span class="icon"><ion-icon name="people-outline"></ion-icon></span><span class="title">ETS</span></a></li>
+                <li><a href="./input.html"><span class="icon"><ion-icon name="chatbubble-outline"></ion-icon></span><span class="title">input</span></a></li>
+                <li><a href="#"><span class="icon"><ion-icon name="help-outline"></ion-icon></span><span class="title">Help</span></a></li>
+                <li><a href="#"><span class="icon"><ion-icon name="settings-outline"></ion-icon></span><span class="title">Settings</span></a></li>
+                <li><a href="#"><span class="icon"><ion-icon name="lock-closed-outline"></ion-icon></span><span class="title">Password</span></a></li>
+                <li><a href="#"><span class="icon"><ion-icon name="log-out-outline"></ion-icon></span><span class="title">Sign Out</span></a></li>
             </ul>
         </div>
-
-        <!-- Sonuçlar tablosu -->
-        <div id="results">
-            <h2>Sefer Sonuçları</h2>
-            <table id="resultsTable">
-                <thead>
-                    <tr>
-                        <th>Ayak Numarası</th>
-                        <th>Başlangıç Limanı</th>
-                        <th>Bitiş Limanı</th>
-                        <th>Başlangıç Tarihi</th>
-                        <th>Bitiş Tarihi</th>
-                        <th>Hangi Ayakta Bitti</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <!-- Sonuçlar burada görüntülenecek -->
-                </tbody>
-            </table>
-        </div>
-    </div>
+        <h1>Vessel Data Table</h1>
+    <table id="vesselTable">
+        <thead>
+            <tr>
+                <th>Vessel Name</th>
+                <th>Start Date</th>
+                <th>End Date</th>
+                <th>Total Distance</th>
+                <th>Total ECA Distance</th>
+                <th>Average Speed</th>
+                <th>Total Days</th>
+                <th>Sea Fuel</th>
+                <th>Sea Consumption</th>
+                <th>ECA Fuel</th>
+                <th>ECA Consumption</th>
+                <th>Port Fuel</th>
+                <th>Port Consumption</th>
+                <th>ETS</th>
+                <th>Compliance Balance</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Dinamik tablo satırları buraya eklenecek -->
+        </tbody>
+    </table>
 
     <script>
-        // Sefer tablolarını listelemek için istek atıyoruz
-        fetch("/sefer-tablolari")
-            .then((response) => response.json())
-            .then((tables) => {
-                const seferList = document.getElementById("seferList");
-
-                // Her tabloyu liste olarak ekleyelim
-                tables.forEach((table) => {
-                    const li = document.createElement("li");
-                    li.textContent = table;
-                    seferList.appendChild(li);
-                });
-            })
-            .catch((error) => {
-                console.error("Sefer tabloları alınırken bir hata oluştu:", error);
+        // Sunucudan tablo verilerini almak ve tabloyu doldurmak için fetch fonksiyonu kullanılacak
+        fetch('/api/get-vessel-data')
+        .then(response => response.json())
+        .then(data => {
+            const tableBody = document.querySelector("#vesselTable tbody");
+            data.forEach(row => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${row.vessel_name}</td>
+                    <td>${row.start_date_}</td>
+                    <td>${row.end_date_}</td>
+                    <td>${row.distance_sum}</td>
+                    <td>${row.distance_eca_sum}</td>
+                    <td>${row.speed_avg}</td>
+                    <td>${row.total_days}</td>
+                    <td>${row.sea_fuel}</td>
+                    <td>${row.sea_consumption}</td>
+                    <td>${row.eca_fuel}</td>
+                    <td>${row.eca_consumption}</td>
+                    <td>${row.port_fuel}</td>
+                    <td>${row.port_consumption}</td>
+                    <td>${row.ets_sum}</td>
+                    <td>${row.compliance_balance_sum}</td>
+                `;
+                tableBody.appendChild(tr);
             });
-
-        document.getElementById("seferForm").addEventListener("submit", function (event) {
-            event.preventDefault();
-
-            const startDate = document.getElementById("start_date").value;
-            const endDate = document.getElementById("end_date").value;
-
-            fetch("/seferler", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({ start_date: startDate, end_date: endDate }),
-            })
-            .then((response) => response.json())
-            .then((data) => {
-                const resultsTableBody = document.querySelector("#resultsTable tbody");
-                resultsTableBody.innerHTML = ""; // Önceki sonuçları temizle
-
-                data.forEach((row, index) => {
-                    const tr = document.createElement("tr");
-                    tr.innerHTML = `
-                        <td>${index + 1}</td>
-                        <td>${row.from_liman}</td>
-                        <td>${row.to_liman}</td>
-                        <td>${row.start_date}</td>
-                        <td>${row.end_date}</td>
-                        <td>${row.sefer_status}</td>
-                    `;
-                    resultsTableBody.appendChild(tr);
-                });
-            })
-            .catch((error) => {
-                console.error("Sonuçlar alınırken bir hata oluştu:", error);
-            });
-        });
+        })
+        .catch(error => console.error('Error fetching vessel data:', error));
     </script>
+
+       
 </body>
 </html>

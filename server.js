@@ -22,13 +22,13 @@ app.use("/static", express.static(path.join(__dirname, "public")));
 
 // Serve HTML files
 app.get("/", (req, res) =>
-  res.sendFile(path.join(__dirname, "view", "kuralli_index.html"))
+  res.sendFile(path.join(__dirname, "view", "dashboard.html"))
 );
-app.get("/index.html", (req, res) => {
-  res.sendFile(path.join(__dirname, "/view", "index.html"));
-});
 app.get("/ets.html", (req, res) => {
-    res.sendFile(path.join(__dirname, "/view", "ets.html"));
+  res.sendFile(path.join(__dirname, "/view", "ets.html"));
+});
+app.get("/input.html", (req, res) => {
+    res.sendFile(path.join(__dirname, "/view", "input.html"));
   });
 app.get("/sefer-tablolari", (req, res) => {
     const query = `SHOW TABLES LIKE 'sefer%'`;
@@ -553,4 +553,28 @@ app.get("/sefer-table-toplami", (req, res) => {
     });
   });
 });
-
+app.get('/api/get-vessel-data', (req, res) => {
+  const sql = 'CALL ets()'; // ets adlı prosedürü çağırır
+  db.query(sql, (err, result) => {
+      if (err) throw err;
+      const rows = result[0]; // Prosedür sonucu satırları
+      const formattedData = rows.map(row => ({
+          vessel_name: row.vessel_name,
+          start_date_: row.start_date_,
+          end_date_: row.end_date_,
+          distance_sum: row['SUM(sefer_7.distance)'],
+          distance_eca_sum: row['SUM(sefer_7.distance_eca)'],
+          speed_avg: row['AVG(sefer_7.speed)'],
+          total_days: row['SUM(sefer_7.port_day+sefer_7.denizde_kalinan_sure)'],
+          sea_fuel: row.sea_fuel,
+          sea_consumption: row.sea_consumption,
+          eca_fuel: row.eca_fuel,
+          eca_consumption: row.eca_consumption,
+          port_fuel: row.port_fuel,
+          port_consumption: row.port_consumption,
+          ets_sum: row['sum(sefer_7.ets)'],
+          compliance_balance_sum: row['SUM(sefer_7.COMPLIANCE_BALANCE)']
+      }));
+      res.json(formattedData);
+  });
+});
