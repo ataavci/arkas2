@@ -27,15 +27,15 @@
             <div class="metrics">
                 <div class="metric-item">
                     <h3>Total Consumption</h3>
-                    <p>5,423</p>
+                    <p id="Consumption"></p>
                 </div>
                 <div class="metric-item">
                     <h3>Compliance Balance</h3>
-                    <p>-3852</p>
+                    <p id="balance"></p>
                 </div>
                 <div class="metric-item">
                     <h3>GHG Intensity</h3>
-                    <p>1,893</p>
+                    <p id="GHG"></p>
                 </div>
                 <div class="metric-item">
                     <h3>FuelEU Cost</h3>
@@ -52,18 +52,55 @@
                     })
                     .catch(error => {
                       console.error("FuelEU verisi alınırken hata:", error);
-                      document.getElementById('fuel-eu-cost').textContent = "Veri alınamadı";
+                      document.getElementById('fuel-ets-cost').textContent = "Veri alınamadı";
                     });
+                    fetch('http://localhost:3000/sefer-ets-toplami')
+                    .then(response => response.json())
+                    .then(data => {
+                      // FuelEU toplamını sayfaya direkt ekle
+                      document.getElementById('ets-cost').textContent = data.totalFuel.toLocaleString('en-US');
+                    })
+                    .catch(error => {
+                      console.error("FuelEU verisi alınırken hata:", error);
+                      document.getElementById('ets-cost').textContent = "Veri alınamadı";
+                    });
+                    fetch('http://localhost:3000/sefer-consumption-toplami')
+                    .then(response => response.json())
+                    .then(data => {
+                      // FuelEU toplamını sayfaya direkt ekle
+                      document.getElementById('Consumption').textContent = data.totalFuel.toLocaleString('en-US');
+                    })
+                    .catch(error => {
+                      console.error("FuelEU verisi alınırken hata:", error);
+                      document.getElementById('Consumption').textContent = "Veri alınamadı";
+                    });
+                    fetch('http://localhost:3000/sefer-balance-toplami')
+                    .then(response => response.json())
+                    .then(data => {
+                      // FuelEU toplamını sayfaya direkt ekle
+                      document.getElementById('balance').textContent = data.totalFuel.toLocaleString('en-US');
+                    })
+                    .catch(error => {
+                      console.error("FuelEU verisi alınırken hata:", error);
+                      document.getElementById('balance').textContent = "Veri alınamadı";
+                    });
+                    fetch('http://localhost:3000/sefer-ghg-toplami')
+                    .then(response => response.json())
+                    .then(data => {
+                      // FuelEU toplamını sayfaya direkt ekle
+                      document.getElementById('ghg').textContent = data.totalFuel.toLocaleString('en-US');
+                    })
+                    .catch(error => {
+                      console.error("FuelEU verisi alınırken hata:", error);
+                      document.getElementById('ghg').textContent = "Veri alınamadı";
+                    });
+                    
                 </script>
                 
                 <div class="metric-item">
                     <h3>ETS Cost</h3>
-                    <p>$94,127</p>
-                </div>
-                <div class="metric-item">
-                    <h3>Total Cost</h3>
-                    <p>168,540</p>
-                </div>
+                    <p id="ets-cost">$0.00</p>
+                
             </div>
 
             <!-- Vessels Table -->
