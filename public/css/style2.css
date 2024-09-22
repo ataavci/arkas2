@@ -86,133 +86,106 @@ body {
 }
 
 /* Top Metrics */
-.metrics {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 30px;
-    flex-wrap: wrap;
-}
-
-.metric-item {
-    background-color: #f1f1f1;
-    border-radius: 8px;
-    padding: 15px;
-    text-align: center;
-    width: calc(20% - 10px);
-    margin-right: 10px;
-    margin-bottom: 10px;
-}
-
-.metric-item:last-child {
-    margin-right: 0;
-}
-
-.metric-item h3 {
-    margin-bottom: 10px;
-    font-size: 1.1em;
-    color: #666;
-}
-
-.metric-item p {
-    font-size: 1.5em;
-    color: #333;
-    margin: 0;
-}
-
-/* Vessels Table */
-.vessels-table {
-    margin-top: 20px;
-    width: 100%; /* Tablo genişliği tam genişlikte */
-}
-
-.vessels-table table {
-    width: 100%;
-    border-collapse: collapse;
-    background-color: #fff;
-}
-
-.vessels-table table th, .vessels-table table td {
-    border: 1px solid #ddd;
-    padding: 10px;
-    text-align: center;
-}
-
-.vessels-table table th {
-    background-color: #f5f5f5;
-    color: #333;
-}
-
-.vessels-table table td.rating {
-    font-weight: bold;
-}
-
-.vessels-table table td.rating.c {
-    background-color: #f4f78c;
-    color: #333;
-}
-
-.vessels-table table td.rating.d {
-    background-color: #f5ba6a;
-    color: #333;
-}
-
-.vessels-table table td.rating.e {
-    background-color: #f56a6a;
-    color: #fff;
-}
-
-/* Bottom Metrics (ETS, CO2 Emissions, etc.) */
-.bottom-metrics {
-    display: flex;
-    justify-content: space-between;
-    margin-top: 20px;
-}
-
-.bottom-metric-item {
-    background-color: #f1f1f1;
-    border-radius: 8px;
-    padding: 15px;
-    text-align: center;
-    width: calc(24% - 10px); /* 4 kutucuk için */
-    margin-right: 10px;
-}
-
-.bottom-metric-item:last-child {
-    margin-right: 0;
-}
-
-.bottom-metric-item h4 {
-    margin-bottom: 10px;
-    font-size: 1.1em;
-    color: #666;
-}
-
-.bottom-metric-item p {
-    font-size: 1.5em;
-    color: #333;
-    margin: 0;
-}
 body {
-    font-family: Arial, sans-serif;
+    font-family: 'Arial', sans-serif;
+    background-color: #f8f9fa;
+    margin: 0;
+    padding: 20px;
 }
+
+h1 {
+    text-align: center;
+    color: #333;
+    margin-bottom: 20px;
+}
+
 table {
     width: 100%;
     border-collapse: collapse;
-    margin: 20px 0;
+    margin: 25px 0;
+    font-size: 0.9em;
+    background-color: #fff;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
 }
-table, th, td {
-    border: 1px solid #ddd;
-}
-th, td {
-    padding: 8px;
+
+table thead th {
+    background-color: #f2f2f2;
+    color: #333;
+    font-weight: bold;
+    padding: 12px;
+    border: 1px solid #dddddd;
     text-align: center;
 }
-th {
-    background-color: #f2f2f2;
+
+table tbody td {
+    padding: 12px;
+    border: 1px solid #dddddd;
+    text-align: center;
 }
-tr:nth-child(even) {
+
+table tbody tr:nth-child(even) {
     background-color: #f9f9f9;
 }
-tr:hover {
+
+table tbody tr:hover {
     background-color: #f1f1f1;
+}
+
+table tbody td:first-of-type {
+    text-align: left;
+    padding-left: 20px;
+}
+
+.status {
+    display: inline-block;
+    padding: 5px 10px;
+    color: white;
+    border-radius: 12px;
+    font-weight: bold;
+}
+
+.status.B {
+    background-color: #28a745; /* Green */
+}
+
+.status.C {
+    background-color: #ffc107; /* Yellow */
+}
+
+/* Table Header Styling */
+table thead th {
+    background-color: #e6f7ff;
+    color: #0056b3;
+}
+
+/* Column Width Adjustments */
+table tbody td {
+    min-width: 70px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    table, thead, tbody, th, td, tr {
+        display: block;
+    }
+
+    table tbody td {
+        padding: 10px;
+        position: relative;
+        text-align: right;
+    }
+
+    table tbody td::before {
+        content: attr(data-label);
+        position: absolute;
+        left: 0;
+        width: 50%;
+        padding-left: 15px;
+        font-weight: bold;
+        text-align: left;
+    }
+
+    table tbody td:first-of-type {
+        text-align: right;
+    }
 }
