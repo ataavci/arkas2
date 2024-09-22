@@ -1,4 +1,8 @@
 /* Global Styles */
+* {
+    box-sizing: border-box;
+}
+
 body {
     font-family: Arial, sans-serif;
     background-color: #f8f9fd;
@@ -8,19 +12,23 @@ body {
 
 .container {
     display: flex;
+    min-height: 100vh;
 }
 
+/* Sidebar Styles */
 .sidebar {
     width: 250px;
-    background-color: #272A84;
-    color: white;
+    background-color: #272A84; /* Arka plan koyu mavi */
+    color: white; /* Genel metin rengi beyaz */
     height: 100vh;
     padding: 20px;
+    box-shadow: 2px 0 5px rgba(0,0,0,0.1); /* Hafif bir gölge */
 }
 
 .sidebar h2 {
     font-size: 1.5em;
     margin-bottom: 20px;
+    color: white; /* Başlık rengi beyaz */
 }
 
 .sidebar ul {
@@ -30,20 +38,59 @@ body {
 
 .sidebar ul li {
     margin: 15px 0;
+}
+
+.sidebar ul li a {
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+    color: white; /* Link metin rengi beyaz */
+    padding: 10px;
+    border-radius: 8px; /* Kenarları yuvarlama */
+    transition: background-color 0.3s ease, color 0.3s ease; /* Hover efekti için geçiş */
+}
+
+.sidebar ul li a:hover {
+    background-color: #1e2360; /* Hover arka planı biraz daha koyu mavi */
+    color: white; /* Hover sırasında metin rengi beyaz */
+}
+
+.sidebar ul li a.active {
+    background-color: #1e2360; /* Aktif olan linkin arka planı daha koyu mavi */
+    color: white; /* Aktif olan linkin metni beyaz */
+}
+
+.sidebar ul li a .icon {
+    margin-right: 10px;
     font-size: 1.2em;
+    color: white; /* İkon rengi beyaz */
+    transition: color 0.3s ease; /* Hover'da renk geçişi */
+}
+
+.sidebar ul li a .title {
+    font-size: 1.1em;
+    color: white; /* Başlık rengi beyaz */
+}
+
+/* Hover'da ikon ve metin rengi */
+.sidebar ul li a:hover .icon, 
+.sidebar ul li a:hover .title {
+    color: white; /* Hover'da ikon ve metin beyaz olacak */
 }
 
 .main-content {
     flex-grow: 1;
     padding: 20px;
     background-color: #fff;
+    margin-left: 250px;
 }
 
 /* Top Metrics */
 .metrics {
     display: flex;
     justify-content: space-between;
-    margin-bottom: 20px;
+    margin-bottom: 30px;
+    flex-wrap: wrap;
 }
 
 .metric-item {
@@ -51,7 +98,13 @@ body {
     border-radius: 8px;
     padding: 15px;
     text-align: center;
-    width: 15%;
+    width: calc(20% - 10px);
+    margin-right: 10px;
+    margin-bottom: 10px;
+}
+
+.metric-item:last-child {
+    margin-right: 0;
 }
 
 .metric-item h3 {
@@ -69,6 +122,7 @@ body {
 /* Vessels Table */
 .vessels-table {
     margin-top: 20px;
+    width: 100%; /* Tablo genişliği tam genişlikte */
 }
 
 .vessels-table table {
@@ -107,28 +161,34 @@ body {
     color: #fff;
 }
 
-/* Graph Section */
-.graphs {
+/* Bottom Metrics (ETS, CO2 Emissions, etc.) */
+.bottom-metrics {
     display: flex;
     justify-content: space-between;
-    flex-wrap: wrap;
     margin-top: 20px;
 }
 
-.graph-item {
-    width: 48%;
-    margin-bottom: 20px;
-}
-
-.graph-item h4 {
-    font-size: 1.2em;
-    margin-bottom: 10px;
-}
-
-.graph-placeholder {
-    width: 100%;
-    height: 200px;
+.bottom-metric-item {
     background-color: #f1f1f1;
-    border: 1px solid #ddd;
     border-radius: 8px;
+    padding: 15px;
+    text-align: center;
+    width: calc(24% - 10px); /* 4 kutucuk için */
+    margin-right: 10px;
+}
+
+.bottom-metric-item:last-child {
+    margin-right: 0;
+}
+
+.bottom-metric-item h4 {
+    margin-bottom: 10px;
+    font-size: 1.1em;
+    color: #666;
+}
+
+.bottom-metric-item p {
+    font-size: 1.5em;
+    color: #333;
+    margin: 0;
 }

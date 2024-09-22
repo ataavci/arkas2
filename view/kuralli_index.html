@@ -12,12 +12,14 @@
         <div class="sidebar">
             <h2>Arkas Line Operational Excellence</h2>
             <ul>
-                <li>Dashboard</li>
-                <li>ETS</li>
-                <li>CII</li>
-                <li>FuelEU</li>
-                <li>Settings</li>
-                <li>Help</li>
+                <li><a href="#"><span class="title">arkas</span></a></li>
+        <li><a href="#"><span class="icon"><ion-icon name="home-outline"></ion-icon></span><span class="title">Dashboard</span></a></li>
+        <li><a href="./ets.html"><span class="icon"><ion-icon name="people-outline"></ion-icon></span><span class="title">ETS</span></a></li>
+        <li><a href="./index.html"><span class="icon"><ion-icon name="chatbubble-outline"></ion-icon></span><span class="title">ets_tables</span></a></li>
+        <li><a href="#"><span class="icon"><ion-icon name="help-outline"></ion-icon></span><span class="title">Help</span></a></li>
+        <li><a href="#"><span class="icon"><ion-icon name="settings-outline"></ion-icon></span><span class="title">Settings</span></a></li>
+        <li><a href="#"><span class="icon"><ion-icon name="lock-closed-outline"></ion-icon></span><span class="title">Password</span></a></li>
+        <li><a href="#"><span class="icon"><ion-icon name="log-out-outline"></ion-icon></span><span class="title">Sign Out</span></a></li>
             </ul>
         </div>
 
@@ -94,6 +96,26 @@
                       console.error("FuelEU verisi alınırken hata:", error);
                       document.getElementById('ghg').textContent = "Veri alınamadı";
                     });
+                    fetch('/sefer-table-toplami')
+            .then(response => response.json())
+            .then(data => {
+                const tbody = document.getElementById('ghg-data');
+                data.totalData.forEach(row => {
+                    const tr = document.createElement('tr');
+
+                    tr.innerHTML = `
+                        <td>${row.table}</td>
+                        <td>${row.ghg_sum.toFixed(2)}</td>
+                        <td>${row.sea_fuel_sum}</td>
+                        <td>${row.eca_fuel_sum}</td>
+                        <td>${row.port_fuel_sum}</td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            })
+            .catch(error => {
+                console.error('Hata:', error);
+            });
                     
                 </script>
                 
@@ -104,56 +126,21 @@
             </div>
 
             <!-- Vessels Table -->
-            <div class="vessels-table">
-                <h3>All Vessels</h3>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Vessel</th>
-                            <th>VLSFO</th>
-                            <th>MGO</th>
-                            <th>Biofuel B24</th>
-                            <th>Biodiesel 24</th>
-                            <th>CII Rating</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>Vessel 1</td>
-                            <td>1913</td>
-                            <td>4686</td>
-                            <td>75</td>
-                            <td>0</td>
-                            <td class="rating c">C</td>
-                        </tr>
-                        <tr>
-                            <td>Vessel 2</td>
-                            <td>6685</td>
-                            <td>682</td>
-                            <td>100</td>
-                            <td>0</td>
-                            <td class="rating c">C</td>
-                        </tr>
-                        <tr>
-                            <td>Vessel 3</td>
-                            <td>2626</td>
-                            <td>571</td>
-                            <td>0</td>
-                            <td>0</td>
-                            <td class="rating d">D</td>
-                        </tr>
-                        <tr>
-                            <td>Vessel 4</td>
-                            <td>1481</td>
-                            <td>5262</td>
-                            <td>450</td>
-                            <td>0</td>
-                            <td class="rating e">E</td>
-                        </tr>
-                        <!-- Add more rows as needed -->
-                    </tbody>
-                </table>
-            </div>
+            h3>Sefer GHG Toplamları</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>Table</th>
+                <th>GHG Sum</th>
+                <th>Sea Fuel</th>
+                <th>ECA Fuel</th>
+                <th>Port Fuel</th>
+            </tr>
+        </thead>
+        <tbody id="ghg-data">
+            <!-- Veriler buraya JavaScript ile eklenecek -->
+        </tbody>
+    </table>
 
             <!-- Graph Section -->
             <div class="graphs">
