@@ -22,10 +22,10 @@ app.use("/static", express.static(path.join(__dirname, "public")));
 
 // Serve HTML files
 app.get("/", (req, res) =>
-  res.sendFile(path.join(__dirname, "view", "index.html"))
+  res.sendFile(path.join(__dirname, "view", "kuralli_index.html"))
 );
-app.get("/kuralli_index.html", (req, res) => {
-  res.sendFile(path.join(__dirname, "/view", "kuralli_index.html"));
+app.get("/index.html", (req, res) => {
+  res.sendFile(path.join(__dirname, "/view", "index.html"));
 });
 app.get("/ets.html", (req, res) => {
     res.sendFile(path.join(__dirname, "/view", "ets.html"));
@@ -509,34 +509,81 @@ app.get("/sefer-balance-toplami", (req, res) => {
   });
 });
 app.get("/sefer-ghg-toplami", (req, res) => {
-  const query = `SHOW TABLES LIKE 'sefer%'`;
-  
+  const query = `SHOW TABLES LIKE 'sefer%'`;  // sefer ile başlayan tabloları bul
+
   db.query(query, (err, results) => {
     if (err) {
       console.error("Tablo sorgusu sırasında hata:", err.message);
       return res.status(500).json({ error: "Veritabanı hatası oluştu." });
     }
 
-    let totalFuel = 0;
+    let totalGHG = 0;
     let completed = 0;
 
     results.forEach((row) => {
       const tableName = Object.values(row)[0];
-      const fuelQuery = `SELECT IFNULL(SUM(89.34-	GHG_ACTUAL), 0) AS fuel_sum FROM ${tableName}`;
+      // TTW + WTT değeri 0'dan büyük olanlar için ortalama hesapla
+      const ghgQuery = `SELECT IFNULL(AVG(TTW + WTT), 0) AS ghg_sum FROM ${tableName} WHERE (TTW + WTT) > 0`;
 
-      db.query(fuelQuery, (err, fuelResults) => {
+      db.query(ghgQuery, (err, ghgResults) => {
         if (err) {
           console.error(`Tablo ${tableName} için sorgu hatası:`, err.message);
-          return res.status(500).json({ error: "Fuel sorgusu sırasında hata oluştu." });
+          return res.status(500).json({ error: "GHG sorgusu sırasında hata oluştu." });
         }
 
-        totalFuel += fuelResults[0].fuel_sum;
+        totalGHG += ghgResults[0].ghg_sum;
         completed++;
 
         // Tüm tablolar işlendiğinde sonucu döndür
         if (completed === results.length) {
-          console.log(`Toplam ets: ${totalFuel}`);
-          res.json({ totalFuel });
+          console.log(`Toplam GHG: ${totalGHG}`);
+          res.json({ totalGHG });
+        }
+      });
+    });
+  });
+});
+app.get("/sefer-table-toplami", (req, res) => {
+  const query = `SHOW TABLES LIKE 'sefer%'`;  // sefer ile başlayan tabloları bul
+
+  db.query(query, (err, results) => {
+    if (err) {
+      console.error("Tablo sorgusu sırasında hata:", err.message);
+      return res.status(500).json({ error: "Veritabanı hatası oluştu." });
+    }
+
+    let totalData = [];
+    let completed = 0;
+
+    results.forEach((row) => {
+      const tableName = Object.values(row)[0];
+      // TTW + WTT değeri 0'dan büyük olanlar için ortalama hesapla ve yakıt verilerini al
+      const fuelQuery = `SELECT IFNULL(AVG(TTW + WTT), 0) AS ghg_sum, 
+                         IFNULL((sea_fuel), 0) AS sea_fuel_sum, 
+                         IFNULL((eca_fuel), 0) AS eca_fuel_sum, 
+                         IFNULL((port_fuel), 0) AS port_fuel_sum 
+                         FROM ${tableName} WHERE (TTW + WTT) > 0`;
+
+      db.query(fuelQuery, (err, fuelResults) => {
+        if (err) {
+          console.error(`Tablo ${tableName} için sorgu hatası:`, err.message);
+          return res.status(500).json({ error: "GHG sorgusu sırasında hata oluştu." });
+        }
+
+        // Her tabloya ait veriyi bir objeye ekle
+        totalData.push({
+          table: tableName,
+          ghg_sum: fuelResults[0].ghg_sum,
+          sea_fuel_sum: fuelResults[0].sea_fuel_sum,
+          eca_fuel_sum: fuelResults[0].eca_fuel_sum,
+          port_fuel_sum: fuelResults[0].port_fuel_sum
+        });
+
+        completed++;
+
+        // Tüm tablolar işlendiğinde sonucu döndür
+        if (completed === results.length) {
+          res.json({ totalData });
         }
       });
     });
