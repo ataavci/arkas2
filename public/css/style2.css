@@ -1,191 +1,253 @@
-/* Global Styles */
+@import url('https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Poppins:wght@400;500;600;700&display=swap');
+
 * {
-    box-sizing: border-box;
+	margin: 0;
+	padding: 0;
+	box-sizing: border-box;
+}
+
+a {
+	text-decoration: none;
+}
+
+li {
+	list-style: none;
+}
+
+:root {
+	--poppins: 'Poppins', sans-serif;
+	--lato: 'Lato', sans-serif;
+
+	--light: #F9F9F9;
+	--blue: #3C91E6;
+	--light-blue: #CFE8FF;
+	--grey: #eee;
+	--dark-grey: #AAAAAA;
+	--dark: #342E37;
+	--red: #DB504A;
+	--yellow: #FFCE26;
+	--light-yellow: #FFF2C6;
+	--orange: #FD7238;
+	--light-orange: #FFE0D3;
+}
+
+html {
+	overflow-x: hidden;
 }
 
 body {
-    font-family: Arial, sans-serif;
-    background-color: #f8f9fd;
-    margin: 0;
-    padding: 0;
+	background: var(--grey);
+	overflow-x: hidden;
+	font-family: var(--poppins); /* Tüm gövdeye yazı tipi uygulandı */
+	color: var(--dark); /* Varsayılan yazı rengi */
 }
 
-.container {
-    display: flex;
-    min-height: 100vh;
+/* SIDEBAR */
+#sidebar {
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 280px;
+	height: 100%;
+	background: var(--light);
+	z-index: 2000;
+	font-family: var(--lato);
+	transition: .3s ease;
+	overflow-x: hidden;
+	scrollbar-width: none;
+}
+#sidebar .brand {
+	font-size: 24px;
+	font-weight: 700;
+	height: 56px;
+	display: flex;
+	align-items: center;
+	color: var(--blue);
+	padding: 20px;
+}
+#sidebar .side-menu {
+	width: 100%;
+	margin-top: 48px;
+}
+#sidebar .side-menu li {
+	height: 48px;
+	background: transparent;
+	border-radius: 48px 0 0 48px;
+	padding: 4px;
+	transition: background 0.3s ease;
+}
+#sidebar .side-menu li a {
+	width: 100%;
+	height: 100%;
+	display: flex;
+	align-items: center;
+	font-size: 16px;
+	color: var(--dark);
+	white-space: nowrap;
+	padding-left: 16px;
+}
+#sidebar .side-menu li.active {
+	background: var(--light-blue);
+}
+#sidebar .side-menu li a.logout {
+	color: var(--red);
+}
+#sidebar .side-menu li:hover {
+	background: var(--grey); /* Hover efekti eklendi */
+}
+#sidebar .side-menu li a:hover {
+	color: var(--blue); /* Hoverda yazı rengi */
 }
 
-/* Sidebar Styles */
-.sidebar {
-    width: 250px;
-    background-color: #272A84; /* Arka plan koyu mavi */
-    color: white; /* Genel metin rengi beyaz */
-    height: 100vh;
-    padding: 20px;
-    box-shadow: 2px 0 5px rgba(0,0,0,0.1); /* Hafif bir gölge */
+/* CONTENT */
+#content-dashboard {
+	position: relative;
+	width: calc(100% - 280px);
+	left: 280px;
+	padding: 20px;
+	transition: .3s ease;
+}
+#sidebar.hide ~ #content-dashboard {
+	width: calc(100% - 60px);
+	left: 60px;
 }
 
-.sidebar h2 {
-    font-size: 1.5em;
-    margin-bottom: 20px;
-    color: white; /* Başlık rengi beyaz */
+/* NAVBAR */
+#content-dashboard nav {
+	height: 56px;
+	background: var(--light);
+	padding: 0 24px;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	position: sticky;
+	top: 0;
+	left: 0;
+	z-index: 1000;
+	box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1); /* Hafif gölge eklendi */
+}
+#content-dashboard nav .form-input {
+	display: flex;
+	align-items: center;
+	height: 36px;
+	background-color: var(--grey);
+	border-radius: 36px;
+	overflow: hidden;
+}
+#content-dashboard nav .form-input input {
+	border: none;
+	padding: 8px 16px;
+	flex-grow: 1;
+	background: transparent;
+	outline: none;
+	color: var(--dark);
+}
+#content-dashboard nav .form-input button {
+	background: var(--blue);
+	border: none;
+	color: var(--light);
+	padding: 0 16px;
+	cursor: pointer;
 }
 
-.sidebar ul {
-    list-style-type: none;
-    padding: 0;
+/* MAIN */
+#content-dashboard main {
+	padding: 20px;
 }
 
-.sidebar ul li {
-    margin: 15px 0;
+.head-title {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin-bottom: 20px;
 }
 
-.sidebar ul li a {
-    display: flex;
-    align-items: center;
-    text-decoration: none;
-    color: white; /* Link metin rengi beyaz */
-    padding: 10px;
-    border-radius: 8px; /* Kenarları yuvarlama */
-    transition: background-color 0.3s ease, color 0.3s ease; /* Hover efekti için geçiş */
+.head-title h1 {
+	font-size: 28px;
+	font-weight: 600;
+	color: var(--dark);
 }
 
-.sidebar ul li a:hover {
-    background-color: #1e2360; /* Hover arka planı biraz daha koyu mavi */
-    color: white; /* Hover sırasında metin rengi beyaz */
+.head-title .breadcrumb {
+	display: flex;
+	align-items: center;
+	font-size: 14px;
+	color: var(--dark-grey);
 }
 
-.sidebar ul li a.active {
-    background-color: #1e2360; /* Aktif olan linkin arka planı daha koyu mavi */
-    color: white; /* Aktif olan linkin metni beyaz */
+.head-title .breadcrumb li {
+	margin-right: 10px;
 }
 
-.sidebar ul li a .icon {
-    margin-right: 10px;
-    font-size: 1.2em;
-    color: white; /* İkon rengi beyaz */
-    transition: color 0.3s ease; /* Hover'da renk geçişi */
+.head-title .breadcrumb li a {
+	color: var(--dark-grey);
+	text-decoration: none;
 }
 
-.sidebar ul li a .title {
-    font-size: 1.1em;
-    color: white; /* Başlık rengi beyaz */
+.head-title .breadcrumb li a:hover {
+	color: var(--blue);
 }
 
-/* Hover'da ikon ve metin rengi */
-.sidebar ul li a:hover .icon, 
-.sidebar ul li a:hover .title {
-    color: white; /* Hover'da ikon ve metin beyaz olacak */
+.btn-download {
+	display: inline-flex;
+	align-items: center;
+	padding: 8px 16px;
+	background-color: var(--blue);
+	color: var(--light);
+	border-radius: 8px;
+	font-size: 14px;
+	text-decoration: none;
 }
 
-.main-content {
-    flex-grow: 1;
-    padding: 20px;
-    background-color: #fff;
-    margin-left: 250px;
+.btn-download:hover {
+	background-color: #357ABD; /* Hoverda koyu mavi */
 }
 
-/* Top Metrics */
-body {
-    font-family: 'Arial', sans-serif;
-    background-color: #f8f9fa;
-    margin: 0;
-    padding: 20px;
+/* TABLE STYLES */
+.table-responsive {
+	width: 100%;
+	overflow-x: auto; /* Yatay kaydırma */
+	margin-bottom: 20px; /* Tabloya alt boşluk */
+}
+#vesselTable th, #vesselTable td {
+	white-space: nowrap;
+	padding: 12px;
+	text-align: left;
+	border: 1px solid var(--grey);
+	font-size: 14px;
+}
+#vesselTable th {
+	background-color: var(--blue);
+	color: var(--light);
+}
+#vesselTable tbody tr:hover {
+	background-color: var(--grey); /* Hoverda satır rengi */
+}
+#vesselTable td {
+	color: var(--dark); /* Varsayılan hücre yazı rengi */
 }
 
-h1 {
-    text-align: center;
-    color: #333;
-    margin-bottom: 20px;
+/* RESPONSIVE */
+@media screen and (max-width: 768px) {
+	#content-dashboard {
+		width: calc(100% - 60px);
+		left: 60px;
+	}
+
+	#vesselTable {
+		min-width: 768px;
+	}
+
+	#content-dashboard nav {
+		padding: 0 10px;
+	}
 }
 
-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin: 25px 0;
-    font-size: 0.9em;
-    background-color: #fff;
-    box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
-}
-
-table thead th {
-    background-color: #f2f2f2;
-    color: #333;
-    font-weight: bold;
-    padding: 12px;
-    border: 1px solid #dddddd;
-    text-align: center;
-}
-
-table tbody td {
-    padding: 12px;
-    border: 1px solid #dddddd;
-    text-align: center;
-}
-
-table tbody tr:nth-child(even) {
-    background-color: #f9f9f9;
-}
-
-table tbody tr:hover {
-    background-color: #f1f1f1;
-}
-
-table tbody td:first-of-type {
-    text-align: left;
-    padding-left: 20px;
-}
-
-.status {
-    display: inline-block;
-    padding: 5px 10px;
-    color: white;
-    border-radius: 12px;
-    font-weight: bold;
-}
-
-.status.B {
-    background-color: #28a745; /* Green */
-}
-
-.status.C {
-    background-color: #ffc107; /* Yellow */
-}
-
-/* Table Header Styling */
-table thead th {
-    background-color: #e6f7ff;
-    color: #0056b3;
-}
-
-/* Column Width Adjustments */
-table tbody td {
-    min-width: 70px;
-}
-
-/* Responsive Design */
-@media (max-width: 768px) {
-    table, thead, tbody, th, td, tr {
-        display: block;
-    }
-
-    table tbody td {
-        padding: 10px;
-        position: relative;
-        text-align: right;
-    }
-
-    table tbody td::before {
-        content: attr(data-label);
-        position: absolute;
-        left: 0;
-        width: 50%;
-        padding-left: 15px;
-        font-weight: bold;
-        text-align: left;
-    }
-
-    table tbody td:first-of-type {
-        text-align: right;
-    }
+@media screen and (max-width: 576px) {
+	#vesselTable {
+		min-width: 576px;
+	}
+	.head-title h1 {
+		font-size: 22px;
+	}
 }

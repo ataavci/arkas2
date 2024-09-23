@@ -3,165 +3,113 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vessel Dashboard</title>
+    <title></title>
+	<link rel="icon" href="/static/image/favicon-16x16.png" type="image/x-icon">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
     <link rel="stylesheet" href="/static/css/style2.css">
 </head>
 <body>
-    <div class="container">
-        <!-- Sidebar -->
-        <div class="sidebar">
-            <h2>Arkas Line Operational Excellence</h2>
-            <ul>
-                
-        <li><a href="./"><span class="icon"><ion-icon name="home-outline"></ion-icon></span><span class="title">Dashboard</span></a></li>
-        <li><a href="./ets.html"><span class="icon"><ion-icon name="people-outline"></ion-icon></span><span class="title">ETS</span></a></li>
-        <li><a href="./input.html"><span class="icon"><ion-icon name="chatbubble-outline"></ion-icon></span><span class="title">input</span></a></li>
-        <li><a href="#"><span class="icon"><ion-icon name="help-outline"></ion-icon></span><span class="title">Help</span></a></li>
-        <li><a href="#"><span class="icon"><ion-icon name="settings-outline"></ion-icon></span><span class="title">Settings</span></a></li>
-        <li><a href="#"><span class="icon"><ion-icon name="lock-closed-outline"></ion-icon></span><span class="title">Password</span></a></li>
-        <li><a href="#"><span class="icon"><ion-icon name="log-out-outline"></ion-icon></span><span class="title">Sign Out</span></a></li>
-            </ul>
-        </div>
+    <!-- SIDEBAR -->
+	<section id="sidebar">
+		<a href="#" class="brand">
+			<i class='bx bxs-smile'></i>
+			<span class="text"></span> 
+					
+		</a>
+		<ul class="side-menu top">
+			<li class="active">
+				<a href="#">
+					<i class='bx bxs-dashboard' ></i>
+					<span class="text">DASHBOARD</span>
+				</a>
+			</li>
+			<li>
+				<a href="./ets.html">
+					<i class='bx bxs-shopping-bag-alt' ></i>
+					<span class="text">ETS</span>
+				</a>
+			</li>
+            <li>
+				<a href="#">
+					<i class='bx bxs-shopping-bag-alt' ></i>
+					<span class="text">CII</span>
+				</a>
+			</li>
+			<li>
+				<a href="#">
+					<i class='bx bxs-doughnut-chart' ></i>
+					<span class="text">FUEL EU</span>
+				</a>
+			</li>
+			<li>
+				<a href="./input.html">
+					<i class='bx bxs-message-dots' ></i>
+					<span class="text">INPUT</span>
+				</a>
+			</li>
+			
+		</ul>
+		<ul class="side-menu">
+			
+			<li>
+				<a href="#" class="logout">
+					<i class='bx bxs-log-out-circle' ></i>
+					<span class="text">Logout</span>
+				</a>
+			</li>
+		</ul>
+	</section>
+	<!-- SIDEBAR -->
 
-        <!-- Main Content -->
-        <div class="main-content">
-            <!-- Top Metrics -->
-            <div class="metrics">
-                <div class="metric-item">
-                    <h3>Total Consumption</h3>
-                    <p id="Consumption"></p>
-                </div>
-                <div class="metric-item">
-                    <h3>Compliance Balance</h3>
-                    <p id="balance"></p>
-                </div>
-                <div class="metric-item">
-                    <h3>GHG Intensity</h3>
-                    <p id="GHG"></p>
-                </div>
-                <div class="metric-item">
-                    <h3>FuelEU Cost</h3>
-                    <p id="fuel-eu-cost">Yükleniyor...</p>
-                </div>
-                
-                <script>
-                  // Sunucudan FuelEU Cost verisini almak ve HTML'e eklemek
-                  fetch('http://localhost:3000/sefer-fuel-toplami')
-                    .then(response => response.json())
-                    .then(data => {
-                      // FuelEU toplamını sayfaya direkt ekle
-                      document.getElementById('fuel-eu-cost').textContent = data.totalFuel.toLocaleString('en-US');
-                    })
-                    .catch(error => {
-                      console.error("FuelEU verisi alınırken hata:", error);
-                      document.getElementById('fuel-ets-cost').textContent = "Veri alınamadı";
-                    });
-                    fetch('http://localhost:3000/sefer-ets-toplami')
-                    .then(response => response.json())
-                    .then(data => {
-                      // FuelEU toplamını sayfaya direkt ekle
-                      document.getElementById('ets-cost').textContent = data.totalFuel.toLocaleString('en-US');
-                    })
-                    .catch(error => {
-                      console.error("FuelEU verisi alınırken hata:", error);
-                      document.getElementById('ets-cost').textContent = "Veri alınamadı";
-                    });
-                    fetch('http://localhost:3000/sefer-consumption-toplami')
-                    .then(response => response.json())
-                    .then(data => {
-                      // FuelEU toplamını sayfaya direkt ekle
-                      document.getElementById('Consumption').textContent = data.totalFuel.toLocaleString('en-US');
-                    })
-                    .catch(error => {
-                      console.error("FuelEU verisi alınırken hata:", error);
-                      document.getElementById('Consumption').textContent = "Veri alınamadı";
-                    });
-                    fetch('http://localhost:3000/sefer-balance-toplami')
-                    .then(response => response.json())
-                    .then(data => {
-                      // FuelEU toplamını sayfaya direkt ekle
-                      document.getElementById('balance').textContent = data.totalFuel.toLocaleString('en-US');
-                    })
-                    .catch(error => {
-                      console.error("FuelEU verisi alınırken hata:", error);
-                      document.getElementById('balance').textContent = "Veri alınamadı";
-                    });
-                    fetch('http://localhost:3000/sefer-ghg-toplami')
-                    .then(response => response.json())
-                    .then(data => {
-                      // FuelEU toplamını sayfaya direkt ekle
-                      document.getElementById('ghg').textContent = data.totalFuel.toLocaleString('en-US');
-                    })
-                    .catch(error => {
-                      console.error("FuelEU verisi alınırken hata:", error);
-                      document.getElementById('ghg').textContent = "Veri alınamadı";
-                    });
-                    fetch('/sefer-table-toplami')
-            .then(response => response.json())
-            .then(data => {
-                const tbody = document.getElementById('ghg-data');
-                data.totalData.forEach(row => {
-                    const tr = document.createElement('tr');
 
-                    tr.innerHTML = `
-                        <td>${row.table}</td>
-                        <td>${row.ghg_sum.toFixed(2)}</td>
-                        <td>${row.sea_fuel_sum}</td>
-                        <td>${row.eca_fuel_sum}</td>
-                        <td>${row.port_fuel_sum}</td>
-                    `;
-                    tbody.appendChild(tr);
-                });
-            })
-            .catch(error => {
-                console.error('Hata:', error);
-            });
-                    
-                </script>
-                
-                <div class="metric-item">
-                    <h3>ETS Cost</h3>
-                    <p id="ets-cost">$0.00</p>
-                
-            </div>
 
-            <!-- Vessels Table -->
-            
-    <table>
-        <thead>
-            <tr>
-                <th>Table</th>
-                <th>GHG </th>
-                <th>Sea Fuel</th>
-                <th>ECA Fuel</th>
-                <th>Port Fuel</th>
-            </tr>
-        </thead>
-        <tbody id="ghg-data">
-            <!-- Veriler buraya JavaScript ile eklenecek -->
-        </tbody>
-    </table>
+	<!-- CONTENT -->
+	<section id="content-dashboard">
+		<!-- NAVBAR -->
+		<nav>
+			<i class='bx bx-menu' ></i>
+			<a href="#" class="nav-link">Search</a>
+			<form action="#">
+				<div class="form-input">
+					<input type="search" placeholder="Search...">
+					<button type="submit" class="search-btn"><i class='bx bx-search' ></i></button>
+				</div>
+			</form>
+			<input type="checkbox" id="switch-mode" hidden>
+			<label for="switch-mode" class="switch-mode"></label>
+			<a href="#" class="notification">
+				<i class='bx bxs-bell' ></i>
+				
+			</a>
+			
+		</nav>
+		<!-- NAVBAR -->
 
-            <!-- Graph Section -->
-            <div class="graphs">
-                <div class="graph-item">
-                    <h4>ETS</h4>
-                    <div class="graph-placeholder"></div>
-                </div>
-                <div class="graph-item">
-                    <h4>CO2 Emissions</h4>
-                    <div class="graph-placeholder"></div>
-                </div>
-                <div class="graph-item">
-                    <h4>Fuel Consumption</h4>
-                    <div class="graph-placeholder"></div>
-                </div>
-                <div class="graph-item">
-                    <h4>Carbon Footprint</h4>
-                    <div class="graph-placeholder"></div>
-                </div>
-            </div>
-        </div>
-    </div>
+		<!-- MAIN -->
+		<main>
+			<div class="head-title">
+				<div class="left">
+					<h1>Dashboard</h1>
+					<ul class="breadcrumb">
+						<li>
+							<a href="#">Dashboard</a>
+						</li>
+						<li><i class='bx bx-chevron-right' ></i></li>
+						
+					</ul>
+				</div>
+				<a href="#" class="btn-download">
+					<i class='bx bxs-cloud-download' ></i>
+					<span class="text">Download PDF</span>
+				</a>
+			</div>
+
+			
+	</section>
+	<!-- CONTENT -->
+	
+
+	<script src="/static/js/script.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
 </body>
 </html>
