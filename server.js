@@ -86,6 +86,7 @@ app.post("/sefer-kaydet", (req, res) => {
     hiz: parseFloat(req.body.speed),
     gunluk_tuketim_sea: parseFloat(req.body.gunluk_tuketim_sea),
     gunluk_tuketim_port: parseFloat(req.body.gunluk_tuketim_port),
+    DWT:parseFloat(req.body.DWT),
   };
   let startDate = new Date(req.body.start_date);
 
@@ -241,7 +242,8 @@ app.post("/sefer-kaydet", (req, res) => {
               const insertAyakQuery = `
                 INSERT INTO sefer_7 (
                   company_id, 
-                  vessel_name, 
+                  vessel_name,
+                  dwt, 
                   from_liman, 
                   to_liman, 
                   status, 
@@ -276,12 +278,13 @@ app.post("/sefer-kaydet", (req, res) => {
                   COMPLIANCE_BALANCE, 
                   fuel_eu
                 ) 
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                VALUES (?,?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
               `;
 
               const ayakValues = [
                 1, // company_id varsayılan olarak 1
-                vesselName, 
+                vesselName,
+                seferBilgisi.DWT, 
                 ayak.from, 
                 ayak.to, 
                 status,
@@ -556,25 +559,28 @@ app.get("/sefer-table-toplami", (req, res) => {
 app.get('/api/get-vessel-data', (req, res) => {
   const sql = 'CALL ets()'; // ets adlı prosedürü çağırır
   db.query(sql, (err, result) => {
-      if (err) throw err;
-      const rows = result[0]; // Prosedür sonucu satırları
-      const formattedData = rows.map(row => ({
-          vessel_name: row.vessel_name,
-          start_date_: row.start_date_,
-          end_date_: row.end_date_,
-          distance_sum: row['SUM(sefer_7.distance)'],
-          distance_eca_sum: row['SUM(sefer_7.distance_eca)'],
-          speed_avg: row['AVG(sefer_7.speed)'],
-          total_days: row['SUM(sefer_7.port_day+sefer_7.denizde_kalinan_sure)'],
-          sea_fuel: row.sea_fuel,
-          sea_consumption: row.sea_consumption,
-          eca_fuel: row.eca_fuel,
-          eca_consumption: row.eca_consumption,
-          port_fuel: row.port_fuel,
-          port_consumption: row.port_consumption,
-          ets_sum: row['sum(sefer_7.ets)'],
-          compliance_balance_sum: row['SUM(sefer_7.COMPLIANCE_BALANCE)']
-      }));
-      res.json(formattedData);
-  });
+    if (err) throw err;
+    const rows = result[0];
+    console.log(rows); // Gelen veriyi konsolda görmek için
+    const formattedData = rows.map(row => ({
+        vessel_name: row.vessel_name,
+        DWT: row.dwt, // Eğer alias ile düzelttiyseniz
+        start_date_: row.start_date_,
+        end_date_: row.end_date_,
+        distance_sum: row.distance_sum,
+        distance_eca_sum: row.distance_eca_sum,
+        speed_avg: row.speed_avg,
+        total_days: row.total_days,
+        sea_fuel: row.sea_fuel,
+        sea_consumption: row.sea_consumption,
+        eca_fuel: row.eca_fuel,
+        eca_consumption: row.eca_consumption,
+        port_fuel: row.port_fuel,
+        port_consumption: row.port_consumption,
+        ets_sum: row.ets_sum,
+        compliance_balance_sum: row.compliance_balance_sum
+    }));
+    res.json(formattedData);
+});
+
 });

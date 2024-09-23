@@ -103,6 +103,9 @@
                     <thead class="table-dark">
                         <tr>
                             <th>Vessel Name</th>
+                            
+                            <th>DWT</th>
+
                             <th>Start Date</th>
                             <th>End Date</th>
                             <th>Total Distance</th>
@@ -129,32 +132,38 @@
 
     <script>
         fetch('/api/get-vessel-data')
-        .then(response => response.json())
-        .then(data => {
-            const tableBody = document.querySelector("#vesselTable tbody");
-            data.forEach(row => {
-                const tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td>${row.vessel_name}</td>
-                    <td>${row.start_date_}</td>
-                    <td>${row.end_date_}</td>
-                    <td>${row.distance_sum}</td>
-                    <td>${row.distance_eca_sum}</td>
-                    <td>${row.speed_avg}</td>
-                    <td>${row.total_days}</td>
-                    <td>${row.sea_fuel}</td>
-                    <td>${row.sea_consumption}</td>
-                    <td>${row.eca_fuel}</td>
-                    <td>${row.eca_consumption}</td>
-                    <td>${row.port_fuel}</td>
-                    <td>${row.port_consumption}</td>
-                    <td>${row.ets_sum}</td>
-                    <td>${row.compliance_balance_sum}</td>
-                `;
-                tableBody.appendChild(tr);
-            });
-        })
-        .catch(error => console.error('Error fetching vessel data:', error));
+    .then(response => response.json())
+    .then(data => {
+        console.log(data); // Tüm veriyi kontrol etmek için bu satırı ekleyin
+
+        const tableBody = document.querySelector("#vesselTable tbody");
+        tableBody.innerHTML = ''; // Tabloyu temizler, mevcut satırları kaldırır.
+
+        data.forEach(row => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td>${row.vessel_name}</td>
+                <td>${row.DWT}</td> <!-- Eğer dwt küçük harfliyse row.dwt kullanın -->
+                <td>${row.start_date_}</td>
+                <td>${row.end_date_}</td>
+                <td>${row.distance_sum}</td>
+                <td>${row.distance_eca_sum}</td>
+                <td>${row.speed_avg}</td>
+                <td>${row.total_days}</td>
+                <td>${row.sea_fuel}</td>
+                <td>${row.sea_consumption}</td>
+                <td>${row.eca_fuel}</td>
+                <td>${row.eca_consumption}</td>
+                <td>${row.port_fuel}</td>
+                <td>${row.port_consumption}</td>
+                <td>${row.ets_sum}</td>
+                <td>${row.compliance_balance_sum}</td>
+            `;
+            tableBody.appendChild(tr); // Satırı tabloya ekler
+        });
+    })
+    .catch(error => console.error('Error fetching vessel data:', error));
+
     </script>
 </body>
 </html>
