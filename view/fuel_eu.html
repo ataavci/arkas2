@@ -95,30 +95,21 @@
                 </a>
             </div>
 
-            <h1>ETS Data Table</h1>
+            <h1>FUEL EU Data Table</h1>
 
             <div class="table-responsive">
                 <table id="vesselTable" class="table table-bordered">
                     <thead class="table-dark">
                         <tr>
-                            <th>Vessel Name</th>
-                            <th>DWT</th>
-                            <th>Start Date</th>
-                            <th>End Date</th>
-                            <th>Total Distance</th>
-                            <th>Total ECA Distance</th>
-                            <th>Average Speed</th>
-                            <th>Total Days</th>
-                            <th>Sea Fuel</th>
-                            <th>Sea Consumption</th>
-                            <th>ECA Fuel</th>
-                            <th>ECA Consumption</th>
-                            <th>Port Fuel</th>
-                            <th>Port Consumption</th>
-                            <th>ETS</th>
-                            <th>Compliance Balance</th>
-                            <th>AER(gCO2/t*nm)</th>
-                            <th>CII</th>
+                            <th>vessel_name</th>
+            <th>min_start_date</th>
+            <th>max_end_date</th>
+            <th>duration</th>
+            <th>intra_eu</th>
+            <th>extra_eu</th>
+            <th>ghg_intensity</th>
+            <th>ghg_target</th>
+            <th>compliance_balance</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -130,100 +121,56 @@
     </section>
 
     <script>
-        
-        // CII değerine göre sınıf ekleme fonksiyonu
-        function getCIIClass(CII) {
-            switch (CII) {
-                case 'A':
-                    return 'cii-a';
-                case 'B':
-                    return 'cii-b';
-                case 'C':
-                    return 'cii-c';
-                case 'D':
-                    return 'cii-d';
-                case 'E':
-                    return 'cii-e';
-                default:
-                    return '';
-            }
-        }
-
-        // Fetch ile veriyi çekip tabloya ekleme işlemi
-        // Fetch ile veriyi çekip tabloya ekleme işlemi
-fetch('/api/get-vessel-data')
-    .then(response => {
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        return response.json();
-    })
+        // API'den veriyi çekmek ve tabloya doldurmak için fetch fonksiyonunu kullanıyoruz
+        fetch('/api/get-fuel_eu-data')
+    .then(response => response.json())
     .then(data => {
-        console.log('Fetched data:', data); // Gelen veriyi konsola yazdır
-
-        const tableBody = document.querySelector("#vesselTable tbody");
-        tableBody.innerHTML = ''; // Tabloyu temizler, mevcut satırları kaldırır.
-
-        if (data.length === 0) {
-            console.log('No data found.');
-            tableBody.innerHTML = '<tr><td colspan="18">No data available</td></tr>';
-            return;
-        }
+        const tableBody = document.querySelector('#vesselTable tbody');
 
         data.forEach(row => {
-            const tr = document.createElement('tr');
+            const tableRow = document.createElement('tr');
 
-            tr.innerHTML = `
+            // 'intra_eu' ve 'extra_eu' verilerini bölme işlemi
+            const intraEU = row.intra_eu.split(', ');
+            const extraEU = row.extra_eu.split(', ');
+
+            // Yakıt türlerini ve miktarlarını ayrı satırlara koyuyoruz
+            const intraFuelTypes = intraEU.filter((_, index) => index % 2 === 0).join(', ');
+            const intraFuelAmounts = intraEU.filter((_, index) => index % 2 !== 0).join(', ');
+
+            const extraFuelTypes = extraEU.filter((_, index) => index % 2 === 0).join(', ');
+            const extraFuelAmounts = extraEU.filter((_, index) => index % 2 !== 0).join(', ');
+
+            // Tablo hücrelerini oluşturuyoruz
+            tableRow.innerHTML = `
                 <td>${row.vessel_name}</td>
-                <td>${row.DWT}</td>
-                <td>${row.start_date_}</td>
-                <td>${row.end_date_}</td>
-                <td>${row.distance_sum}</td>
-                <td>${row.distance_eca_sum}</td>
-                <td>${row.speed_avg}</td>
-                <td>${row.total_days}</td>
-                <td>${row.sea_fuel}</td>
-                <td>${row.sea_consumption}</td>
-                <td>${row.eca_fuel}</td>
-                <td>${row.eca_consumption}</td>
-                <td>${row.port_fuel}</td>
-                <td>${row.port_consumption}</td>
-                <td>${row.ets_sum}</td>
-                <td>${row.compliance_balance_sum}</td>
-                <td>${row.AER}</td>
-                <td class="cii">${row.CII}</td> <!-- CII hücresi -->
+                <td>${row.min_start_date}</td>
+                <td>${row.max_end_date}</td>
+                <td>${row.duration}</td>
+                <td>
+                    <div><strong>Fuel Types:</strong> ${intraFuelTypes}</div>
+                    <div><strong>Amounts:</strong> ${intraFuelAmounts}</div>
+                </td>
+                <td>
+                    <div><strong>Fuel Types:</strong> ${extraFuelTypes}</div>
+                    <div><strong>Amounts:</strong> ${extraFuelAmounts}</div>
+                </td>
+                <td>${row.ghg_intensity}</td>
+                <td>${row.ghg_target}</td>
+                <td>${row.compliance_balance}</td>
             `;
 
-            // CII hücresine sınıf ekleme
-            const ciiCell = tr.querySelector('.cii');
-            const ciiClass = getCIIClass(row.CII); // CII değerine göre sınıf ekle
-            if (ciiClass) {
-                ciiCell.classList.add(ciiClass); // Eğer geçerli bir sınıf varsa ekle
-            }
-
-            tableBody.appendChild(tr); // Satırı tabloya ekler
+            // Satırı tablo gövdesine ekliyoruz
+            tableBody.appendChild(tableRow);
         });
     })
     .catch(error => {
-        console.error('Error fetching vessel data:', error);
+        console.error('Veri işlenirken bir hata oluştu:', error);
     });
-// CII değerine göre sınıf döndüren fonksiyon
-function getCIIClass(CII) {
-    switch (CII) {
-        case 'A':
-            return 'cii-a';
-        case 'B':
-            return 'cii-b';
-        case 'C':
-            return 'cii-c';
-        case 'D':
-            return 'cii-d';
-        case 'E':
-            return 'cii-e';
-        default:
-            return ''; // Geçersiz bir CII varsa sınıf eklememek için boş döner
-    }
-}
+
+        
+     
+
 
     </script>
 </body>

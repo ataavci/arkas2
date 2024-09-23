@@ -33,6 +33,10 @@ app.get("/input.html", (req, res) => {
 app.get("/cii.html", (req, res) => {
     res.sendFile(path.join(__dirname, "/view", "cii.html"));
   });
+  app.get("/fuel_eu.html", (req, res) => {
+    res.sendFile(path.join(__dirname, "/view", "fuel_eu.html"));
+  });
+
 app.get("/sefer-tablolari", (req, res) => {
     const query = `SHOW TABLES LIKE 'sefer%'`;
 
@@ -629,4 +633,39 @@ app.get('/api/get-cii-data', (req, res) => {
     res.json(formattedData2);
   });
 });
+app.get('/api/get-fuel_eu-data', (req, res) => {
+  const sql = 'CALL fuel_eu()'; // Doğru prosedürü çağırıyoruz
+  db.query(sql, (err, result) => {
+    if (err) {
+      return res.status(500).json({ error: 'Veritabanı sorgusu başarısız oldu' });
+    }
+
+    // Veritabanı sonucunun iki boyutlu olduğunu varsayıyoruz, `result[0]` veriyi içerir
+    const rows = result[0];
+
+    // Eğer `rows` bir dizi değilse, verinin doğru geldiğinden emin olun
+    if (!Array.isArray(rows)) {
+      return res.status(500).json({ error: 'Beklenmedik veri formatı' });
+    }
+
+    // Veriyi uygun şekilde formatlıyoruz
+    const formattedData3 = rows.map(row => ({
+        vessel_name: row.vessel_name,
+        min_start_date: row.min_start_date,  // Min start date
+        max_end_date: row.max_end_date,  // Max end date
+        duration: row.duration,  // Süre
+        intra_eu: row.intra_eu,  // Intra EU yakıt verisi
+        extra_eu: row.extra_eu,  // Extra EU yakıt verisi
+        ghg_intensity: row.ghg_intensity,  // GHG yoğunluğu
+        ghg_target: row.ghg_target,  // GHG hedefi
+        compliance_balance: row.compliance_balance  // Uyumluluk dengesi
+    }));
+
+    // Formatlanmış veriyi JSON olarak döndür
+    res.json(formattedData3);
+  });
+});
+
+
+  
 
