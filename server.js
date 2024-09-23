@@ -30,6 +30,9 @@ app.get("/ets.html", (req, res) => {
 app.get("/input.html", (req, res) => {
     res.sendFile(path.join(__dirname, "/view", "input.html"));
   });
+app.get("/cii.html", (req, res) => {
+    res.sendFile(path.join(__dirname, "/view", "cii.html"));
+  });
 app.get("/sefer-tablolari", (req, res) => {
     const query = `SHOW TABLES LIKE 'sefer%'`;
 
@@ -561,7 +564,7 @@ app.get('/api/get-vessel-data', (req, res) => {
   db.query(sql, (err, result) => {
     if (err) throw err;
     const rows = result[0];
-    console.log(rows); // Gelen veriyi konsolda görmek için
+    
     const formattedData = rows.map(row => ({
         vessel_name: row.vessel_name,
         DWT: row.dwt, // Eğer alias ile düzelttiyseniz
@@ -578,9 +581,47 @@ app.get('/api/get-vessel-data', (req, res) => {
         port_fuel: row.port_fuel,
         port_consumption: row.port_consumption,
         ets_sum: row.ets_sum,
-        compliance_balance_sum: row.compliance_balance_sum
+        compliance_balance_sum: row.compliance_balance_sum,
+        AER:row.AER,
+        CII:row.CII
     }));
     res.json(formattedData);
 });
 
 });
+app.get('/api/get-cii-data', (req, res) => {
+  const sql = 'CALL cii()'; // cii prosedürünü çağırır
+  db.query(sql, (err, result) => {
+    if (err) {
+      return res.status(500).json({ error: 'Database query failed' });
+    }
+
+    // Veritabanından dönen sonuç genellikle iki boyutlu olur, `result[0]` veriyi içerir
+    const rows = result[0]; 
+
+    // Eğer `rows` bir dizi değilse, verinin doğru döndüğünü kontrol edin
+    if (!Array.isArray(rows)) {
+      return res.status(500).json({ error: 'Unexpected data format' });
+    }
+
+    const formattedData2 = rows.map(row => ({
+        vessel_name: row.vessel_name,
+        dwt: row.dwt, // Eğer alias ile düzelttiyseniz
+        start_date_: row.start_date_,
+        end_date_: row.end_date_,
+        distance: row.distance, // Toplam mesafe (distance + distance_eca)
+        sea_fuel: row.sea_fuel,
+        sea_consumption: row.sea_consumption,
+        eca_fuel: row.eca_fuel,
+        eca_consumption: row.eca_consumption,
+        port_fuel: row.port_fuel,
+        port_consumption: row.port_consumption,
+        AER: row.AER, // AER hesaplanmış değer
+        CII: row.CII // CII harfi
+    }));
+
+    // JSON formatında döner
+    res.json(formattedData2);
+  });
+});
+

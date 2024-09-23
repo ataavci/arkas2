@@ -251,3 +251,19 @@ body {
 		font-size: 22px;
 	}
 }
+/* CII değerlerine göre renkler sadece hücrede geçerli olacak */
+.cii-a {
+    background-color: #00FF00; /* Yeşil (A) */
+}
+.cii-b {
+    background-color: #7FFF00; /* Açık yeşil (B) */
+}
+.cii-c {
+    background-color: #FFFF00; /* Sarı (C) */
+}
+.cii-d {
+    background-color: #FF7F50; /* Turuncu (D) */
+}
+.cii-e {
+    background-color: #FF0000; /* Kırmızı (E) */
+}
