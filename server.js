@@ -198,8 +198,10 @@ app.post("/sefer-kaydet", (req, res) => {
             console.error("Yakıt verisi alınırken hata:", err ? err.message : "Yakıt bulunamadı");
             return;
           }
+          const seaCO2eqWtT= seaFuelResult[0].CO2eqWtT;
           const seaCf_CO2_ggFuel = seaFuelResult[0].Cf_CO2_ggFuel;
           const seaLCV = seaFuelResult[0].LCV;
+          const seaCO2eqTTW = seaFuelResult[0].CO2eqTTW;
           const seaTotalConsumption = (consumption100Sea + consumption50Sea) * seaCf_CO2_ggFuel;
 
           db.query(fuelQuery, [ayak.port_fuel], (err, portFuelResult) => {
@@ -208,6 +210,9 @@ app.post("/sefer-kaydet", (req, res) => {
               return;
             }
             const portCf_CO2_ggFuel = portFuelResult[0].Cf_CO2_ggFuel;
+            const portLCV = portFuelResult[0].LCV;
+            const portCf_CO2eq_TtW = portFuelResult[0].Cf_CO2eq_TtW;
+            const portCO2eqWtT= portFuelResult[0].CO2eqWtT;
             const portTotalConsumption = consumption100Port * portCf_CO2_ggFuel;
 
             db.query(fuelQuery, [ayak.eca_fuel], (err, ecaFuelResult) => {
@@ -216,6 +221,9 @@ app.post("/sefer-kaydet", (req, res) => {
                 return;
               }
               const ecaCf_CO2_ggFuel = ecaFuelResult[0].Cf_CO2_ggFuel;
+              const ecaLCV = ecaFuelResult[0].LCV;
+              const ecaCf_CO2eq_TtW = ecaFuelResult[0].Cf_CO2eq_TtW;
+              const ecaCO2eqWtT= ecaFuelResult[0].CO2eqWtT;
               const ecaTotalConsumption = (consumption100Eca + consumption50Eca) * ecaCf_CO2_ggFuel;
 
               // Tüm yakıt tüketimlerini toplama ve ETS hesaplama
@@ -227,11 +235,8 @@ app.post("/sefer-kaydet", (req, res) => {
                 consumption100Port + consumption0Port;
 
               // TTW ve WTT hesaplama
-              const ttwEmissions = (seaTotalConsumption + ecaTotalConsumption + portTotalConsumption) / 
-                (seaLCV + portFuelResult[0].LCV + ecaFuelResult[0].LCV);
-              const wttEmissions = (seaTotalConsumption + ecaTotalConsumption + portTotalConsumption) /
-                (seaFuelResult[0].LCV + portFuelResult[0].LCV + ecaFuelResult[0].LCV);
-
+              const ttwEmissions = ((consumption100Sea + consumption50Sea) * seaCf_CO2_ggFuel + (consumption100Eca + consumption50Eca) * ecaCf_CO2eq_TtW + consumption100Port * portCf_CO2eq_TtW) / ((consumption100Sea + consumption50Sea) * seaLCV + (consumption100Eca + consumption50Eca) * ecaLCV + consumption100Port * portLCV);
+              const wttEmissions = ((consumption100Sea+consumption50Sea)*seaCO2eqWtT*seaLCV+consumption100Port*portCO2eqWtT*portLCV+(consumption100Eca+consumption50Eca)*ecaLCV*ecaCO2eqWtT)/((consumption100Sea+consumption50Sea)*seaLCV+consumption100Port*portLCV+(consumption100Eca+consumption50Eca*ecaLCV))
               // GHG ve uyum hesaplama
               const ghgActual = wttEmissions + ttwEmissions;
               const complianceBalance = (89.34 - ghgActual) * fuelConsumptionTotal * 1000000;
