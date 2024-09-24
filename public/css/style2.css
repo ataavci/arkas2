@@ -267,3 +267,8 @@ body {
 .cii-e {
     background-color: #FF0000; /* Kırmızı (E) */
 }
+#vesselTable tbody tr td.vessel-name:hover {
+    background-color: green;
+    color: white;
+    cursor: pointer;
+}
