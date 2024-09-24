@@ -98,7 +98,7 @@
                         <li><i class='bx bx-chevron-right'></i></li>
                     </ul>
                 </div>
-                <a href="#" class="btn-download">
+                <a href="#" id="btn-download-pdf" class="btn-download">
                     <i class='bx bxs-cloud-download'></i>
                     <span class="text">Download PDF</span>
                 </a>
@@ -308,6 +308,28 @@
                 }
             });
         });
+        document.addEventListener('DOMContentLoaded', () => {
+            const btnDownloadPDF = document.querySelector('#btn-download-pdf');
+
+            btnDownloadPDF.addEventListener('click', () => {
+                const content = document.querySelector('#content-dashboard');
+
+                html2canvas(content).then(canvas => {
+                    const imgData = canvas.toDataURL('image/png');
+                    const { jsPDF } = window.jspdf;
+                    const pdf = new jsPDF('p', 'mm', 'a4');
+                    const imgWidth = 210;
+                    const imgHeight = canvas.height * imgWidth / canvas.width;
+                    pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
+                    pdf.save('dashboard.pdf');
+                });
+            });
+        });
     </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.3.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.3.1/jspdf.umd.min.js"></script>
+
+
 </body>
 </html>

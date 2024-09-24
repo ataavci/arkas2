@@ -102,14 +102,14 @@
                     <thead class="table-dark">
                         <tr>
                             <th>vessel_name</th>
-            <th>min_start_date</th>
-            <th>max_end_date</th>
-            <th>duration</th>
-            <th>intra_eu</th>
-            <th>extra_eu</th>
-            <th>ghg_intensity</th>
-            <th>ghg_target</th>
-            <th>compliance_balance</th>
+                            <th>min_start_date</th>
+                            <th>max_end_date</th>
+                            <th>duration</th>
+                            <th>intra_eu</th>
+                            <th>extra_eu</th>
+                            <th>ghg_intensity</th>
+                            <th>ghg_target</th>
+                            <th>compliance_balance</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -122,7 +122,8 @@
 
     <script>
         // API'den veriyi çekmek ve tabloya doldurmak için fetch fonksiyonunu kullanıyoruz
-        fetch('/api/get-fuel_eu-data')
+// Fetch and populate the main table with vessel data
+fetch('/api/get-fuel_eu-data')
     .then(response => response.json())
     .then(data => {
         const tableBody = document.querySelector('#vesselTable tbody');
@@ -130,20 +131,20 @@
         data.forEach(row => {
             const tableRow = document.createElement('tr');
 
-            // 'intra_eu' ve 'extra_eu' verilerini bölme işlemi
+            // Split the 'intra_eu' and 'extra_eu' data
             const intraEU = row.intra_eu.split(', ');
             const extraEU = row.extra_eu.split(', ');
 
-            // Yakıt türlerini ve miktarlarını ayrı satırlara koyuyoruz
+            // Separate fuel types and amounts for Intra EU and Extra EU
             const intraFuelTypes = intraEU.filter((_, index) => index % 2 === 0).join(', ');
             const intraFuelAmounts = intraEU.filter((_, index) => index % 2 !== 0).join(', ');
 
             const extraFuelTypes = extraEU.filter((_, index) => index % 2 === 0).join(', ');
             const extraFuelAmounts = extraEU.filter((_, index) => index % 2 !== 0).join(', ');
 
-            // Tablo hücrelerini oluşturuyoruz
+            // Construct table row with vessel data
             tableRow.innerHTML = `
-                <td>${row.vessel_name}</td>
+                <td class="vessel-name">${row.vessel_name}</td> <!-- Vessel Name'e sınıf ekledik -->
                 <td>${row.min_start_date}</td>
                 <td>${row.max_end_date}</td>
                 <td>${row.duration}</td>
@@ -160,18 +161,90 @@
                 <td>${row.compliance_balance}</td>
             `;
 
-            // Satırı tablo gövdesine ekliyoruz
+            // Append the row to the table
             tableBody.appendChild(tableRow);
         });
     })
     .catch(error => {
-        console.error('Veri işlenirken bir hata oluştu:', error);
+        console.error('Error processing the data:', error);
     });
 
-        
-     
+// Handle click event to fetch and display detailed data when a vessel name is clicked
+document.addEventListener('DOMContentLoaded', () => {
+    const tableBody = document.querySelector("#vesselTable tbody");
 
+    // Add click event listener to the table body
+    tableBody.addEventListener('click', (event) => {
+        const target = event.target;
 
-    </script>
+        // If the clicked element is in the 'Vessel Name' column
+        if (target.classList.contains('vessel-name')) {
+            const vesselName = target.innerText;
+
+            // Get the parent row of the clicked cell
+            const parentRow = target.parentNode;
+
+            // If a detail row already exists, remove it
+            if (parentRow.nextElementSibling && parentRow.nextElementSibling.classList.contains('details-row')) {
+                parentRow.nextElementSibling.remove();
+            } else {
+                // Fetch and display the detailed data for the selected vessel
+                fetch(`/api/get-fuel_eu-detail?vessel_name=${vesselName}`)
+                    .then(response => response.json())
+                    .then(detailData => {
+                        const detailRow = document.createElement('tr');
+                        detailRow.classList.add('details-row'); // Add a class for the detail row
+
+                        // Create detail table within the new row
+                        detailRow.innerHTML = `
+                            <td colspan="12">
+                                <table class="table table-bordered">
+                                    <thead class="table-dark">
+                                        <tr>
+                                            <th>Select</th>
+                                            <th>Vessel Name</th>
+                                            <th>Min Start Date</th>
+                                            <th>Max End Date</th>
+                                            <th>Duration</th>
+                                            <th>Intra EU Fuel Types</th>
+                                            
+                                            <th>Extra EU Fuel Types</th>
+                                            
+                                            <th>GHG Intensity</th>
+                                            <th>GHG Target</th>
+                                            <th>Compliance Balance</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        ${detailData.map(det => `
+                                            <tr>
+                                                <td><input type="checkbox" class="select-row"></td>
+                                                <td>${det.vessel_name}</td>
+                                                <td>${det.min_start_date}</td>
+                                                <td>${det.max_end_date}</td>
+                                                <td>${det.duration}</td>
+                                                <td>${det.intra_fuel_types}</td>
+                                                
+                                                <td>${det.extra_fuel_types}</td>
+                                               
+                                                <td>${det.ghg_intensity}</td>
+                                                <td>${det.ghg_target}</td>
+                                                <td>${det.compliance_balance}</td>
+                                            </tr>
+                                        `).join('')}
+                                    </tbody>
+                                </table>
+                            </td>
+                        `;
+
+                        // Insert the new detail row right below the clicked row
+                        parentRow.insertAdjacentElement('afterend', detailRow);
+                    })
+                    .catch(error => console.error('Error fetching detail data:', error));
+            }
+        }
+    });
+});
+</script>
 </body>
 </html>
