@@ -171,3 +171,116 @@
   <script nomodule src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>
 </body>
 </html>
+document.getElementById('reset-compliance-btn').addEventListener('click', () => {
+  const selectedRows = document.querySelectorAll('#vesselTable tbody tr input.select-row:checked');
+  let totalComplianceBalance = 0;
+  const negativeBalances = [];
+  const positiveBalances = [];
+  const balanceResults = [];
+
+  // Gemilerin Compliance Balance değerlerini ayır
+  selectedRows.forEach(row => {
+      const rowElement = row.closest('tr');
+      const balanceCell = rowElement.querySelector('.compliance-balance');
+      const currentBalance = parseFloat(balanceCell.innerText);
+      
+      totalComplianceBalance += currentBalance;
+
+      if (currentBalance < 0) {
+          negativeBalances.push({
+              vesselName: rowElement.querySelector('.vessel-name').innerText,
+              balance: currentBalance
+          });
+      } else if (currentBalance > 0) {
+          positiveBalances.push({
+              vesselName: rowElement.querySelector('.vessel-name').innerText,
+              balance: currentBalance
+          });
+      }
+  });
+
+  // Negatif gemileri pozitif gemilerle dengele
+  negativeBalances.forEach(negVessel => {
+      positiveBalances.forEach(posVessel => {
+          if (negVessel.balance !== 0 && posVessel.balance !== 0) {
+              const amountToTransfer = Math.min(Math.abs(negVessel.balance), posVessel.balance);
+
+              // Negatif gemi ile pozitif gemi eşleşiyor
+              balanceResults.push({
+                  negativeVessel: negVessel.vesselName,
+                  positiveVessel: posVessel.vesselName,
+                  amount: amountToTransfer
+              });
+
+              // Negatif gemiyi güncelle
+              negVessel.balance += amountToTransfer;
+
+              // Pozitif gemiyi güncelle
+              posVessel.balance -= amountToTransfer;
+          }
+      });
+  });
+
+  // Kalan ekside veya pozitifteki gemileri topla
+  const remainingBalances = [...negativeBalances, ...positiveBalances].filter(vessel => vessel.balance !== 0);
+
+  // Toplam Compliance Balance'ı ekranda göster
+  document.getElementById('total-compliance-balance').innerText = `Total: ${totalComplianceBalance.toFixed(2)}`;
+
+  // Sonuçları ekrana göster
+  showAdjustmentResults(balanceResults, remainingBalances);
+});
+
+// Sonuçları göstermek için fonksiyon
+function showAdjustmentResults(results, remaining) {
+  const resultCard = document.getElementById('result-card');
+  const resultList = document.getElementById('result-list');
+  resultList.innerHTML = '';
+
+  // Eşleşen gemileri göster
+  results.forEach(result => {
+      const listItem = document.createElement('li');
+      listItem.classList.add('list-group-item');
+      listItem.innerHTML = `<strong>${result.negativeVessel}</strong> ${result.amount} kadar dengelemek için <strong>${result.positiveVessel}</strong> ile eşleşti.`;
+      resultList.appendChild(listItem);
+  });
+
+  // Eğer kalan pozitif veya negatif gemiler varsa onları göster
+  if (remaining.length > 0) {
+      const remainingHeader = document.createElement('h6');
+      remainingHeader.textContent = "Kalan Balances:";
+      resultList.appendChild(remainingHeader);
+
+      remaining.forEach(vessel => {
+          const listItem = document.createElement('li');
+          listItem.classList.add('list-group-item');
+          listItem.innerHTML = `<strong>${vessel.vesselName}</strong>: Kalan Balance: ${vessel.balance.toFixed(2)}`;
+          resultList.appendChild(listItem);
+      });
+  }
+
+  resultCard.classList.remove('d-none'); // Sonuç kartını görünür yap
+}
+
+
+
+<button id="reset-compliance-btn" class="btn btn-primary mt-3">Reset Compliance Balance for Selected Vessels</button>
+
+            <div id="result-card" class="card d-none">
+                <div class="card-body">
+                    <h5 class="card-title">Compliance Balance Adjustment Results</h5>
+                    <ul id="result-list" class="list-group">
+                        <!-- Sonuçlar burada gösterilecek -->
+                    </ul>
+                </div>
+            </div>
+            
+            <!-- Toplam Compliance Balance için gösterge -->
+            <div class="card mt-3">
+                <div class="card-body">
+                    <h5 class="card-title">Total Compliance Balance</h5>
+                    <p id="total-compliance-balance">Total: 0</p>
+                </div>
+            </div>
+            
+        </main>

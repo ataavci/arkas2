@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Vessel Dashboard</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
-    <link rel="stylesheet" href="/static/css/style2.css"> <!-- CSS dosyanız burada yüklü -->
+    <link rel="stylesheet" href="/static/css/style2.css">
 
     <style>
         /* CSS for hover effect on Vessel Name */
@@ -110,7 +110,7 @@
                 <table id="vesselTable" class="table table-bordered">
                     <thead class="table-dark">
                         <tr>
-                            <th>Select</th> <!-- Checkbox için başlık ekleniyor -->
+                            <th>Select</th>
                             <th>Vessel Name</th>
                             <th>DWT</th>
                             <th>Start Date</th>
@@ -136,53 +136,62 @@
                     </tbody>
                 </table>
             </div>
+            
+            <!-- Reset Button -->
+            <button id="reset-compliance-btn" class="btn btn-primary mt-3">Reset Compliance Balance for Selected Vessels</button>
+
+            <!-- Result Card -->
+            <div id="result-card" class="card d-none">
+                <div class="card-body">
+                    <h5 class="card-title">Compliance Balance Adjustment Results</h5>
+                    <ul id="result-list" class="list-group">
+                        <!-- Sonuçlar burada gösterilecek -->
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Total Compliance Balance Display -->
+            <div class="card mt-3">
+                <div class="card-body">
+                    <h5 class="card-title">Total Compliance Balance</h5>
+                    <p id="total-compliance-balance">Total: 0</p>
+                </div>
+            </div>
         </main>
     </section>
 
     <script>
-        // CII değerine göre sınıf ekleme fonksiyonu
+        // CII sınıf ekleme fonksiyonu
         function getCIIClass(CII) {
             switch (CII) {
-                case 'A':
-                    return 'cii-a';
-                case 'B':
-                    return 'cii-b';
-                case 'C':
-                    return 'cii-c';
-                case 'D':
-                    return 'cii-d';
-                case 'E':
-                    return 'cii-e';
-                default:
-                    return '';
+                case 'A': return 'cii-a';
+                case 'B': return 'cii-b';
+                case 'C': return 'cii-c';
+                case 'D': return 'cii-d';
+                case 'E': return 'cii-e';
+                default: return '';
             }
         }
 
         // Fetch ile veriyi çekip tabloya ekleme işlemi
         fetch('/api/get-vessel-data')
             .then(response => {
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
                 return response.json();
             })
             .then(data => {
-                console.log('Fetched data:', data); // Gelen veriyi konsola yazdır
-
                 const tableBody = document.querySelector("#vesselTable tbody");
-                tableBody.innerHTML = ''; // Tabloyu temizler, mevcut satırları kaldırır.
+                tableBody.innerHTML = '';
 
                 if (data.length === 0) {
-                    console.log('No data found.');
                     tableBody.innerHTML = '<tr><td colspan="19">No data available</td></tr>';
                     return;
                 }
 
                 data.forEach(row => {
                     const tr = document.createElement('tr');
-
                     tr.innerHTML = `
-                        <td><input type="checkbox" class="select-row"></td> <!-- Checkbox -->
+                        <td><input type="checkbox" class="select-row"></td>
                         <td class="vessel-name">${row.vessel_name}</td>
                         <td>${row.DWT}</td>
                         <td>${row.start_date_}</td>
@@ -198,138 +207,103 @@
                         <td>${row.port_fuel}</td>
                         <td>${row.port_consumption}</td>
                         <td>${row.ets_sum}</td>
-                        <td>${row.compliance_balance_sum}</td>
+                        <td class="compliance-balance">${row.compliance_balance_sum}</td>
                         <td>${row.AER}</td>
-                        <td class="cii">${row.CII}</td> <!-- CII hücresi -->
+                        <td class="cii">${row.CII}</td>
                     `;
-
-                    // CII hücresine sınıf ekleme
                     const ciiCell = tr.querySelector('.cii');
-                    const ciiClass = getCIIClass(row.CII); // CII değerine göre sınıf ekle
-                    if (ciiClass) {
-                        ciiCell.classList.add(ciiClass); // Eğer geçerli bir sınıf varsa ekle
-                    }
-
-                    tableBody.appendChild(tr); // Satırı tabloya ekler
+                    const ciiClass = getCIIClass(row.CII);
+                    if (ciiClass) ciiCell.classList.add(ciiClass);
+                    tableBody.appendChild(tr);
                 });
             })
-            .catch(error => {
-                console.error('Error fetching vessel data:', error);
-            });
+            .catch(error => console.error('Error fetching vessel data:', error));
 
-        // Vessel Name'e tıklama ve detay tablosu oluşturma
-        document.addEventListener('DOMContentLoaded', () => {
-            const tableBody = document.querySelector("#vesselTable tbody");
+        // Compliance Balance Reset İşlemi
+        document.getElementById('reset-compliance-btn').addEventListener('click', () => {
+            const selectedRows = document.querySelectorAll('#vesselTable tbody tr input.select-row:checked');
+            let totalComplianceBalance = 0;
+            const negativeBalances = [];
+            const positiveBalances = [];
+            const balanceResults = [];
 
-            // Tüm satırlara tıklama olayı ekle
-            tableBody.addEventListener('click', (event) => {
-                const target = event.target;
+            selectedRows.forEach(row => {
+                const rowElement = row.closest('tr');
+                const balanceCell = rowElement.querySelector('.compliance-balance');
+                const currentBalance = parseFloat(balanceCell.innerText);
 
-                // Eğer tıklanan hücre 'Vessel Name' sütunundaysa (td.vessel-name)
-                if (target.classList.contains('vessel-name')) {
-                    const vesselName = target.innerText;
+                totalComplianceBalance += currentBalance;
 
-                    // Satırın hemen altına detay tablosunu eklemek için satırın referansını alıyoruz
-                    const parentRow = target.parentNode;
-
-                    // Eğer detay tablosu zaten varsa (aynı gemi için), yeniden ekleme
-                    if (parentRow.nextElementSibling && parentRow.nextElementSibling.classList.contains('details-row')) {
-                        parentRow.nextElementSibling.remove(); // Mevcut tabloyu kaldır
-                    } else {
-                        // API çağrısı ile detay verilerini getiriyoruz
-                        fetch(`/api/get-vessel-detail?vessel_name=${vesselName}`)
-                            .then(response => response.json())
-                            .then(detailData => {
-                                // Detay verilerle yeni bir satır oluşturuyoruz
-                                const detailRow = document.createElement('tr');
-                                detailRow.classList.add('details-row'); // Detay satırı için özel bir sınıf
-
-                                // Detay tablosunun hücresini oluştur
-                                detailRow.innerHTML = `
-            <td colspan="19">
-                <table class="table table-bordered">
-                    <thead class="table-dark">
-                        <tr>
-                            <th>Select</th> <!-- Checkbox için başlık ekleniyor -->
-                            <th>Vessel Name</th>
-                            <th>DWT</th>
-                            <th>Start Date</th>
-                            <th>End Date</th>
-                            <th>Total Distance</th>
-                            <th>Total ECA Distance</th>
-                            <th>Average Speed</th>
-                            <th>Total Days</th>
-                            <th>Sea Fuel</th>
-                            <th>Sea Consumption</th>
-                            <th>ECA Fuel</th>
-                            <th>ECA Consumption</th>
-                            <th>Port Fuel</th>
-                            <th>Port Consumption</th>
-                            <th>ETS</th>
-                            <th>Compliance Balance</th>
-                            <th>AER(gCO2/t*nm)</th>
-                            <th>CII</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        ${detailData.map(det => `
-                            <tr>
-                                <td><input type="checkbox" class="select-row"></td> <!-- Checkbox -->
-                                <td>${det.vessel_name }</td>
-                                <td>${det.dwt}</td>
-                                <td>${det.start_date_ }</td>
-                                <td>${det.end_date_ }</td>
-                                <td>${det.distance_sum || 'N/A'}</td>
-                                <td>${det.distance_eca_sum || 'N/A'}</td>
-                                <td>${det.speed_avg || 'N/A'}</td>
-                                <td>${det.total_days || 'N/A'}</td>
-                                <td>${det.sea_fuel || 'N/A'}</td>
-                                <td>${det.sea_consumption || 'N/A'}</td>
-                                <td>${det.eca_fuel || 'N/A'}</td>
-                                <td>${det.eca_consumption || 'N/A'}</td>
-                                <td>${det.port_fuel || 'N/A'}</td>
-                                <td>${det.port_consumption || 'N/A'}</td>
-                                <td>${det.ets_sum }</td>
-                                <td>${det.compliance_balance_sum || 'N/A'}</td>
-                                <td>${det.AER }</td>
-                                <td>${det.CII }</td>
-                            </tr>
-                        `).join('')}
-                    </tbody>
-                </table>
-            </td>
-        `;
-
-                                // Yeni detay satırını, tıklanan satırın altına ekliyoruz
-                                parentRow.insertAdjacentElement('afterend', detailRow);
-                            })
-                            .catch(error => console.error('Detay verisi getirilemedi:', error));
-                    }
+                if (currentBalance < 0) {
+                    negativeBalances.push({
+                        vesselName: rowElement.querySelector('.vessel-name').innerText,
+                        balance: currentBalance
+                    });
+                } else if (currentBalance > 0) {
+                    positiveBalances.push({
+                        vesselName: rowElement.querySelector('.vessel-name').innerText,
+                        balance: currentBalance
+                    });
                 }
             });
-        });
-        document.addEventListener('DOMContentLoaded', () => {
-            const btnDownloadPDF = document.querySelector('#btn-download-pdf');
 
-            btnDownloadPDF.addEventListener('click', () => {
-                const content = document.querySelector('#content-dashboard');
+            // Negatif gemileri pozitif gemilerle dengele
+            negativeBalances.forEach(negVessel => {
+                positiveBalances.forEach(posVessel => {
+                    if (negVessel.balance !== 0 && posVessel.balance !== 0) {
+                        const amountToTransfer = Math.min(Math.abs(negVessel.balance), posVessel.balance);
 
-                html2canvas(content).then(canvas => {
-                    const imgData = canvas.toDataURL('image/png');
-                    const { jsPDF } = window.jspdf;
-                    const pdf = new jsPDF('p', 'mm', 'a4');
-                    const imgWidth = 210;
-                    const imgHeight = canvas.height * imgWidth / canvas.width;
-                    pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
-                    pdf.save('dashboard.pdf');
+                        balanceResults.push({
+                            negativeVessel: negVessel.vesselName,
+                            positiveVessel: posVessel.vesselName,
+                            amount: amountToTransfer
+                        });
+
+                        negVessel.balance += amountToTransfer;
+                        posVessel.balance -= amountToTransfer;
+                    }
                 });
             });
+
+            const remainingBalances = [...negativeBalances, ...positiveBalances].filter(vessel => vessel.balance !== 0);
+
+            document.getElementById('total-compliance-balance').innerText = `Total: ${totalComplianceBalance.toFixed(2)}`;
+
+            showAdjustmentResults(balanceResults, remainingBalances);
         });
+
+        // Sonuçları gösterme fonksiyonu
+        function showAdjustmentResults(results, remaining) {
+            const resultCard = document.getElementById('result-card');
+            const resultList = document.getElementById('result-list');
+            resultList.innerHTML = '';
+
+            results.forEach(result => {
+                const listItem = document.createElement('li');
+                listItem.classList.add('list-group-item');
+                listItem.innerHTML = `<strong>${result.negativeVessel}</strong> ${result.amount} kadar dengelemek için <strong>${result.positiveVessel}</strong> ile eşleşti.`;
+                resultList.appendChild(listItem);
+            });
+
+            if (remaining.length > 0) {
+                const remainingHeader = document.createElement('h6');
+                remainingHeader.textContent = "Kalan Balances:";
+                resultList.appendChild(remainingHeader);
+
+                remaining.forEach(vessel => {
+                    const listItem = document.createElement('li');
+                    listItem.classList.add('list-group-item');
+                    listItem.innerHTML = `<strong>${vessel.vesselName}</strong>: Kalan Balance: ${vessel.balance.toFixed(2)}`;
+                    resultList.appendChild(listItem);
+                });
+            }
+
+            resultCard.classList.remove('d-none');
+        }
     </script>
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.3.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.4.1/html2canvas.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.3.1/jspdf.umd.min.js"></script>
-
 
 </body>
 </html>

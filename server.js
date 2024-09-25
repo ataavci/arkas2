@@ -706,6 +706,20 @@ app.get('/api/get-fuel_eu-detail', (req, res) => {
       }
   });
 });
+app.get('/api/get-cii-detail', (req, res) => {
+  const vesselName = req.query.vessel_name;
+
+  const query = `CALL cii_detay(?)`; // ets_detay prosedürü için query
+  db.query(query, [vesselName], (error, results) => {
+      if (error) {
+          console.error('Error fetching ETS detail:', error);
+          res.status(500).json({ error: 'Database error' });
+      } else {
+          console.log('Query Results:', results); // Gelen sonuçları kontrol ediyoruz
+          res.json(results[0]); // Tüm sonuç setini döndür
+      }
+  });
+});
 
 
 

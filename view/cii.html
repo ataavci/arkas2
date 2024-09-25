@@ -5,7 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Vessel Dashboard</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
-    <link rel="stylesheet" href="/static/css/style2.css"> <!-- CSS dosyanız burada yüklü -->
+    <link rel="stylesheet" href="/static/css/style2.css">
+    <style>
+        /* Mouse ile satır üzerine gelindiğinde yeşile dönmesi için */
+        .vessel-row:hover {
+            background-color: #d4edda; /* Yeşil renk */
+            cursor: pointer;
+        }
+    </style>
 </head>
 <body>
     <!-- SIDEBAR -->
@@ -101,6 +108,7 @@
                 <table id="vesselTablecii" class="table table-bordered">
                     <thead class="table-dark">
                         <tr>
+                            <th>Select</th>
                             <th>Vessel Name</th>
                             <th>START DATE (UTC) </th>
                             <th>END DATE (UTC) </th>
@@ -123,79 +131,157 @@
             </div>
         </main>
     </section>
-<script>
-    // CII değerine göre renk sınıfı döndüren fonksiyon
-    function getCIIClass(CII) {
-        switch (CII) {
-            case 'A':
-                return 'cii-a'; // Yeşil
-            case 'B':
-                return 'cii-b'; // Açık yeşil
-            case 'C':
-                return 'cii-c'; // Sarı
-            case 'D':
-                return 'cii-d'; // Turuncu
-            case 'E':
-                return 'cii-e'; // Kırmızı
-            default:
-                return ''; // Eğer CII değeri geçerli değilse sınıf eklenmez
+
+    <script>
+        // CII değerine göre renk sınıfı döndüren fonksiyon
+        function getCIIClass(CII) {
+            switch (CII) {
+                case 'A': return 'cii-a'; // Yeşil
+                case 'B': return 'cii-b'; // Açık yeşil
+                case 'C': return 'cii-c'; // Sarı
+                case 'D': return 'cii-d'; // Turuncu
+                case 'E': return 'cii-e'; // Kırmızı
+                default: return ''; // Eğer CII değeri geçerli değilse sınıf eklenmez
+            }
         }
-    }
 
-    // Fetch ile veriyi çekip tabloya ekleme işlemi
-    fetch('/api/get-cii-data')
-        .then(response => {
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            return response.json();
-        })
-        .then(data => {
-            console.log('Fetched data:', data); // Gelen veriyi konsola yazdır
+        // Fetch ile veriyi çekip tabloya ekleme işlemi
+        fetch('/api/get-cii-data')
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('Fetched data:', data); // Gelen veriyi konsola yazdır
 
-            const tableBody = document.querySelector("#vesselTablecii tbody"); // ID düzeltilmiş
-            tableBody.innerHTML = ''; // Tabloyu temizler, mevcut satırları kaldırır.
+                const tableBody = document.querySelector("#vesselTablecii tbody"); // ID düzeltilmiş
+                tableBody.innerHTML = ''; // Tabloyu temizler, mevcut satırları kaldırır.
 
-            if (data.length === 0) {
-                console.log('No data found.');
-                tableBody.innerHTML = '<tr><td colspan="18">No data available</td></tr>';
-                return;
-            }
-
-            data.forEach(row => {
-                const tr = document.createElement('tr');
-
-                tr.innerHTML = `
-                    <td>${row.vessel_name}</td>
-                    <td>${row.start_date_}</td>
-                    <td>${row.end_date_}</td>
-                    <td>${row.dwt}</td> <!-- DWT burada küçük harf olmalı çünkü SQL sorgusundaki sütun adı küçük -->
-                    <td>${row.distance}</td> <!-- distance_sum ve distance_eca_sum yerine distance kullanılmalı -->
-                    <td>${row.sea_fuel}</td>
-                    <td>${row.sea_consumption}</td>
-                    <td>${row.eca_fuel}</td>
-                    <td>${row.eca_consumption}</td>
-                    <td>${row.port_fuel}</td>
-                    <td>${row.port_consumption}</td>
-                    <td>${row.AER}</td>
-                    <td class="cii">${row.CII}</td> <!-- CII hücresi -->
-                `;
-
-                // CII hücresine sınıf ekleme
-                const ciiCell = tr.querySelector('.cii');
-                const ciiClass = getCIIClass(row.CII); // CII değerine göre sınıf ekle
-                if (ciiClass) {
-                    ciiCell.classList.add(ciiClass); // Eğer geçerli bir sınıf varsa ekle
+                if (data.length === 0) {
+                    console.log('No data found.');
+                    tableBody.innerHTML = '<tr><td colspan="18">No data available</td></tr>';
+                    return;
                 }
 
-                tableBody.appendChild(tr); // Satırı tabloya ekler
-            });
-        })
-        .catch(error => {
-            console.error('Error fetching vessel data:', error);
-        });
-</script>
+                data.forEach(row => {
+                    const tr = document.createElement('tr');
+                    tr.classList.add('vessel-row');
 
-    
+                    tr.innerHTML = `
+                        <td><input type="checkbox" class="select-row"></td> <!-- Checkbox eklendi -->
+                        <td class="vessel-name">${row.vessel_name}</td>
+                        <td>${row.start_date_}</td>
+                        <td>${row.end_date_}</td>
+                        <td>${row.dwt}</td>
+                        <td>${row.distance}</td>
+                        <td>${row.sea_fuel}</td>
+                        <td>${row.sea_consumption}</td>
+                        <td>${row.eca_fuel}</td>
+                        <td>${row.eca_consumption}</td>
+                        <td>${row.port_fuel}</td>
+                        <td>${row.port_consumption}</td>
+                        <td>${row.AER}</td>
+                        <td class="cii">${row.CII}</td>
+                    `;
+
+                    // CII hücresine sınıf ekleme
+                    const ciiCell = tr.querySelector('.cii');
+                    const ciiClass = getCIIClass(row.CII);
+                    if (ciiClass) {
+                        ciiCell.classList.add(ciiClass);
+                    }
+
+                    tableBody.appendChild(tr); // Satırı tabloya ekler
+                });
+
+                // Tablodaki her bir satıra tıklama olayını ekle
+                addRowClickEvents();
+            })
+            .catch(error => {
+                console.error('Error fetching vessel data:', error);
+            });
+
+        function addRowClickEvents() {
+            const rows = document.querySelectorAll(".vessel-row");
+            rows.forEach(row => {
+                row.addEventListener('click', function() {
+                    const vesselName = this.querySelector('.vessel-name').innerText;
+
+                    // Eğer detay tablosu zaten varsa, kaldır
+                    if (this.nextElementSibling && this.nextElementSibling.classList.contains('details-row')) {
+                        this.nextElementSibling.remove();
+                    } else {
+                        // API çağrısı ile detay verileri çek
+                        fetch(`/api/get-cii-detail?vessel_name=${vesselName}`)
+                            .then(response => response.json())
+                            .then(detailData => {
+                                const detailRow = document.createElement('tr');
+                                detailRow.classList.add('details-row');
+                                const detailHtml = `
+                                    <td colspan="14">
+                                        <table class="table table-bordered">
+                                            <thead class="table-dark">
+                                                <tr>
+                                                    <th>Voyage ID</th>
+                                                    <th>START DATE (UTC)</th>
+                                                    <th>END DATE (UTC)</th>
+                                                    <th>DISTANCE</th>
+                                                    <th>Sea Fuel</th>
+                                                    <th>Sea Consumption</th>
+                                                    <th>ECA Fuel</th>
+                                                    <th>ECA Consumption</th>
+                                                    <th>Port Fuel</th>
+                                                    <th>Port Consumption</th>
+                                                    <th>AER</th>
+                                                    <th>CII</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                ${detailData.map(detail => `
+                                                    <tr>
+                                                        <td>${detail.voyage_id}</td>
+                                                        <td>${detail.start_date_}</td>
+                                                        <td>${detail.end_date_}</td>
+                                                        <td>${detail.distance}</td>
+                                                        <td>${detail.sea_fuel}</td>
+                                                        <td>${detail.sea_consumption}</td>
+                                                        <td>${detail.eca_fuel}</td>
+                                                        <td>${detail.eca_consumption}</td>
+                                                        <td>${detail.port_fuel}</td>
+                                                        <td>${detail.port_consumption}</td>
+                                                        <td>${detail.AER}</td>
+                                                        <td>${detail.CII}</td>
+                                                    </tr>
+                                                `).join('')}
+                                            </tbody>
+                                        </table>
+                                    </td>
+                                `;
+
+                                detailRow.innerHTML = detailHtml;
+
+                                // Detay tablosunu tıklanan satırın altına ekle
+                                this.insertAdjacentElement('afterend', detailRow);
+                            })
+                            .catch(error => {
+                                console.error('Error fetching vessel detail:', error);
+                            });
+                    }
+                });
+
+                // Satır hover edildiğinde yeşil olacak
+                row.addEventListener('mouseenter', function() {
+                    this.style.backgroundColor = '#d4edda'; // Yeşil renk
+                });
+                
+                // Mouse çıkınca rengini geri döndür
+                row.addEventListener('mouseleave', function() {
+                    this.style.backgroundColor = ''; // Varsayılan rengi geri döndür
+                });
+            });
+        }
+    </script>
 </body>
 </html>
