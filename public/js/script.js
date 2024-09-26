@@ -202,6 +202,61 @@ function calculateOffset() {
     var myModal = new bootstrap.Modal(document.getElementById('resultModal'));
     myModal.show();
 }
+// Sample chart.js configurations, you'll need to customize these based on your actual data.
+
+const ctxEts = document.getElementById('chart-ets').getContext('2d');
+const ctxCo2 = document.getElementById('chart-co2').getContext('2d');
+const ctxFuel = document.getElementById('chart-fuel').getContext('2d');
+const ctxCii = document.getElementById('chart-cii').getContext('2d');
+
+new Chart(ctxEts, {
+    type: 'line',
+    data: {
+        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May'],
+        datasets: [{
+            label: 'ETS Cost',
+            data: [12000, 15000, 18000, 22000, 25000],
+            borderColor: 'rgba(75, 192, 192, 1)',
+            fill: false
+        }]
+    }
+});
+
+new Chart(ctxCo2, {
+    type: 'bar',
+    data: {
+        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May'],
+        datasets: [{
+            label: 'CO2 Emissions',
+            data: [200, 220, 210, 230, 240],
+            backgroundColor: 'rgba(255, 159, 64, 0.6)'
+        }]
+    }
+});
+
+new Chart(ctxFuel, {
+    type: 'line',
+    data: {
+        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May'],
+        datasets: [{
+            label: 'Fuel Consumption',
+            data: [5000, 6000, 5500, 6500, 7000],
+            borderColor: 'rgba(54, 162, 235, 1)',
+            fill: false
+        }]
+    }
+});
+
+new Chart(ctxCii, {
+    type: 'doughnut',
+    data: {
+        labels: ['A', 'B', 'C', 'D', 'E'],
+        datasets: [{
+            data: [10, 20, 30, 20, 20],
+            backgroundColor: ['#4CAF50', '#8BC34A', '#FFC107', '#FF5722', '#F44336']
+        }]
+    }
+});
 
 
 

@@ -3,113 +3,252 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title></title>
-	<link rel="icon" href="/static/image/favicon-16x16.png" type="image/x-icon">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <title>Dashboard</title>
+    <link rel="icon" href="/static/image/favicon-16x16.png" type="image/x-icon">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="/static/css/style2.css">
 </head>
 <body>
     <!-- SIDEBAR -->
-	<section id="sidebar">
-		<a href="#" class="brand">
-			<i class='bx bxs-smile'></i>
-			<span class="text"></span> 
-					
-		</a>
-		<ul class="side-menu top">
-			<li class="active">
-				<a href="#">
-					<i class='bx bxs-dashboard' ></i>
-					<span class="text">DASHBOARD</span>
-				</a>
-			</li>
-			<li>
-				<a href="./ets.html">
-					<i class='bx bxs-shopping-bag-alt' ></i>
-					<span class="text">ETS</span>
-				</a>
-			</li>
+    <section id="sidebar" class="sidebar bg-light">
+        <a href="#" class="brand">
+            <i class='bx bxs-smile'></i>
+            <span class="text"></span>
+        </a>
+        <ul class="side-menu top">
+            <li class="active">
+                <a href="#">
+                    <i class='bx bxs-dashboard'></i>
+                    <span class="text">Dashboard</span>
+                </a>
+            </li>
             <li>
-				<a href="./cii.html">
-					<i class='bx bxs-shopping-bag-alt' ></i>
-					<span class="text">CII</span>
-				</a>
-			</li>
-			<li>
-				<a href="./fuel_eu.html">
-					<i class='bx bxs-doughnut-chart' ></i>
-					<span class="text">FUEL EU</span>
-				</a>
-			</li>
-			<li>
-				<a href="./input.html">
-					<i class='bx bxs-message-dots' ></i>
-					<span class="text">INPUT</span>
-				</a>
-			</li>
-			
-		</ul>
-		<ul class="side-menu">
-			
-			<li>
-				<a href="#" class="logout">
-					<i class='bx bxs-log-out-circle' ></i>
-					<span class="text">Logout</span>
-				</a>
-			</li>
-		</ul>
-	</section>
-	<!-- SIDEBAR -->
+                <a href="./ets.html">
+                    <i class='bx bxs-shopping-bag-alt'></i>
+                    <span class="text">ETS</span>
+                </a>
+            </li>
+            <li>
+                <a href="./cii.html">
+                    <i class='bx bxs-shopping-bag-alt'></i>
+                    <span class="text">CII</span>
+                </a>
+            </li>
+            <li>
+                <a href="./fuel_eu.html">
+                    <i class='bx bxs-doughnut-chart'></i>
+                    <span class="text">Fuel EU</span>
+                </a>
+            </li>
+            <li>
+                <a href="./input.html">
+                    <i class='bx bxs-message-dots'></i>
+                    <span class="text">Input</span>
+                </a>
+            </li>
+        </ul>
+        <ul class="side-menu bottom">
+            <li>
+                <a href="#" class="logout">
+                    <i class='bx bxs-log-out-circle'></i>
+                    <span class="text">Logout</span>
+                </a>
+            </li>
+        </ul>
+    </section>
+    <!-- SIDEBAR -->
 
+    <!-- CONTENT -->
+    <section id="content-dashboard" class="content">
+        <!-- NAVBAR -->
+        
+        <!-- NAVBAR -->
 
+        <!-- MAIN -->
+        <main>
+            <div class="head-title">
+                <h1>Dashboard</h1>
+                <ul class="breadcrumb">
+                    <li><a href="#">Dashboard</a></li>
+                    <li><i class='bx bx-chevron-right'></i></li>
+                </ul>
+                <a href="#" class="btn btn-primary btn-download">
+                    <i class='bx bxs-cloud-download'></i>
+                    Download PDF
+                </a>
+            </div>
 
-	<!-- CONTENT -->
-	<section id="content-dashboard">
-		<!-- NAVBAR -->
-		<nav>
-			<i class='bx bx-menu' ></i>
-			<a href="#" class="nav-link">Search</a>
-			<form action="#">
-				<div class="form-input">
-					<input type="search" placeholder="Search...">
-					<button type="submit" class="search-btn"><i class='bx bx-search' ></i></button>
-				</div>
-			</form>
-			<input type="checkbox" id="switch-mode" hidden>
-			<label for="switch-mode" class="switch-mode"></label>
-			<a href="#" class="notification">
-				<i class='bx bxs-bell' ></i>
-				
-			</a>
-			
-		</nav>
-		<!-- NAVBAR -->
+            <!-- Stats Section -->
+            <div class="stats-container row">
+                <div class="col-md-2 stat-card text-center">
+                    <h3>Total Consumption</h3>
+                    <p>5,423</p>
+                </div>
+                <div class="col-md-2 stat-card text-center">
+                    <h3>Compliance Balance</h3>
+                    <p>-3,852</p>
+                </div>
+                <div class="col-md-2 stat-card text-center">
+                    <h3>GHG Intensity</h3>
+                    <p>1,893</p>
+                </div>
+                <div class="col-md-2 stat-card text-center">
+                    <h3>FuelEU Cost</h3>
+                    <p>12,152</p>
+                </div>
+                <div class="col-md-2 stat-card text-center">
+                    <h3>ETS Cost</h3>
+                    <p>94,127</p>
+                </div>
+                <div class="col-md-2 stat-card text-center">
+                    <h3>Total Cost</h3>
+                    <p>168,540</p>
+                </div>
+            </div>
 
-		<!-- MAIN -->
-		<main>
-			<div class="head-title">
-				<div class="left">
-					<h1>Dashboard</h1>
-					<ul class="breadcrumb">
-						<li>
-							<a href="#">Dashboard</a>
-						</li>
-						<li><i class='bx bx-chevron-right' ></i></li>
-						
-					</ul>
-				</div>
-				<a href="#" class="btn-download">
-					<i class='bx bxs-cloud-download' ></i>
-					<span class="text">Download PDF</span>
-				</a>
-			</div>
+            <!-- Vessel Data Table -->
+            <div class="vessel-table-container mt-4">
+                <h2>All Vessels</h2>
+                <table class="table table-hover">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Vessel</th>
+                            <th>VLSFO</th>
+                            <th>MGO</th>
+                            <th>Biofuel B24</th>
+                            <th>Biodiesel 24</th>
+                            <th>CII Rating</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Vessel 1</td>
+                            <td>1913</td>
+                            <td>4686</td>
+                            <td>75</td>
+                            <td>0</td>
+                            <td><span class="cii-rating c">C</span></td>
+                        </tr>
+                        <tr>
+                            <td>Vessel 2</td>
+                            <td>6685</td>
+                            <td>682</td>
+                            <td>100</td>
+                            <td>0</td>
+                            <td><span class="cii-rating c">C</span></td>
+                        </tr>
+                        <tr>
+                            <td>Vessel 3</td>
+                            <td>2626</td>
+                            <td>571</td>
+                            <td>0</td>
+                            <td>0</td>
+                            <td><span class="cii-rating d">D</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
 
-			
-	</section>
-	<!-- CONTENT -->
-	
+            <!-- Charts Section -->
+            <div class="charts-container mt-4">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h3>ETS</h3>
+                        <div class="chart" id="chart-ets"></div>
+                    </div>
+                    <div class="col-md-6">
+                        <h3>CO2 Emissions</h3>
+                        <div class="chart" id="chart-co2"></div>
+                    </div>
+                    <div class="col-md-6 mt-4">
+                        <h3>Fuel Consumption</h3>
+                        <div class="chart" id="chart-fuel"></div>
+                    </div>
+                    <div class="col-md-6 mt-4">
+                        <h3>CII Rating Distribution</h3>
+                        <div class="chart" id="chart-cii"></div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </section>
+	<script> // Sample chart.js configurations, you'll need to customize these based on your actual data.
 
-	<script src="/static/js/script.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+		const ctxEts = document.getElementById('chart-ets').getContext('2d');
+		const ctxCo2 = document.getElementById('chart-co2').getContext('2d');
+		const ctxFuel = document.getElementById('chart-fuel').getContext('2d');
+		const ctxCii = document.getElementById('chart-cii').getContext('2d');
+		
+		new Chart(ctxEts, {
+			type: 'line',
+			data: {
+				labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May'],
+				datasets: [{
+					label: 'ETS Cost',
+					data: [12000, 15000, 18000, 22000, 25000],
+					borderColor: 'rgba(75, 192, 192, 1)',
+					fill: false
+				}]
+			}
+		});
+		
+		window.onload = function () {
+
+var ctxCo2 = new CanvasJS.Chart("chartContainer", {
+	animationEnabled: true,
+	title:{
+		text: "Email Categories",
+		horizontalAlign: "left"
+	},
+	data: [{
+		type: "doughnut",
+		startAngle: 60,
+		//innerRadius: 60,
+		indexLabelFontSize: 17,
+		indexLabel: "{label} - #percent%",
+		toolTipContent: "<b>{label}:</b> {y} (#percent%)",
+		dataPoints: [
+			{ y: 67, label: "Inbox" },
+			{ y: 28, label: "Archives" },
+			{ y: 10, label: "Labels" },
+			{ y: 7, label: "Drafts"},
+			{ y: 15, label: "Trash"},
+			{ y: 6, label: "Spam"}
+		]
+	}]
+});
+chart.render();
+
+}
+		
+		new Chart(ctxFuel, {
+			type: 'line',
+			data: {
+				labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May'],
+				datasets: [{
+					label: 'Fuel Consumption',
+					data: [5000, 6000, 5500, 6500, 7000],
+					borderColor: 'rgba(54, 162, 235, 1)',
+					fill: false
+				}]
+			}
+		});
+		
+		new Chart(ctxCii, {
+			type: 'doughnut',
+			data: {
+				labels: ['A', 'B', 'C', 'D', 'E'],
+				datasets: [{
+					data: [10, 20, 30, 20, 20],
+					backgroundColor: ['#4CAF50', '#8BC34A', '#FFC107', '#FF5722', '#F44336']
+				}]
+			}
+		});
+		</script>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+	<script src="https://cdn.canvasjs.com/ga/canvasjs.min.js"></script>
+    <script src="./static/js/script.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
