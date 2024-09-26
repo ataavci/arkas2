@@ -267,8 +267,8 @@ body {
 .cii-e {
     background-color: #FF0000; /* Kırmızı (E) */
 }
-#vesselTable tbody tr td.vessel-name:hover {
-    background-color: green;
-    color: white;
-    cursor: pointer;
+/* Mouse ile satır üzerine gelindiğinde yeşile dönmesi için */
+.vessel-row:hover {
+	background-color: #d4edda; /* Yeşil renk */
+	cursor: pointer;
 }

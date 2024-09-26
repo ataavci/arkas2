@@ -224,7 +224,7 @@
                                         <table class="table table-bordered">
                                             <thead class="table-dark">
                                                 <tr>
-                                                    <th>Voyage ID</th>
+                                                    <th>VESSEL</th>
                                                     <th>START DATE (UTC)</th>
                                                     <th>END DATE (UTC)</th>
                                                     <th>DISTANCE</th>
@@ -241,7 +241,7 @@
                                             <tbody>
                                                 ${detailData.map(detail => `
                                                     <tr>
-                                                        <td>${detail.voyage_id}</td>
+                                                        <td>${detail.vessel_name}</td>
                                                         <td>${detail.start_date_}</td>
                                                         <td>${detail.end_date_}</td>
                                                         <td>${detail.distance}</td>

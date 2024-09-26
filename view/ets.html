@@ -300,6 +300,96 @@
 
             resultCard.classList.remove('d-none');
         }
+        document.addEventListener('DOMContentLoaded', () => {
+            const tableBody = document.querySelector("#vesselTable tbody");
+
+            // Tüm satırlara tıklama olayı ekle
+            tableBody.addEventListener('click', (event) => {
+                const target = event.target;
+
+                // Eğer tıklanan hücre 'Vessel Name' sütunundaysa (td.vessel-name)
+                if (target.classList.contains('vessel-name')) {
+                    const vesselName = target.innerText;
+
+                    // Satırın hemen altına detay tablosunu eklemek için satırın referansını alıyoruz
+                    const parentRow = target.parentNode;
+
+                    // Eğer detay tablosu zaten varsa (aynı gemi için), yeniden ekleme
+                    if (parentRow.nextElementSibling && parentRow.nextElementSibling.classList.contains('details-row')) {
+                        parentRow.nextElementSibling.remove(); // Mevcut tabloyu kaldır
+                    } else {
+                        // API çağrısı ile detay verilerini getiriyoruz
+                        fetch(`/api/get-vessel-detail?vessel_name=${vesselName}`)
+                            .then(response => response.json())
+                            .then(detailData => {
+                                // Detay verilerle yeni bir satır oluşturuyoruz
+                                const detailRow = document.createElement('tr');
+                                detailRow.classList.add('details-row'); // Detay satırı için özel bir sınıf
+
+                                // Detay tablosunun hücresini oluştur
+                                detailRow.innerHTML = `
+            <td colspan="19">
+                <table class="table table-bordered">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Select</th> <!-- Checkbox için başlık ekleniyor -->
+                            <th>Vessel Name</th>
+                            <th>DWT</th>
+                            <th>Start Date</th>
+                            <th>End Date</th>
+                            <th>Total Distance</th>
+                            <th>Total ECA Distance</th>
+                            <th>Average Speed</th>
+                            <th>Total Days</th>
+                            <th>Sea Fuel</th>
+                            <th>Sea Consumption</th>
+                            <th>ECA Fuel</th>
+                            <th>ECA Consumption</th>
+                            <th>Port Fuel</th>
+                            <th>Port Consumption</th>
+                            <th>ETS</th>
+                            <th>Compliance Balance</th>
+                            <th>AER(gCO2/t*nm)</th>
+                            <th>CII</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${detailData.map(det => `
+                            <tr>
+                                <td><input type="checkbox" class="select-row"></td> <!-- Checkbox -->
+                                <td>${det.vessel_name }</td>
+                                <td>${det.dwt}</td>
+                                <td>${det.start_date_ }</td>
+                                <td>${det.end_date_ }</td>
+                                <td>${det.distance_sum || 'N/A'}</td>
+                                <td>${det.distance_eca_sum || 'N/A'}</td>
+                                <td>${det.speed_avg || 'N/A'}</td>
+                                <td>${det.total_days || 'N/A'}</td>
+                                <td>${det.sea_fuel || 'N/A'}</td>
+                                <td>${det.sea_consumption || 'N/A'}</td>
+                                <td>${det.eca_fuel || 'N/A'}</td>
+                                <td>${det.eca_consumption || 'N/A'}</td>
+                                <td>${det.port_fuel || 'N/A'}</td>
+                                <td>${det.port_consumption || 'N/A'}</td>
+                                <td>${det.ets_sum }</td>
+                                <td>${det.compliance_balance_sum || 'N/A'}</td>
+                                <td>${det.AER }</td>
+                                <td>${det.CII }</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            </td>
+        `;
+
+                                // Yeni detay satırını, tıklanan satırın altına ekliyoruz
+                                parentRow.insertAdjacentElement('afterend', detailRow);
+                            })
+                            .catch(error => console.error('Detay verisi getirilemedi:', error));
+                    }
+                }
+            });
+        });
     </script>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.3.1/jspdf.umd.min.js"></script>
