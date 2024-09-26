@@ -349,225 +349,10 @@ app.post("/sefer-kaydet", (req, res) => {
   res.status(200).send("Sefer başarıyla kaydedildi.");
 });
 
-app.get("/sefer-fuel-toplami", (req, res) => {
-  const query = `SHOW TABLES LIKE 'sefer%'`;
-  
-  db.query(query, (err, results) => {
-    if (err) {
-      console.error("Tablo sorgusu sırasında hata:", err.message);
-      return res.status(500).json({ error: "Veritabanı hatası oluştu." });
-    }
 
-    let totalFuel = 0;
-    let completed = 0;
 
-    results.forEach((row) => {
-      const tableName = Object.values(row)[0];
-      const fuelQuery = `SELECT IFNULL(SUM(fuel_eu), 0) AS fuel_sum FROM ${tableName}`;
 
-      db.query(fuelQuery, (err, fuelResults) => {
-        if (err) {
-          console.error(`Tablo ${tableName} için sorgu hatası:`, err.message);
-          return res.status(500).json({ error: "Fuel sorgusu sırasında hata oluştu." });
-        }
 
-        totalFuel += fuelResults[0].fuel_sum;
-        completed++;
-
-        // Tüm tablolar işlendiğinde sonucu döndür
-        if (completed === results.length) {
-          console.log(`Toplam fuel_eu: ${totalFuel}`);
-          res.json({ totalFuel });
-        }
-      });
-    });
-  });
-});
-app.get("/sefer-ets-toplami", (req, res) => {
-  const query = `SHOW TABLES LIKE 'sefer%'`;
-  
-  db.query(query, (err, results) => {
-    if (err) {
-      console.error("Tablo sorgusu sırasında hata:", err.message);
-      return res.status(500).json({ error: "Veritabanı hatası oluştu." });
-    }
-
-    let totalFuel = 0;
-    let completed = 0;
-
-    results.forEach((row) => {
-      const tableName = Object.values(row)[0];
-      const fuelQuery = `SELECT IFNULL(SUM(ets), 0) AS fuel_sum FROM ${tableName}`;
-
-      db.query(fuelQuery, (err, fuelResults) => {
-        if (err) {
-          console.error(`Tablo ${tableName} için sorgu hatası:`, err.message);
-          return res.status(500).json({ error: "Fuel sorgusu sırasında hata oluştu." });
-        }
-
-        totalFuel += fuelResults[0].fuel_sum;
-        completed++;
-
-        // Tüm tablolar işlendiğinde sonucu döndür
-        if (completed === results.length) {
-          console.log(`Toplam ets: ${totalFuel}`);
-          res.json({ totalFuel });
-        }
-      });
-    });
-  });
-});
-app.get("/sefer-consumption-toplami", (req, res) => {
-  const query = `SHOW TABLES LIKE 'sefer%'`;  // sefer ile başlayan tabloları bul
-
-  db.query(query, (err, results) => {
-    if (err) {
-      console.error("Tablo sorgusu sırasında hata:", err.message);
-      return res.status(500).json({ error: "Veritabanı hatası oluştu." });
-    }
-
-    let totalFuel = 0;
-    let completed = 0;
-
-    results.forEach((row) => {
-      const tableName = Object.values(row)[0];
-      // Üç sütunu toplayarak toplam tüketimi hesapla
-      const fuelQuery = `SELECT IFNULL(SUM(sea_consumption + port_consumption + eca_consumption), 0) AS fuel_sum FROM ${tableName}`;
-
-      db.query(fuelQuery, (err, fuelResults) => {
-        if (err) {
-          console.error(`Tablo ${tableName} için sorgu hatası:`, err.message);
-          return res.status(500).json({ error: "Fuel sorgusu sırasında hata oluştu." });
-        }
-
-        totalFuel += fuelResults[0].fuel_sum;
-        completed++;
-
-        // Tüm tablolar işlendiğinde sonucu döndür
-        if (completed === results.length) {
-          console.log(`Toplam consumption: ${totalFuel}`);
-          res.json({ totalFuel });
-        }
-      });
-    });
-  });
-});
-
-app.get("/sefer-balance-toplami", (req, res) => {
-  const query = `SHOW TABLES LIKE 'sefer%'`;
-  
-  db.query(query, (err, results) => {
-    if (err) {
-      console.error("Tablo sorgusu sırasında hata:", err.message);
-      return res.status(500).json({ error: "Veritabanı hatası oluştu." });
-    }
-
-    let totalFuel = 0;
-    let completed = 0;
-
-    results.forEach((row) => {
-      const tableName = Object.values(row)[0];
-      const fuelQuery = `SELECT IFNULL(SUM(COMPLIANCE_BALANCE), 0) AS fuel_sum FROM ${tableName}`;
-
-      db.query(fuelQuery, (err, fuelResults) => {
-        if (err) {
-          console.error(`Tablo ${tableName} için sorgu hatası:`, err.message);
-          return res.status(500).json({ error: "Fuel sorgusu sırasında hata oluştu." });
-        }
-
-        totalFuel += fuelResults[0].fuel_sum;
-        completed++;
-
-        // Tüm tablolar işlendiğinde sonucu döndür
-        if (completed === results.length) {
-          console.log(`Toplam ets: ${totalFuel}`);
-          res.json({ totalFuel });
-        }
-      });
-    });
-  });
-});
-app.get("/sefer-ghg-toplami", (req, res) => {
-  const query = `SHOW TABLES LIKE 'sefer%'`;  // sefer ile başlayan tabloları bul
-
-  db.query(query, (err, results) => {
-    if (err) {
-      console.error("Tablo sorgusu sırasında hata:", err.message);
-      return res.status(500).json({ error: "Veritabanı hatası oluştu." });
-    }
-
-    let totalGHG = 0;
-    let completed = 0;
-
-    results.forEach((row) => {
-      const tableName = Object.values(row)[0];
-      // TTW + WTT değeri 0'dan büyük olanlar için ortalama hesapla
-      const ghgQuery = `SELECT IFNULL(AVG(TTW + WTT), 0) AS ghg_sum FROM ${tableName} WHERE (TTW + WTT) > 0`;
-
-      db.query(ghgQuery, (err, ghgResults) => {
-        if (err) {
-          console.error(`Tablo ${tableName} için sorgu hatası:`, err.message);
-          return res.status(500).json({ error: "GHG sorgusu sırasında hata oluştu." });
-        }
-
-        totalGHG += ghgResults[0].ghg_sum;
-        completed++;
-
-        // Tüm tablolar işlendiğinde sonucu döndür
-        if (completed === results.length) {
-          console.log(`Toplam GHG: ${totalGHG}`);
-          res.json({ totalGHG });
-        }
-      });
-    });
-  });
-});
-app.get("/sefer-table-toplami", (req, res) => {
-  const query = `SHOW TABLES LIKE 'sefer%'`;  // sefer ile başlayan tabloları bul
-
-  db.query(query, (err, results) => {
-    if (err) {
-      console.error("Tablo sorgusu sırasında hata:", err.message);
-      return res.status(500).json({ error: "Veritabanı hatası oluştu." });
-    }
-
-    let totalData = [];
-    let completed = 0;
-
-    results.forEach((row) => {
-      const tableName = Object.values(row)[0];
-      // TTW + WTT değeri 0'dan büyük olanlar için ortalama hesapla ve yakıt verilerini al
-      const fuelQuery = `SELECT IFNULL(AVG(TTW + WTT), 0) AS ghg_sum, 
-                         IFNULL((sea_fuel), 0) AS sea_fuel_sum, 
-                         IFNULL((eca_fuel), 0) AS eca_fuel_sum, 
-                         IFNULL((port_fuel), 0) AS port_fuel_sum 
-                         FROM ${tableName} WHERE (TTW + WTT) > 0`;
-
-      db.query(fuelQuery, (err, fuelResults) => {
-        if (err) {
-          console.error(`Tablo ${tableName} için sorgu hatası:`, err.message);
-          return res.status(500).json({ error: "GHG sorgusu sırasında hata oluştu." });
-        }
-
-        // Her tabloya ait veriyi bir objeye ekle
-        totalData.push({
-          table: tableName,
-          ghg_sum: fuelResults[0].ghg_sum,
-          sea_fuel_sum: fuelResults[0].sea_fuel_sum,
-          eca_fuel_sum: fuelResults[0].eca_fuel_sum,
-          port_fuel_sum: fuelResults[0].port_fuel_sum
-        });
-
-        completed++;
-
-        // Tüm tablolar işlendiğinde sonucu döndür
-        if (completed === results.length) {
-          res.json({ totalData });
-        }
-      });
-    });
-  });
-});
 app.get('/api/get-vessel-data', (req, res) => {
   const sql = 'CALL ets()'; // ets adlı prosedürü çağırır
   db.query(sql, (err, result) => {
@@ -692,20 +477,59 @@ app.get('/api/get-vessel-detail', (req, res) => {
       }
   });
 });
-app.get('/api/get-fuel_eu-detail', (req, res) => {
-  const vesselName = req.query.vessel_name;
+app.get('/api/total-consumption', (req, res) => {
+  db.query('CALL total_consumption()', (error, results) => {
+    if (error) {
+      console.error('MySQL Hatası:', error); // Hata logu
+      return res.status(500).json({ error: 'Error fetching total consumption' });
+    }
 
-  const query = `CALL fuel_eu_detay(?)`; // ets_detay prosedürü için query
-  db.query(query, [vesselName], (error, results) => {
-      if (error) {
-          console.error('Error fetching ETS detail:', error);
-          res.status(500).json({ error: 'Database error' });
-      } else {
-          console.log('Query Results:', results); // Gelen sonuçları kontrol ediyoruz
-          res.json(results[0]); // Tüm sonuç setini döndür
-      }
+    // MySQL sonucunu logla ve yanıt olarak dön
+    const totalConsumption = results[0][0].total;
+    res.json({ totalConsumption });
   });
 });
+app.get('/api/complian-balance', (req, res) => {
+  db.query('CALL complian_balance()', (error, results) => {
+    if (error) {
+      console.error('MySQL Hatası:', error);
+      return res.status(500).json({ error: 'Error fetching complian balance' });
+    }
+
+    // Sonuçları konsola yazdır
+    console.log('MySQL Sonucu:', results);
+
+    if (results && results.length > 0 && results[0].length > 0) {
+      const complianBalance = results[0][0].balance;
+      res.json({ complianBalance });
+    } else {
+      console.error('Sonuç bulunamadı');
+      res.status(404).json({ error: 'No results found' });
+    }
+  });
+});
+app.get('/api/ghg_intensity', (req, res) => {
+  db.query('CALL ghg_intensity()', (error, results) => {
+    if (error) {
+      console.error('MySQL Hatası:', error);
+      return res.status(500).json({ error: 'Error fetching GHG intensity' });
+    }
+
+    // Sonuçları konsola yazdır
+    console.log('MySQL Sonucu:', results);
+
+    if (results && results.length > 0 && results[0].length > 0) {
+      // GHG intensity değerini al
+      const GHG_intensity = results[0][0].ghg;  // Eğer prosedür 'ghg' adıyla sonuç döndürüyor.
+      res.json({ GHG_intensity });
+    } else {
+      console.error('Sonuç bulunamadı');
+      res.status(404).json({ error: 'No results found' });
+    }
+  });
+});
+
+
 app.get('/api/get-cii-detail', (req, res) => {
   const vesselName = req.query.vessel_name;
 
@@ -720,6 +544,30 @@ app.get('/api/get-cii-detail', (req, res) => {
       }
   });
 });
+app.get('/api/total-consumption', (req, res) => {
+  db.query('CALL total_consumption()', (error, results) => {
+    if (error) {
+      return res.status(500).json({ error: 'Error fetching total consumption' });
+    }
+    
+    
+    const totalConsumption = results[0][0].total;
+    res.json({ totalConsumption });
+  });
+});
+app.get('/api/vessels', (req, res) => {
+  db.query('CALL get_vessel_cii()', (error, results) => {
+    if (error) {
+      console.error('MySQL Hatası:', error);
+      return res.status(500).json({ error: 'Veri çekilirken bir hata oluştu' });
+    }
+
+    // Procedure sonuçları results[0] içinde döner
+    res.json(results[0]);  // JSON formatında sonuçları gönder
+  });
+});
+
+
 
 
 

@@ -17,7 +17,7 @@
         </a>
         <ul class="side-menu top">
             <li class="active">
-                <a class="nav-link dropdown-toggle " style="border: 5px;" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                <a class="nav-link dropdown-toggle" style="border: 5px;" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                     Optimizasyon
                   </a>
                   <ul class="dropdown-menu">
@@ -27,7 +27,6 @@
                     <li><a class="dropdown-item" href="./fuel_eu.html">FUEL EU</a></li>
                     <li><a class="dropdown-item" href="./input.html">ADD VESSEL</a></li>
                   </ul>
-        
             </li>
         </ul>
     </section>
@@ -35,10 +34,6 @@
 
     <!-- CONTENT -->
     <section id="content-dashboard" class="content">
-        <!-- NAVBAR -->
-        
-        <!-- NAVBAR -->
-
         <!-- MAIN -->
         <main>
             <div class="head-title">
@@ -56,16 +51,16 @@
             <!-- Stats Section -->
             <div class="stats-container row">
                 <div class="col-md-2 stat-card text-center">
-                    <h3>Total Consumption</h3>
-                    <p>5,423</p>
+                    <h3>Toplam Tüketim</h3>
+                    <p id="total-consumption-value">Yükleniyor...</p>
                 </div>
                 <div class="col-md-2 stat-card text-center">
-                    <h3>Compliance Balance</h3>
-                    <p>-3,852</p>
+                    <h3>Complian Balance</h3>
+                    <p id="complian-balance-value">Yükleniyor...</p>
                 </div>
                 <div class="col-md-2 stat-card text-center">
                     <h3>GHG Intensity</h3>
-                    <p>1,893</p>
+                    <p id="ghg_intensity-value">Yükleniyor...</p>
                 </div>
                 <div class="col-md-2 stat-card text-center">
                     <h3>FuelEU Cost</h3>
@@ -87,39 +82,18 @@
                 <table class="table table-hover">
                     <thead class="table-dark">
                         <tr>
-                            <th>Vessel</th>
-                            <th>VLSFO</th>
-                            <th>MGO</th>
-                            <th>Biofuel B24</th>
-                            <th>Biodiesel 24</th>
+                            <th>Vessel Name</th>
+                            <th>Sea Fuel</th>
+                            <th>Sea Consumption</th>
+                            <th>ECA Fuel</th>
+                            <th>ECA Consumption</th>
+                            <th>Port Fuel</th>
+                            <th>Port Consumption</th>
                             <th>CII Rating</th>
                         </tr>
                     </thead>
-                    <tbody>
-                        <tr>
-                            <td>Vessel 1</td>
-                            <td>1913</td>
-                            <td>4686</td>
-                            <td>75</td>
-                            <td>0</td>
-                            <td><span class="cii-rating c">C</span></td>
-                        </tr>
-                        <tr>
-                            <td>Vessel 2</td>
-                            <td>6685</td>
-                            <td>682</td>
-                            <td>100</td>
-                            <td>0</td>
-                            <td><span class="cii-rating c">C</span></td>
-                        </tr>
-                        <tr>
-                            <td>Vessel 3</td>
-                            <td>2626</td>
-                            <td>571</td>
-                            <td>0</td>
-                            <td>0</td>
-                            <td><span class="cii-rating d">D</span></td>
-                        </tr>
+                    <tbody id="vessel-table-body">
+                        <!-- Dinamik veri buraya yüklenecek -->
                     </tbody>
                 </table>
             </div>
@@ -147,82 +121,86 @@
             </div>
         </main>
     </section>
-	<script> // Sample chart.js configurations, you'll need to customize these based on your actual data.
 
-		const ctxEts = document.getElementById('chart-ets').getContext('2d');
-		const ctxCo2 = document.getElementById('chart-co2').getContext('2d');
-		const ctxFuel = document.getElementById('chart-fuel').getContext('2d');
-		const ctxCii = document.getElementById('chart-cii').getContext('2d');
-		
-		new Chart(ctxEts, {
-			type: 'line',
-			data: {
-				labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May'],
-				datasets: [{
-					label: 'ETS Cost',
-					data: [12000, 15000, 18000, 22000, 25000],
-					borderColor: 'rgba(75, 192, 192, 1)',
-					fill: false
-				}]
-			}
-		});
-		
-		window.onload = function () {
+    <script>
+        // API'den verileri çek ve tabloyu güncelle
 
-var ctxCo2 = new CanvasJS.Chart("chartContainer", {
-	animationEnabled: true,
-	title:{
-		text: "Email Categories",
-		horizontalAlign: "left"
-	},
-	data: [{
-		type: "doughnut",
-		startAngle: 60,
-		//innerRadius: 60,
-		indexLabelFontSize: 17,
-		indexLabel: "{label} - #percent%",
-		toolTipContent: "<b>{label}:</b> {y} (#percent%)",
-		dataPoints: [
-			{ y: 67, label: "Inbox" },
-			{ y: 28, label: "Archives" },
-			{ y: 10, label: "Labels" },
-			{ y: 7, label: "Drafts"},
-			{ y: 15, label: "Trash"},
-			{ y: 6, label: "Spam"}
-		]
-	}]
-});
-chart.render();
+        async function fetchTotalConsumption() {
+            try {
+                const response = await fetch('/api/total-consumption');
+                const data = await response.json();
+                document.getElementById('total-consumption-value').textContent = data.totalConsumption;
+            } catch (error) {
+                console.error('Toplam tüketim verisi çekilirken bir hata oluştu:', error);
+            }
+        }
 
+        async function fetchComplianBalance() {
+            try {
+                const response = await fetch('/api/complian-balance');
+                const data = await response.json();
+                document.getElementById('complian-balance-value').textContent = data.complianBalance;
+            } catch (error) {
+                console.error('Complian balance verisi çekilirken bir hata oluştu:', error);
+            }
+        }
+
+        async function fetchghgintensity() {
+            try {
+                const response = await fetch('/api/ghg_intensity');
+                const data = await response.json();
+                document.getElementById('ghg_intensity-value').textContent = data.GHG_intensity;
+            } catch (error) {
+                console.error('GHG intensity verisi çekilirken bir hata oluştu:', error);
+            }
+        }
+
+        async function fetchVesselData() {
+    try {
+        const response = await fetch('/api/vessels');  // API'ye istek gönder
+        const vessels = await response.json();  // Gelen JSON verisini al
+        
+        console.log('Vessels Data:', vessels);  // Gelen veriyi konsola yazdır
+
+        const tableBody = document.getElementById('vessel-table-body');
+        console.log('Table Body:', tableBody);  // Tablo gövdesini kontrol et
+
+        // Tüm verileri tabloya ekle
+        vessels.forEach(vessel => {
+            console.log('Vessel CII:', vessel.CII);  // Her bir geminin CII değerini kontrol et
+            const row = document.createElement('tr');
+            
+            // CII undefined ise bir default değer verelim
+            const ciiRating = vessel.CII ? vessel.CII.toLowerCase() : 'n/a';
+            row.innerHTML = `
+                <td>${vessel.vessel_name}</td>
+                <td>${vessel.sea_fuel}</td>
+                <td>${vessel.sea_consumption}</td>
+                <td>${vessel.eca_fuel}</td>
+                <td>${vessel.eca_consumption}</td>
+                <td>${vessel.port_fuel}</td>
+                <td>${vessel.port_consumption}</td>
+                <td><span class="cii-rating ${ciiRating}">${vessel.CII || 'N/A'}</span></td>
+            `;
+            tableBody.appendChild(row);
+        });
+    } catch (error) {
+        console.error('Veriler çekilirken bir hata oluştu:', error);
+    }
 }
-		
-		new Chart(ctxFuel, {
-			type: 'line',
-			data: {
-				labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May'],
-				datasets: [{
-					label: 'Fuel Consumption',
-					data: [5000, 6000, 5500, 6500, 7000],
-					borderColor: 'rgba(54, 162, 235, 1)',
-					fill: false
-				}]
-			}
-		});
-		
-		new Chart(ctxCii, {
-			type: 'doughnut',
-			data: {
-				labels: ['A', 'B', 'C', 'D', 'E'],
-				datasets: [{
-					data: [10, 20, 30, 20, 20],
-					backgroundColor: ['#4CAF50', '#8BC34A', '#FFC107', '#FF5722', '#F44336']
-				}]
-			}
-		});
-		</script>
+
+
+        // Sayfa yüklendiğinde tüm API'leri çağır
+        window.onload = function() {
+            fetchTotalConsumption();
+            fetchComplianBalance();
+            fetchghgintensity();
+            fetchVesselData();
+        };
+    </script>
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-	<script src="https://cdn.canvasjs.com/ga/canvasjs.min.js"></script>
+    <script src="https://cdn.canvasjs.com/ga/canvasjs.min.js"></script>
     <script src="./static/js/script.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
