@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard</title>
     <link rel="icon" href="/static/image/favicon-16x16.png" type="image/x-icon">
+    
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="/static/css/style2.css">
 </head>
@@ -13,23 +14,24 @@
     <section id="sidebar" class="sidebar bg-light">
         <a href="#" class="brand">
             <i class='bx bxs-smile'></i>
-            <span class="text"></span>
+            <span class="text">Dashboard</span>
         </a>
         <ul class="side-menu top">
             <li class="active">
-                <a class="nav-link dropdown-toggle" style="border: 5px;" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                     Optimizasyon
-                  </a>
-                  <ul class="dropdown-menu">
+                </a>
+                <ul class="dropdown-menu">
                     <li><a class="dropdown-item" href="./dashboard.html">DASHBOARD</a></li>
                     <li><a class="dropdown-item" href="./ets.html">ETS</a></li>
                     <li><a class="dropdown-item" href="./cii.html">CII</a></li>
                     <li><a class="dropdown-item" href="./fuel_eu.html">FUEL EU</a></li>
                     <li><a class="dropdown-item" href="./input.html">ADD VESSEL</a></li>
-                  </ul>
+                </ul>
             </li>
         </ul>
     </section>
+
     <!-- SIDEBAR -->
 
     <!-- CONTENT -->
@@ -98,33 +100,180 @@
                 </table>
             </div>
 
-            <!-- Charts Section -->
-            <div class="charts-container mt-4">
-                <div class="row">
-                    <div class="col-md-6">
-                        <h3>ETS</h3>
-                        <div class="chart" id="chart-ets"></div>
+            <!-- Line Chart (Chart.js) -->
+            <section id="content-dashboard" class="content">
+                <main>
+                    <div class="head-title">
+                        <h1>ETS Dashboard</h1>
                     </div>
-                    <div class="col-md-6">
-                        <h3>CO2 Emissions</h3>
-                        <div class="chart" id="chart-co2"></div>
+        
+                    <!-- Date Filters -->
+                    <div class="filter-container">
+                        <label for="start-date-1">Start Date (Chart 1):</label>
+                        <input type="date" id="start-date-1">
+                        <label for="end-date-1">End Date (Chart 1):</label>
+                        <input type="date" id="end-date-1">
+                        <button id="update-chart-1" class="btn">Update Chart 1</button>
                     </div>
-                    <div class="col-md-6 mt-4">
-                        <h3>Fuel Consumption</h3>
-                        <div class="chart" id="chart-fuel"></div>
+                    
+                    <!-- Date Filters for Chart 2 -->
+                    <div class="filter-container">
+                        <label for="start-date-2">Start Date (Chart 2):</label>
+                        <input type="date" id="start-date-2">
+                        <label for="end-date-2">End Date (Chart 2):</label>
+                        <input type="date" id="end-date-2">
+                        <button id="update-chart-2" class="btn">Update Chart 2</button>
                     </div>
-                    <div class="col-md-6 mt-4">
-                        <h3>CII Rating Distribution</h3>
-                        <div class="chart" id="chart-cii"></div>
+                    
+                    <!-- Chart Containers -->
+                    <div class="chart-row">
+                        <div class="chart-box chart-container">
+                            <canvas id="myLineChart1"></canvas>
+                        </div>
+                        <div class="chart-box chart-container">
+                            <canvas id="myLineChart2"></canvas>
+                        </div>
                     </div>
-                </div>
-            </div>
-        </main>
-    </section>
-
+                </main>
+            </section>
+        
     <script>
-        // API'den verileri çek ve tabloyu güncelle
+       
+       let chart1Instance, chart2Instance;
 
+// Ay bazlı ETS grafiği (1. Grafik)
+function createLineChart1(labels, data, label) {
+    const ctx = document.getElementById('myLineChart1').getContext('2d');
+    if (chart1Instance) {
+        chart1Instance.destroy(); // Eski grafiği yok et
+    }
+
+    chart1Instance = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: label,
+                data: data,
+                fill: false,
+                borderColor: 'rgb(75, 192, 192)',
+                tension: 0.1
+            }]
+        },
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+}
+
+// Gemi isimlerine göre ETS grafiği (2. Grafik)
+function createLineChart2(dataSets, months) {
+    const ctx = document.getElementById('myLineChart2').getContext('2d');
+    if (chart2Instance) {
+        chart2Instance.destroy(); // Eski grafiği yok et
+    }
+
+    chart2Instance = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: months, // X ekseninde aylar
+            datasets: dataSets // Gemiler için dinamik çizgi seti
+        },
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+}
+
+// 1. Grafik için tarih aralığına göre verileri güncelle
+document.getElementById('update-chart-1').addEventListener('click', function() {
+    const startDate1 = document.getElementById('start-date-1').value;
+    const endDate1 = document.getElementById('end-date-1').value;
+
+    if (!startDate1 || !endDate1) {
+        alert('Please select both start and end dates for the first chart.');
+        return;
+    }
+
+    // İlk grafik (Ay bazlı ETS toplamı)
+    fetch(`/api/get-data?start=${startDate1}&end=${endDate1}`)
+        .then(response => response.json())
+        .then(data => {
+            console.log("Ay bazlı ETS verileri (1. Grafik):", data); // Konsolda verileri görüntüle
+            const labels = data.map(item => item.month_name);
+            const values = data.map(item => item.total_ets);
+            createLineChart1(labels, values, 'Monthly ETS');
+        })
+        .catch(error => console.error('Error fetching data for the first chart:', error));
+});
+
+// 2. Grafik için tarih aralığına göre verileri güncelle
+document.getElementById('update-chart-2').addEventListener('click', function() {
+    const startDate2 = document.getElementById('start-date-2').value;
+    const endDate2 = document.getElementById('end-date-2').value;
+
+    if (!startDate2 || !endDate2) {
+        alert('Please select both start and end dates for the second chart.');
+        return;
+    }
+
+    // İkinci grafik (Vessel name bazlı ETS, Aylar X ekseninde)
+    fetch(`/api/get-vessel-data?start=${startDate2}&end=${endDate2}`)
+        .then(response => response.json())
+        .then(data => {
+            console.log("Gemi bazlı ETS verileri (2. Grafik):", data); // Konsolda verileri görüntüle
+            
+            // Aylara göre benzersiz ay isimlerini alıyoruz
+            const months = [...new Set(data.map(item => item.month_name))];
+
+            // Her gemi için ayrı bir dataset hazırlıyoruz
+            const vesselNames = [...new Set(data.map(item => item.vessel_name))];
+            const datasets = vesselNames.map((vessel) => {
+                const vesselData = data.filter(item => item.vessel_name === vessel);
+                const etsValues = vesselData.map(item => item.total_ets);
+
+                // Dinamik renkler üretmek için random bir renk seçelim
+                const randomColor = `rgb(${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)})`;
+
+                return {
+                    label: vessel,
+                    data: etsValues,
+                    fill: false,
+                    borderColor: randomColor,
+                    tension: 0.1
+                };
+            });
+
+            createLineChart2(datasets, months);
+        })
+        .catch(error => console.error('Error fetching vessel data for the second chart:', error));
+});
+
+// Varsayılan grafik verisi (İlk yükleme için)
+window.onload = function () {
+    const defaultLabels = ['January', 'February', 'March', 'April', 'May', 'June', 'July'];
+    const defaultData = [0, 0, 0, 0, 0, 0, 0];
+    createLineChart1(defaultLabels, defaultData, 'Monthly ETS');
+    createLineChart2([], defaultLabels);
+
+
+
+            // Diğer fonksiyonlar aynı window.onload içine dahil edilebilir
+            fetchTotalConsumption();
+            fetchComplianBalance();
+            fetchghgintensity();
+            fetchVesselData();
+        };
+
+        // API'den verileri çek ve tabloyu güncelle
         async function fetchTotalConsumption() {
             try {
                 const response = await fetch('/api/total-consumption');
@@ -156,52 +305,34 @@
         }
 
         async function fetchVesselData() {
-    try {
-        const response = await fetch('/api/vessels');  // API'ye istek gönder
-        const vessels = await response.json();  // Gelen JSON verisini al
-        
-        console.log('Vessels Data:', vessels);  // Gelen veriyi konsola yazdır
+            try {
+                const response = await fetch('/api/vessels');  // API'ye istek gönder
+                const vessels = await response.json();  // Gelen JSON verisini al
 
-        const tableBody = document.getElementById('vessel-table-body');
-        console.log('Table Body:', tableBody);  // Tablo gövdesini kontrol et
+                const tableBody = document.getElementById('vessel-table-body');
 
-        // Tüm verileri tabloya ekle
-        vessels.forEach(vessel => {
-            console.log('Vessel CII:', vessel.CII);  // Her bir geminin CII değerini kontrol et
-            const row = document.createElement('tr');
-            
-            // CII undefined ise bir default değer verelim
-            const ciiRating = vessel.CII ? vessel.CII.toLowerCase() : 'n/a';
-            row.innerHTML = `
-                <td>${vessel.vessel_name}</td>
-                <td>${vessel.sea_fuel}</td>
-                <td>${vessel.sea_consumption}</td>
-                <td>${vessel.eca_fuel}</td>
-                <td>${vessel.eca_consumption}</td>
-                <td>${vessel.port_fuel}</td>
-                <td>${vessel.port_consumption}</td>
-                <td><span class="cii-rating ${ciiRating}">${vessel.CII || 'N/A'}</span></td>
-            `;
-            tableBody.appendChild(row);
-        });
-    } catch (error) {
-        console.error('Veriler çekilirken bir hata oluştu:', error);
-    }
-}
-
-
-        // Sayfa yüklendiğinde tüm API'leri çağır
-        window.onload = function() {
-            fetchTotalConsumption();
-            fetchComplianBalance();
-            fetchghgintensity();
-            fetchVesselData();
-        };
-        
+                vessels.forEach(vessel => {
+                    const row = document.createElement('tr');
+                    const ciiRating = vessel.CII ? vessel.CII.toLowerCase() : 'n/a';
+                    row.innerHTML = `
+                        <td>${vessel.vessel_name}</td>
+                        <td>${vessel.sea_fuel}</td>
+                        <td>${vessel.sea_consumption}</td>
+                        <td>${vessel.eca_fuel}</td>
+                        <td>${vessel.eca_consumption}</td>
+                        <td>${vessel.port_fuel}</td>
+                        <td>${vessel.port_consumption}</td>
+                        <td><span class="cii-rating ${ciiRating}">${vessel.CII || 'N/A'}</span></td>
+                    `;
+                    tableBody.appendChild(row);
+                });
+            } catch (error) {
+                console.error('Veriler çekilirken bir hata oluştu:', error);
+            }
+        }
     </script>
-
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdn.canvasjs.com/ga/canvasjs.min.js"></script>
     <script src="./static/js/script.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>

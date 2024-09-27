@@ -7,6 +7,31 @@
   <!-- Bootstrap CSS -->
   <link rel="stylesheet" href="/static/css/style2.css">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+  <style>
+    /* Ekstra stil eklemeleri */
+    /* Ekstra stil eklemeleri */
+    .form-group {
+      margin-bottom: 15px;
+    }
+    .form-control {
+      padding: 5px;
+      font-size: 0.9rem;
+    }
+    .form-label {
+      font-weight: bold;
+      font-size: 0.85rem;
+    }
+    .btn {
+      padding: 8px 20px;
+    }
+    .ayakInput {
+      margin-bottom: 20px;
+      padding: 10px;
+      border: 1px solid #95e3f4;
+      border-radius: 5px;
+      background-color: #10c9ea; /* Tüm ayakInput'lar için açık mavi arka plan */
+    }
+  </style>
 </head>
 
 <body>
@@ -91,140 +116,218 @@
                     <li><i class='bx bx-chevron-right'></i></li>
                 </ul>
             </div>
-            <a href="#" id="btn-download-pdf" class="btn-download">
+            <a href="#" id="btn-download-pdf" class="btn btn-primary">
                 <i class='bx bxs-cloud-download'></i>
                 <span class="text">Download PDF</span>
             </a>
         </div>
 
-
       <h2>Sefer Bilgileri Girişi</h2>
-      <form action="/sefer-kaydet" method="POST" id="seferForm">
-        <label for="vessel_name">Vessel Name:</label>
-        <input type="text" id="vessel_name" name="vessel_name" required><br><br>
-
-        <!-- Seferin başlayacağı tarih alanı -->
-        <label for="start_date">Start Date:</label>
-        <input type="date" id="start_date" name="start_date" required><br><br>
-
-        <div id="ayakInputs">
-          <!-- İlk ayak için form inputları -->
-          <div class="ayakInput" id="ayak_1">
-            <label for="from_1">From Ayak 1:</label>
-            <select id="from_1" name="from_1" required></select><br><br>
-            <label for="to_1">To Ayak 1:</label>
-            <select id="to_1" name="to_1" required></select><br><br>
-            <label for="distance_1">Distance Ayak 1 (km):</label>
-            <input type="number" id="distance_1" name="distance_1" step="any" required><br><br>
-            <label for="distance_eca_1">Distance ECA Ayak 1 (km):</label>
-            <input type="number" id="distance_eca_1" name="distance_eca_1" step="any" required><br><br>
-            <label for="port_day_1">Port Day Ayak 1 (gün):</label>
-            <input type="number" id="port_day_1" name="port_day_1" step="any" required><br><br>
-            <label for="port_fuel_1">Port Yakıt Ayak 1:</label>
-            <select id="port_fuel_1" name="port_fuel_1" required></select><br><br>
-            <label for="sea_fuel_1">Sea Yakıt Ayak 1:</label>
-            <select id="sea_fuel_1" name="sea_fuel_1" required></select><br><br>
-            <label for="eca_fuel_1">ECA Sea Yakıt Ayak 1:</label>
-            <select id="eca_fuel_1" name="eca_fuel_1" required></select><br><br>
+      <form id="seferForm" class="container">
+        <div class="form-group row">
+          <label for="vessel_name" class="col-sm-2 col-form-label form-label">Vessel Name:</label>
+          <div class="col-sm-4">
+            <input type="text" id="vessel_name" name="vessel_name" class="form-control" required>
           </div>
         </div>
 
-        <button type="button" onclick="addAyak()">Add </button><br><br>
+        <div class="form-group row">
+          <label for="start_date" class="col-sm-2 col-form-label form-label">Start Date:</label>
+          <div class="col-sm-4">
+            <input type="date" id="start_date" name="start_date" class="form-control" required>
+          </div>
+        </div>
 
-        <label for="speed">Hız (km/saat):</label>
-        <input type="number" id="speed" name="speed" step="any" required><br><br>
+        <div id="ayakInputs">
+          <!-- İlk ayak için form inputları -->
+          <div class="ayakInput row" id="ayak_1">
+            <div class="col-sm-6">
+              <label for="from_1" class="form-label">From Ayak 1:</label>
+              <select id="from_1" name="from_1" class="form-control" required></select>
+            </div>
+            <div class="col-sm-6">
+              <label for="to_1" class="form-label">To Ayak 1:</label>
+              <select id="to_1" name="to_1" class="form-control" required></select>
+            </div>
+            <div class="col-sm-6">
+              <label for="distance_1" class="form-label">Distance Ayak 1 (km):</label>
+              <input type="number" id="distance_1" name="distance_1" class="form-control" step="any" required>
+            </div>
+            <div class="col-sm-6">
+              <label for="distance_eca_1" class="form-label">Distance ECA Ayak 1 (km):</label>
+              <input type="number" id="distance_eca_1" name="distance_eca_1" class="form-control" step="any" required>
+            </div>
+            <div class="col-sm-6">
+              <label for="port_day_1" class="form-label">Port Day Ayak 1 (gün):</label>
+              <input type="number" id="port_day_1" name="port_day_1" class="form-control" step="any" required>
+            </div>
+            <div class="col-sm-6">
+              <label for="port_fuel_1" class="form-label">Port Yakıt Ayak 1:</label>
+              <select id="port_fuel_1" name="port_fuel_1" class="form-control" required></select>
+            </div>
+            <div class="col-sm-6">
+              <label for="sea_fuel_1" class="form-label">Sea Yakıt Ayak 1:</label>
+              <select id="sea_fuel_1" name="sea_fuel_1" class="form-control" required></select>
+            </div>
+            <div class="col-sm-6">
+              <label for="eca_fuel_1" class="form-label">ECA Sea Yakıt Ayak 1:</label>
+              <select id="eca_fuel_1" name="eca_fuel_1" class="form-control" required></select>
+            </div>
+          </div>
+        </div>
 
-        <label for="gunluk_tuketim_sea">Günlük Tüketim Sea (ton):</label>
-        <input type="number" id="gunluk_tuketim_sea" name="gunluk_tuketim_sea" step="any" required><br><br>
+        <div class="form-group">
+          <button type="button" class="btn btn-secondary" onclick="addAyak()">Add Ayak</button>
+        </div>
 
-        <label for="gunluk_tuketim_port">Günlük Tüketim Port (ton):</label>
-        <input type="number" id="gunluk_tuketim_port" name="gunluk_tuketim_port" step="any" required><br><br>
+        <div class="form-group row">
+          <label for="speed" class="col-sm-2 col-form-label form-label">Hız (km/saat):</label>
+          <div class="col-sm-4">
+            <input type="number" id="speed" name="speed" class="form-control" step="any" required>
+          </div>
+        </div>
 
-        <label for="DWT">DWT:</label>
-        <input type="number" id="DWT" name="DWT" step="any" required><br><br>
+        <div class="form-group row">
+          <label for="gunluk_tuketim_sea" class="col-sm-2 col-form-label form-label">Günlük Tüketim Sea (ton):</label>
+          <div class="col-sm-4">
+            <input type="number" id="gunluk_tuketim_sea" name="gunluk_tuketim_sea" class="form-control" step="any" required>
+          </div>
+        </div>
 
-        <button type="submit">Seferi Kaydet</button>
+        <div class="form-group row">
+          <label for="gunluk_tuketim_port" class="col-sm-2 col-form-label form-label">Günlük Tüketim Port (ton):</label>
+          <div class="col-sm-4">
+            <input type="number" id="gunluk_tuketim_port" name="gunluk_tuketim_port" class="form-control" step="any" required>
+          </div>
+        </div>
+
+        <div class="form-group row">
+          <label for="DWT" class="col-sm-2 col-form-label form-label">DWT:</label>
+          <div class="col-sm-4">
+            <input type="number" id="DWT" name="DWT" class="form-control" step="any" required>
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Seferi Kaydet</button>
       </form>
-    </div>
-  </div>
+    </main>
+</section>
 
-  <script>
-    let ayakCount = 1;
-    let rotaData = [];
-    let fuelData = [];
+<script>
+  let ayakCount = 1;
+  let rotaData = [];
+  let fuelData = [];
 
-    function addAyak() {
-      ayakCount++;
-      const ayakInputs = document.getElementById("ayakInputs");
+  function addAyak() {
+    ayakCount++;
+    const ayakInputs = document.getElementById("ayakInputs");
 
-      // Bir önceki ayaktaki 'to' değerini alıyoruz
-      const previousTo = document.getElementById(`to_${ayakCount - 1}`).value;
+    const previousTo = document.getElementById(`to_${ayakCount - 1}`).value;
 
-      // Yeni ayak inputlarını ekliyoruz
-      const newAyak = document.createElement("div");
-      newAyak.classList.add("ayakInput");
-      newAyak.innerHTML = `
-        <label for="from_${ayakCount}">From Ayak ${ayakCount}:</label>
-        <select id="from_${ayakCount}" name="from_${ayakCount}" required>${generateOptions(rotaData)}</select><br><br>
-        <label for="to_${ayakCount}">To Ayak ${ayakCount}:</label>
-        <select id="to_${ayakCount}" name="to_${ayakCount}" required>${generateOptions(rotaData)}</select><br><br>
-        <label for="distance_${ayakCount}">Distance Ayak ${ayakCount} (km):</label>
-        <input type="number" id="distance_${ayakCount}" name="distance_${ayakCount}" step="any" required><br><br>
-        <label for="distance_eca_${ayakCount}">Distance ECA Ayak ${ayakCount} (km):</label>
-        <input type="number" id="distance_eca_${ayakCount}" name="distance_eca_${ayakCount}" step="any" required><br><br>
-        <label for="port_day_${ayakCount}">Port Day Ayak ${ayakCount} (gün):</label>
-        <input type="number" id="port_day_${ayakCount}" name="port_day_${ayakCount}" step="any" required><br><br>
-        <label for="port_fuel_${ayakCount}">Port Yakıt Ayak ${ayakCount}:</label>
-        <select id="port_fuel_${ayakCount}" name="port_fuel_${ayakCount}" required>${generateOptions(fuelData)}</select><br><br>
-        <label for="sea_fuel_${ayakCount}">Sea Yakıt Ayak ${ayakCount}:</label>
-        <select id="sea_fuel_${ayakCount}" name="sea_fuel_${ayakCount}" required>${generateOptions(fuelData)}</select><br><br>
-        <label for="eca_fuel_${ayakCount}">ECA Sea Yakıt Ayak ${ayakCount}:</label>
-        <select id="eca_fuel_${ayakCount}" name="eca_fuel_${ayakCount}" required>${generateOptions(fuelData)}</select><br><br>
-      `;
+    const newAyak = document.createElement("div");
+    newAyak.classList.add("ayakInput", "row");
+    newAyak.innerHTML = `
+      <div class="col-sm-6">
+        <label for="from_${ayakCount}" class="form-label">From Ayak ${ayakCount}:</label>
+        <select id="from_${ayakCount}" name="from_${ayakCount}" class="form-control" required>${generateOptions(rotaData)}</select>
+      </div>
+      <div class="col-sm-6">
+        <label for="to_${ayakCount}" class="form-label">To Ayak ${ayakCount}:</label>
+        <select id="to_${ayakCount}" name="to_${ayakCount}" class="form-control" required>${generateOptions(rotaData)}</select>
+      </div>
+      <div class="col-sm-6">
+        <label for="distance_${ayakCount}" class="form-label">Distance Ayak ${ayakCount} (km):</label>
+        <input type="number" id="distance_${ayakCount}" name="distance_${ayakCount}" class="form-control" step="any" required>
+      </div>
+      <div class="col-sm-6">
+        <label for="distance_eca_${ayakCount}" class="form-label">Distance ECA Ayak ${ayakCount} (km):</label>
+        <input type="number" id="distance_eca_${ayakCount}" name="distance_eca_${ayakCount}" class="form-control" step="any" required>
+      </div>
+      <div class="col-sm-6">
+        <label for="port_day_${ayakCount}" class="form-label">Port Day Ayak ${ayakCount} (gün):</label>
+        <input type="number" id="port_day_${ayakCount}" name="port_day_${ayakCount}" class="form-control" step="any" required>
+      </div>
+      <div class="col-sm-6">
+        <label for="port_fuel_${ayakCount}" class="form-label">Port Yakıt Ayak ${ayakCount}:</label>
+        <select id="port_fuel_${ayakCount}" name="port_fuel_${ayakCount}" class="form-control" required>${generateOptions(fuelData)}</select>
+      </div>
+      <div class="col-sm-6">
+        <label for="sea_fuel_${ayakCount}" class="form-label">Sea Yakıt Ayak ${ayakCount}:</label>
+        <select id="sea_fuel_${ayakCount}" name="sea_fuel_${ayakCount}" class="form-control" required>${generateOptions(fuelData)}</select>
+      </div>
+      <div class="col-sm-6">
+        <label for="eca_fuel_${ayakCount}" class="form-label">ECA Sea Yakıt Ayak ${ayakCount}:</label>
+        <select id="eca_fuel_${ayakCount}" name="eca_fuel_${ayakCount}" class="form-control" required>${generateOptions(fuelData)}</select>
+      </div>
+    `;
+    ayakInputs.appendChild(newAyak);
+    document.getElementById(`from_${ayakCount}`).value = previousTo;
+  }
 
-      ayakInputs.appendChild(newAyak); // Yeni ayak inputlarını DOM'a ekliyoruz
+  function generateOptions(data) {
+    return data.map(item => `<option value="${item.port || item.Pathway_Name}">${item.port || item.Pathway_Name}</option>`).join("");
+  }
 
-      // Yeni ayak için from alanını bir önceki 'to' değeri ile otomatik dolduruyoruz
-      document.getElementById(`from_${ayakCount}`).value = previousTo;
+  document.addEventListener("DOMContentLoaded", () => {
+    fetch("/rota_data")
+      .then(response => response.json())
+      .then(data => {
+        rotaData = data;
+        fillInitialAyak();
+      })
+      .catch(err => console.error("Liman verileri alınırken hata oluştu:", err));
+
+    fetch("/fuel_data")
+      .then(response => response.json())
+      .then(data => {
+        fuelData = data;
+        fillInitialAyak();
+      })
+      .catch(err => console.error("Yakıt verileri alınırken hata oluştu:", err));
+  });
+
+  function fillInitialAyak() {
+    if (rotaData.length > 0 && fuelData.length > 0) {
+      document.getElementById("from_1").innerHTML = generateOptions(rotaData);
+      document.getElementById("to_1").innerHTML = generateOptions(rotaData);
+      document.getElementById("port_fuel_1").innerHTML = generateOptions(fuelData);
+      document.getElementById("sea_fuel_1").innerHTML = generateOptions(fuelData);
+      document.getElementById("eca_fuel_1").innerHTML = generateOptions(fuelData);
     }
+  }
 
-    // Rota ve yakıt verilerini doldurmak için helper fonksiyon
-    function generateOptions(data) {
-      return data.map(item => `<option value="${item.port || item.Pathway_Name}">${item.port || item.Pathway_Name}</option>`).join("");
-    }
+  seferForm.addEventListener('submit', function(event) {
+    event.preventDefault();
+    const formData = new FormData(seferForm);
+    const formObject = Object.fromEntries(formData.entries());
 
-    // Sayfa yüklendiğinde rota ve yakıt verilerini doldur
-    document.addEventListener("DOMContentLoaded", () => {
-      fetch("/rota_data")
-        .then(response => response.json())
-        .then(data => {
-          rotaData = data;
-          fillInitialAyak(); // İlk ayak verilerini doldur
-        })
-        .catch(err => console.error("Liman verileri alınırken hata oluştu:", err));
-
-      fetch("/fuel_data")
-        .then(response => response.json())
-        .then(data => {
-          fuelData = data;
-          fillInitialAyak(); // İlk ayak verilerini doldur
-        })
-        .catch(err => console.error("Yakıt verileri alınırken hata oluştu:", err));
-    });
-
-    function fillInitialAyak() {
-      if (rotaData.length > 0 && fuelData.length > 0) {
-        document.getElementById("from_1").innerHTML = generateOptions(rotaData);
-        document.getElementById("to_1").innerHTML = generateOptions(rotaData);
-        document.getElementById("port_fuel_1").innerHTML = generateOptions(fuelData);
-        document.getElementById("sea_fuel_1").innerHTML = generateOptions(fuelData);
-        document.getElementById("eca_fuel_1").innerHTML = generateOptions(fuelData);
+    fetch('/sefer-kaydet', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(formObject)
+    })
+    .then(response => {
+      if (response.ok) {
+        return response.text();
       }
-    }
-  </script>
+      throw new Error("Kayıt işlemi sırasında hata oluştu.");
+    })
+    .then(message => {
+      alert(message);
+      seferForm.reset();
+      window.location.reload();
+    })
+    .catch(error => {
+      alert(error.message);
+    });
+  });
 
-  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-  <script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
-  <script nomodule src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>
+</script>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
+<script nomodule src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>
 </body>
 </html>
