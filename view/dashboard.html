@@ -95,7 +95,7 @@
                         </tr>
                     </thead>
                     <tbody id="vessel-table-body">
-                        <!-- Dinamik veri buraya yüklenecek -->
+                        <!-- Dynamic data will load here -->
                     </tbody>
                 </table>
             </div>
@@ -106,25 +106,7 @@
                     <div class="head-title">
                         <h1>ETS Dashboard</h1>
                     </div>
-        
-                    <!-- Date Filters -->
-                    <div class="filter-container">
-                        <label for="start-date-1">Start Date (Chart 1):</label>
-                        <input type="date" id="start-date-1">
-                        <label for="end-date-1">End Date (Chart 1):</label>
-                        <input type="date" id="end-date-1">
-                        <button id="update-chart-1" class="btn">Update Chart 1</button>
-                    </div>
-                    
-                    <!-- Date Filters for Chart 2 -->
-                    <div class="filter-container">
-                        <label for="start-date-2">Start Date (Chart 2):</label>
-                        <input type="date" id="start-date-2">
-                        <label for="end-date-2">End Date (Chart 2):</label>
-                        <input type="date" id="end-date-2">
-                        <button id="update-chart-2" class="btn">Update Chart 2</button>
-                    </div>
-                    
+
                     <!-- Chart Containers -->
                     <div class="chart-row">
                         <div class="chart-box chart-container">
@@ -136,204 +118,239 @@
                     </div>
                 </main>
             </section>
-        
-    <script>
-       
-       let chart1Instance, chart2Instance;
 
-// Ay bazlı ETS grafiği (1. Grafik)
-function createLineChart1(labels, data, label) {
-    const ctx = document.getElementById('myLineChart1').getContext('2d');
-    if (chart1Instance) {
-        chart1Instance.destroy(); // Eski grafiği yok et
-    }
+            <!-- JavaScript Section -->
+            <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+            <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-    chart1Instance = new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: labels,
-            datasets: [{
-                label: label,
-                data: data,
-                fill: false,
-                borderColor: 'rgb(75, 192, 192)',
-                tension: 0.1
-            }]
-        },
-        options: {
-            scales: {
-                y: {
-                    beginAtZero: true
+            <script>
+                let chart1Instance, chart2Instance;
+
+                // Chart 1: Monthly ETS data
+                function createLineChart1(labels, data, label) {
+                    const ctx = document.getElementById('myLineChart1').getContext('2d');
+                    if (chart1Instance) {
+                        chart1Instance.destroy(); // Destroy the old chart
+                    }
+
+                    chart1Instance = new Chart(ctx, {
+                        type: 'line',
+                        data: {
+                            labels: labels,
+                            datasets: [{
+                                label: label,
+                                data: data,
+                                fill: false,
+                                borderColor: 'rgb(75, 192, 192)',
+                                tension: 0.1
+                            }]
+                        },
+                        options: {
+                            scales: {
+                                y: {
+                                    beginAtZero: true
+                                }
+                            }
+                        }
+                    });
                 }
-            }
-        }
-    });
+
+                // Chart 2: ETS data by vessel
+                function createLineChart2(dataSets, months) {
+                    const ctx = document.getElementById('myLineChart2').getContext('2d');
+                    if (chart2Instance) {
+                        chart2Instance.destroy(); // Destroy the old chart
+                    }
+
+                    chart2Instance = new Chart(ctx, {
+                        type: 'line',
+                        data: {
+                            labels: months, // X-axis will show the months
+                            datasets: dataSets // Dataset for vessels
+                        },
+                        options: {
+                            scales: {
+                                y: {
+                                    beginAtZero: true
+                                }
+                            }
+                        }
+                    });
+                }
+
+                // Initial state on window load
+                window.onload = async function() {
+                    try {
+                        // Fetch initial data and update charts
+                        const defaultLabels = ['January', 'February', 'March', 'April', 'May', 'June', 'July'];
+                        const defaultData = [0, 0, 0, 0, 0, 0, 0];
+                        createLineChart1(defaultLabels, defaultData, 'Monthly ETS');
+                        createLineChart2([], defaultLabels);
+
+                        // Fetch data to update content
+                        await fetchTotalConsumption();
+                        await fetchComplianBalance();
+                        await fetchghgintensity();
+                        await fetchVesselData();
+                        await fetchChart1Data();
+                        await fetchChart2Data();
+                    } catch (error) {
+                        console.error('Error initializing dashboard:', error);
+                    }
+                };
+
+                // Fetch and update Total Consumption
+                async function fetchTotalConsumption() {
+                    try {
+                        const response = await fetch('/api/total-consumption');
+                        const data = await response.json();
+                        console.log("Total Consumption Data: ", data);  // Log the data for debugging
+                        document.getElementById('total-consumption-value').textContent = data.totalConsumption || 'No data';
+                    } catch (error) {
+                        console.error('Error fetching total consumption data:', error);
+                    }
+                }
+
+                // Fetch and update Complian Balance
+                async function fetchComplianBalance() {
+                    try {
+                        const response = await fetch('/api/complian-balance');
+                        const data = await response.json();
+                        console.log("Complian Balance Data: ", data);  // Log the data for debugging
+                        document.getElementById('complian-balance-value').textContent = data.complianBalance || 'No data';
+                    } catch (error) {
+                        console.error('Error fetching complian balance data:', error);
+                    }
+                }
+
+                // Fetch and update GHG Intensity
+                async function fetchghgintensity() {
+                    try {
+                        const response = await fetch('/api/ghg_intensity');
+                        const data = await response.json();
+                        console.log("GHG Intensity Data: ", data);  // Log the data for debugging
+                        document.getElementById('ghg_intensity-value').textContent = data.GHG_intensity || 'No data';
+                    } catch (error) {
+                        console.error('Error fetching GHG intensity data:', error);
+                    }
+                }
+
+                // Fetch and update Vessel Data
+                async function fetchVesselData() {
+                    try {
+                        const response = await fetch('/api/vessels');  // Fetch data from API
+                        const vessels = await response.json();  // Parse JSON data
+                        console.log("Vessel Data: ", vessels);  // Log the data for debugging
+
+                        const tableBody = document.getElementById('vessel-table-body');
+                        tableBody.innerHTML = '';  // Clear existing rows
+
+                        vessels.forEach(vessel => {
+                            const row = document.createElement('tr');
+                            const ciiRating = vessel.CII ? vessel.CII.toLowerCase() : 'n/a';
+                            row.innerHTML = `
+                                <td>${vessel.vessel_name}</td>
+                                <td>${vessel.sea_fuel}</td>
+                                <td>${vessel.sea_consumption}</td>
+                                <td>${vessel.eca_fuel}</td>
+                                <td>${vessel.eca_consumption}</td>
+                                <td>${vessel.port_fuel}</td>
+                                <td>${vessel.port_consumption}</td>
+                                <td><span class="cii-rating ${ciiRating}">${vessel.CII || 'N/A'}</span></td>
+                            `;
+                            tableBody.appendChild(row);
+                        });
+                    } catch (error) {
+                        console.error('Error fetching vessel data:', error);
+                    }
+                }
+
+                // Fetch and update Chart 1 data
+                async function fetchChart1Data() {
+                    try {
+                        const response = await fetch('/api/get-data');
+                        const data = await response.json();
+                        console.log("Chart 1 Data: ", data);  // Log the data for debugging
+
+                        const labels = data.map(item => item.month_name);
+                        const values = data.map(item => item.total_ets);
+
+                        createLineChart1(labels, values, 'Monthly ETS');
+                    } catch (error) {
+                        console.error('Error fetching data for Chart 1:', error);
+                    }
+                }
+
+                // Fetch and update Chart 2 data
+                  // Fetch and update Chart 2 data
+    // Fetch and update Chart 2 data
+    async function fetchChart2Data() {
+    try {
+        const response = await fetch('/api/get-vessel-data2');  // Fetch the updated data with vessel, month, and total ETS
+        const data = await response.json();
+        
+        // Log the full API response to inspect the fields
+        console.log("Full API Response: ", data);
+        
+        // Extract unique months from the response
+        const months = [...new Set(data.map(item => item.month_name))];  
+        const vesselNames = [...new Set(data.map(item => item.vessel_name))];
+
+        console.log("Unique Months:", months);
+        console.log("Unique Vessel Names:", vesselNames);
+
+        // Build the dataset for each vessel across the months
+        const datasets = vesselNames.map(vessel => {
+            const vesselData = months.map(month => {
+                // Filter the data for the current vessel and month
+                const monthData = data.filter(item => item.vessel_name === vessel && item.month_name === month);
+                return monthData.length > 0 ? monthData[0].total_ets : 0;  // Use total_ets from the API response
+            });
+
+            // Generate random color for each vessel line
+            const randomColor = `rgb(${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)})`;
+
+            return {
+                label: `Vessel ${vessel}`,  // Label for the vessel
+                data: vesselData,  // Data for each month
+                fill: false,
+                borderColor: randomColor,
+                tension: 0.1
+            };
+        });
+
+        console.log("Datasets for Chart 2:", datasets);
+
+        // Create the line chart for vessels with data across months
+        createLineChart2(datasets, months);
+    } catch (error) {
+        console.error('Error fetching data for Chart 2:', error);
+    }
 }
 
-// Gemi isimlerine göre ETS grafiği (2. Grafik)
+// Function to create Line Chart 2 (ETS by vessel per month)
 function createLineChart2(dataSets, months) {
     const ctx = document.getElementById('myLineChart2').getContext('2d');
     if (chart2Instance) {
-        chart2Instance.destroy(); // Eski grafiği yok et
+        chart2Instance.destroy(); // Destroy the old chart
     }
 
     chart2Instance = new Chart(ctx, {
         type: 'line',
         data: {
-            labels: months, // X ekseninde aylar
-            datasets: dataSets // Gemiler için dinamik çizgi seti
+            labels: months,  // X-axis will show the months
+            datasets: dataSets  // Dataset for vessels
         },
         options: {
             scales: {
                 y: {
-                    beginAtZero: true
+                    beginAtZero: true  // Start Y-axis at zero
                 }
             }
         }
     });
 }
 
-// 1. Grafik için tarih aralığına göre verileri güncelle
-document.getElementById('update-chart-1').addEventListener('click', function() {
-    const startDate1 = document.getElementById('start-date-1').value;
-    const endDate1 = document.getElementById('end-date-1').value;
-
-    if (!startDate1 || !endDate1) {
-        alert('Please select both start and end dates for the first chart.');
-        return;
-    }
-
-    // İlk grafik (Ay bazlı ETS toplamı)
-    fetch(`/api/get-data?start=${startDate1}&end=${endDate1}`)
-        .then(response => response.json())
-        .then(data => {
-            console.log("Ay bazlı ETS verileri (1. Grafik):", data); // Konsolda verileri görüntüle
-            const labels = data.map(item => item.month_name);
-            const values = data.map(item => item.total_ets);
-            createLineChart1(labels, values, 'Monthly ETS');
-        })
-        .catch(error => console.error('Error fetching data for the first chart:', error));
-});
-
-// 2. Grafik için tarih aralığına göre verileri güncelle
-document.getElementById('update-chart-2').addEventListener('click', function() {
-    const startDate2 = document.getElementById('start-date-2').value;
-    const endDate2 = document.getElementById('end-date-2').value;
-
-    if (!startDate2 || !endDate2) {
-        alert('Please select both start and end dates for the second chart.');
-        return;
-    }
-
-    // İkinci grafik (Vessel name bazlı ETS, Aylar X ekseninde)
-    fetch(`/api/get-vessel-data?start=${startDate2}&end=${endDate2}`)
-        .then(response => response.json())
-        .then(data => {
-            console.log("Gemi bazlı ETS verileri (2. Grafik):", data); // Konsolda verileri görüntüle
-            
-            // Aylara göre benzersiz ay isimlerini alıyoruz
-            const months = [...new Set(data.map(item => item.month_name))];
-
-            // Her gemi için ayrı bir dataset hazırlıyoruz
-            const vesselNames = [...new Set(data.map(item => item.vessel_name))];
-            const datasets = vesselNames.map((vessel) => {
-                const vesselData = data.filter(item => item.vessel_name === vessel);
-                const etsValues = vesselData.map(item => item.total_ets);
-
-                // Dinamik renkler üretmek için random bir renk seçelim
-                const randomColor = `rgb(${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)})`;
-
-                return {
-                    label: vessel,
-                    data: etsValues,
-                    fill: false,
-                    borderColor: randomColor,
-                    tension: 0.1
-                };
-            });
-
-            createLineChart2(datasets, months);
-        })
-        .catch(error => console.error('Error fetching vessel data for the second chart:', error));
-});
-
-// Varsayılan grafik verisi (İlk yükleme için)
-window.onload = function () {
-    const defaultLabels = ['January', 'February', 'March', 'April', 'May', 'June', 'July'];
-    const defaultData = [0, 0, 0, 0, 0, 0, 0];
-    createLineChart1(defaultLabels, defaultData, 'Monthly ETS');
-    createLineChart2([], defaultLabels);
-
-
-
-            // Diğer fonksiyonlar aynı window.onload içine dahil edilebilir
-            fetchTotalConsumption();
-            fetchComplianBalance();
-            fetchghgintensity();
-            fetchVesselData();
-        };
-
-        // API'den verileri çek ve tabloyu güncelle
-        async function fetchTotalConsumption() {
-            try {
-                const response = await fetch('/api/total-consumption');
-                const data = await response.json();
-                document.getElementById('total-consumption-value').textContent = data.totalConsumption;
-            } catch (error) {
-                console.error('Toplam tüketim verisi çekilirken bir hata oluştu:', error);
-            }
-        }
-
-        async function fetchComplianBalance() {
-            try {
-                const response = await fetch('/api/complian-balance');
-                const data = await response.json();
-                document.getElementById('complian-balance-value').textContent = data.complianBalance;
-            } catch (error) {
-                console.error('Complian balance verisi çekilirken bir hata oluştu:', error);
-            }
-        }
-
-        async function fetchghgintensity() {
-            try {
-                const response = await fetch('/api/ghg_intensity');
-                const data = await response.json();
-                document.getElementById('ghg_intensity-value').textContent = data.GHG_intensity;
-            } catch (error) {
-                console.error('GHG intensity verisi çekilirken bir hata oluştu:', error);
-            }
-        }
-
-        async function fetchVesselData() {
-            try {
-                const response = await fetch('/api/vessels');  // API'ye istek gönder
-                const vessels = await response.json();  // Gelen JSON verisini al
-
-                const tableBody = document.getElementById('vessel-table-body');
-
-                vessels.forEach(vessel => {
-                    const row = document.createElement('tr');
-                    const ciiRating = vessel.CII ? vessel.CII.toLowerCase() : 'n/a';
-                    row.innerHTML = `
-                        <td>${vessel.vessel_name}</td>
-                        <td>${vessel.sea_fuel}</td>
-                        <td>${vessel.sea_consumption}</td>
-                        <td>${vessel.eca_fuel}</td>
-                        <td>${vessel.eca_consumption}</td>
-                        <td>${vessel.port_fuel}</td>
-                        <td>${vessel.port_consumption}</td>
-                        <td><span class="cii-rating ${ciiRating}">${vessel.CII || 'N/A'}</span></td>
-                    `;
-                    tableBody.appendChild(row);
-                });
-            } catch (error) {
-                console.error('Veriler çekilirken bir hata oluştu:', error);
-            }
-        }
-    </script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="./static/js/script.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+            </script>
 </body>
 </html>

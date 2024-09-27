@@ -570,20 +570,16 @@ app.get('/api/vessels', (req, res) => {
   });
 });
 app.get('/api/get-data', (req, res) => {
-  const startDate = req.query.start;
-  const endDate = req.query.end;
-
   const query = `
       SELECT 
           MONTHNAME(start_date) AS month_name, 
           SUM(ets) AS total_ets
       FROM sefer_7
-      WHERE start_date BETWEEN ? AND ?
       GROUP BY MONTH(start_date)
       ORDER BY MONTH(start_date);
   `;
 
-  db.query(query, [startDate, endDate], (err, results) => {
+  db.query(query, (err, results) => {
       if (err) {
           return res.status(500).json({ error: 'Veri alınırken hata oluştu.' });
       }
@@ -591,23 +587,20 @@ app.get('/api/get-data', (req, res) => {
   });
 });
 
-// Yeni endpoint: Gemi adına göre ETS verileri
-app.get('/api/get-vessel-data', (req, res) => {
-  const startDate = req.query.start;
-  const endDate = req.query.end;
 
+// Yeni endpoint: Gemi adına göre ETS verileri
+app.get('/api/get-vessel-data2', (req, res) => {
   const query = `
       SELECT 
           vessel_name,
-          YEAR(start_date) AS year, 
+           
           MONTHNAME(start_date) AS month_name, 
           SUM(ets) AS total_ets
       FROM sefer_7
-      WHERE start_date BETWEEN ? AND ?
       GROUP BY vessel_name
   `;
 
-  db.query(query, [startDate, endDate], (err, results) => {
+  db.query(query, (err, results) => {
       if (err) {
           return res.status(500).json({ error: 'Veri alınırken hata oluştu.' });
       }
