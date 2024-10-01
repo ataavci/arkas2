@@ -66,6 +66,9 @@ app.post("/excel/csv", upload.single("file_input"), async (req, res) => {
       return parsedDate.toISOString().split('T')[0];
     }
 
+    // Debugging: Log the row data before insertion
+    console.log("Row Data: ", row);
+
     const sql = `
       INSERT INTO sefer_7 (company_id, vessel_name, dwt, from_liman, to_liman, status, start_date, end_date, distance, distance_eca, port_day, speed, denizde_kalinan_sure, gunluk_tuketim_sea, gunluk_tuketim_port, sea_fuel, eca_fuel, port_fuel, sea_consumption, eca_consumption, port_consumption, consumption_100_sea, consumption_50_sea, consumption_100_eca, consumption_50_eca, consumption_100_port, consumption_0_port, zeroSeaConsumption, zeroEcaConsumption, ets, Fuel_Consumption_Total, TTW, WTT, GHG_ACTUAL, COMPLIANCE_BALANCE, fuel_eu, created_at)
 
