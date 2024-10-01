@@ -1,9 +1,21 @@
 const express = require("express");
 const path = require("path");
 const bodyParser = require("body-parser");
-const cors = require("cors");
-const db = require("./data/db"); // Veritabanı bağlantısı
+const xlsx = require("xlsx");
+const moment = require('moment');
 
+const db = require("./data/db"); // Veritabanı bağlantısı
+const cors = require("cors");
+const fileUpload = require("express-fileupload");
+const mysql = require('mysql2');
+const multer = require("multer");
+ 
+const uploadOpts={
+  useTempFiles :true,
+  tempFileDir:"/tmt/"
+}
+const XLSX=require("xlsx");
+const fs= require("fs");
 const app = express();
 const port = 3000;
 
@@ -15,6 +27,123 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 app.listen(port, () => {
   console.log(`Sunucu ${port} portunda başlatıldı`);
+});
+const upload = multer({
+  dest: "uploads/", // Dosyaların geçici olarak kaydedileceği yer
+});
+
+app.post("/excel/csv", upload.single("file_input"), async (req, res) => {
+  const file = req.file;
+  if (!file) {
+    return res.status(400).json({ msg: "Dosya yüklenemedi." });
+  }
+
+  const filePath = path.join(__dirname, file.path);
+  const workbook = xlsx.readFile(filePath);
+  const sheetName = workbook.SheetNames[0]; // İlk sayfayı alıyoruz
+  const data = xlsx.utils.sheet_to_json(workbook.Sheets[sheetName]);
+
+  const succesData = [];
+  const FailureData = [];
+
+  // MySQL veritabanına ekleme işlemi için tüm işlemleri asenkron yapıyoruz
+  const insertPromises = data.map((row) => {
+    function parseDate(date) {
+      // Eğer date geçerli değilse veya boşsa null döndür
+      if (!date) {
+        return null;
+      }
+
+      // Eğer date bir string ise, parse yap
+      const parsedDate = new Date(date);
+      
+      // Eğer geçerli bir tarih değilse null döndür
+      if (isNaN(parsedDate)) {
+        return null;
+      }
+
+      // Tarihi YYYY-MM-DD formatına dönüştür
+      return parsedDate.toISOString().split('T')[0];
+    }
+
+    const sql = `
+      INSERT INTO sefer_7 (company_id, vessel_name, dwt, from_liman, to_liman, status, start_date, end_date, distance, distance_eca, port_day, speed, denizde_kalinan_sure, gunluk_tuketim_sea, gunluk_tuketim_port, sea_fuel, eca_fuel, port_fuel, sea_consumption, eca_consumption, port_consumption, consumption_100_sea, consumption_50_sea, consumption_100_eca, consumption_50_eca, consumption_100_port, consumption_0_port, zeroSeaConsumption, zeroEcaConsumption, ets, Fuel_Consumption_Total, TTW, WTT, GHG_ACTUAL, COMPLIANCE_BALANCE, fuel_eu, created_at)
+
+      VALUES (?,?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())
+    `;
+
+    const values = [
+      row.company_id || null,
+      row.vessel_name || '',
+      row.dwt || 0,
+      row.from_liman || '',
+      row.to_liman || '',
+      row.status || '',
+      parseDate(row.start_date) || null,  // Tarih formatını düzeltelim
+      parseDate(row.end_date) || null,    // Tarih formatını düzeltelim
+      row.distance || 0,
+      row.distance_eca || 0,
+      row.port_day || 0,
+      row.speed || 0,
+      row.denizde_kalinan_sure || 0,
+      row.gunluk_tuketim_sea || 0,
+      row.gunluk_tuketim_port || 0,
+      row.sea_fuel || '',
+      row.eca_fuel || '',
+      row.port_fuel || '',
+      parseFloat(row.sea_consumption) || 0,  // Sayısal değerleri tırnak olmadan
+      parseFloat(row.eca_consumption) || 0,  // Sayısal değerleri tırnak olmadan
+      parseFloat(row.port_consumption) || 0, // Sayısal değerleri tırnak olmadan
+      parseFloat(row.consumption_100_sea) || 0,
+      parseFloat(row.consumption_50_sea) || 0,
+      parseFloat(row.consumption_100_eca) || 0,
+      parseFloat(row.consumption_50_eca) || 0,
+      parseFloat(row.consumption_100_port) || 0,
+      parseFloat(row.consumption_0_port) || 0,
+      parseFloat(row.zeroSeaConsumption) || 0,
+      parseFloat(row.zeroEcaConsumption) || 0,
+      row.ets || '',
+      parseFloat(row.Fuel_Consumption_Total) || 0,
+      parseFloat(row.TTW) || 0,
+      parseFloat(row.WTT) || 0,
+      parseFloat(row.GHG_ACTUAL) || 0,
+      parseFloat(row.COMPLIANCE_BALANCE) || 0,
+      row.fuel_eu || ''
+    ];
+
+    // Veritabanına eklemeyi bir promise olarak dönüyoruz
+    return new Promise((resolve, reject) => {
+      db.query(sql, values, (err, result) => {
+        if (err) {
+          console.error("Veritabanına eklenirken hata oluştu:", err);
+          FailureData.push(row); // Başarısız kayıtları listeye ekle
+          reject(err);
+        } else {
+          succesData.push(row);  // Başarılı kayıtları listeye ekle
+          resolve(result);
+        }
+      });
+    });
+  });
+
+  try {
+    // Tüm insert işlemlerini bekliyoruz
+    await Promise.all(insertPromises);
+
+    // Geçici dosyayı sil
+    fs.unlinkSync(filePath);
+
+    // Yanıtı gönder
+    return res.json({
+      msg: "İşlem tamamlandı.",
+      succesData,
+      FailureData,
+    });
+  } catch (err) {
+    // Herhangi bir hata durumunda
+    console.error("İşlem sırasında hata oluştu:", err);
+    return res.status(500).json({ msg: "İşlem sırasında hata oluştu.", err });
+  }
 });
 
 // Static dosyalar (CSS, JS vs.)

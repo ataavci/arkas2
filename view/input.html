@@ -210,10 +210,35 @@
 
         <button type="submit" class="btn btn-primary">Seferi Kaydet</button>
       </form>
-    </main>
-</section>
+      <h2>CSV/Excel Dosyası Yükleyin</h2>
+      <form id="seferFormcsv" enctype="multipart/form-data">
+        <div>
+          <label for="file_input">CSV/Excel Yükle:</label>
+          <input type="file" id="file_input" name="file_input" accept=".csv, .xls, .xlsx" required>
+        </div>
+        <button type="submit">Dosyayı Yükle</button>
+      </form>
+      
+      <script>
+        document.getElementById("seferFormcsv").addEventListener("submit", function(event) {
+          event.preventDefault();
+          
+          const formData = new FormData(document.getElementById("seferFormcsv"));
+          
+          fetch('/excel/csv', {
+            method: 'POST',
+            body: formData
+          })
+          .then(response => response.json())
+          .then(data => {
+            alert(`Başarılı Kayıtlar: ${data.succesData.length}, Başarısız Kayıtlar: ${data.FailureData.length}`);
+          })
+          .catch(error => {
+            console.error("Hata oluştu:", error);
+            alert("Kayıt işlemi sırasında hata oluştu.");
+          });
+        });
 
-<script>
   let ayakCount = 1;
   let rotaData = [];
   let fuelData = [];

@@ -328,59 +328,59 @@
 
                                 // Detay tablosunun hücresini oluştur
                                 detailRow.innerHTML = `
-            <td colspan="19">
-                <table class="table table-bordered">
-                    <thead class="table-dark">
-                        <tr>
-                            <th>Select</th> <!-- Checkbox için başlık ekleniyor -->
-                            <th>Vessel Name</th>
-                            <th>DWT</th>
-                            <th>Start Date</th>
-                            <th>End Date</th>
-                            <th>Total Distance</th>
-                            <th>Total ECA Distance</th>
-                            <th>Average Speed</th>
-                            <th>Total Days</th>
-                            <th>Sea Fuel</th>
-                            <th>Sea Consumption</th>
-                            <th>ECA Fuel</th>
-                            <th>ECA Consumption</th>
-                            <th>Port Fuel</th>
-                            <th>Port Consumption</th>
-                            <th>ETS</th>
-                            <th>Compliance Balance</th>
-                            <th>AER(gCO2/t*nm)</th>
-                            <th>CII</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        ${detailData.map(det => `
-                            <tr>
-                                <td><input type="checkbox" class="select-row"></td> <!-- Checkbox -->
-                                <td>${det.vessel_name }</td>
-                                <td>${det.dwt}</td>
-                                <td>${det.start_date_ }</td>
-                                <td>${det.end_date_ }</td>
-                                <td>${det.distance_sum || 'N/A'}</td>
-                                <td>${det.distance_eca_sum || 'N/A'}</td>
-                                <td>${det.speed_avg || 'N/A'}</td>
-                                <td>${det.total_days || 'N/A'}</td>
-                                <td>${det.sea_fuel || 'N/A'}</td>
-                                <td>${det.sea_consumption || 'N/A'}</td>
-                                <td>${det.eca_fuel || 'N/A'}</td>
-                                <td>${det.eca_consumption || 'N/A'}</td>
-                                <td>${det.port_fuel || 'N/A'}</td>
-                                <td>${det.port_consumption || 'N/A'}</td>
-                                <td>${det.ets_sum }</td>
-                                <td>${det.compliance_balance_sum || 'N/A'}</td>
-                                <td>${det.AER }</td>
-                                <td>${det.CII }</td>
-                            </tr>
-                        `).join('')}
-                    </tbody>
-                </table>
-            </td>
-        `;
+    <td colspan="19">
+        <table class="table table-bordered">
+            <thead class="table-dark">
+                <tr>
+                    <th>Select</th> <!-- Checkbox için başlık ekleniyor -->
+                    <th>Leg</th> <!-- Vessel Name yerine Leg -->
+                    <th>DWT</th>
+                    <th>Start Date</th>
+                    <th>End Date</th>
+                    <th>Total Distance</th>
+                    <th>Total ECA Distance</th>
+                    <th>Average Speed</th>
+                    <th>Total Days</th>
+                    <th>Sea Fuel</th>
+                    <th>Sea Consumption</th>
+                    <th>ECA Fuel</th>
+                    <th>ECA Consumption</th>
+                    <th>Port Fuel</th>
+                    <th>Port Consumption</th>
+                    <th>ETS</th>
+                    <th>Compliance Balance</th>
+                    <th>AER(gCO2/t*nm)</th>
+                    <th>CII</th>
+                </tr>
+            </thead>
+            <tbody>
+                ${detailData.map((det, index) => `
+                    <tr>
+                        <td><input type="checkbox" class="select-row"></td> <!-- Checkbox -->
+                        <td>Leg ${index + 1}</td> <!-- Vessel Name yerine Leg 1, Leg 2, ... -->
+                        <td>${det.dwt}</td>
+                        <td>${det.start_date_ }</td>
+                        <td>${det.end_date_ }</td>
+                        <td>${det.distance_sum || 'N/A'}</td>
+                        <td>${det.distance_eca_sum || 'N/A'}</td>
+                        <td>${det.speed_avg || 'N/A'}</td>
+                        <td>${det.total_days || 'N/A'}</td>
+                        <td>${det.sea_fuel || 'N/A'}</td>
+                        <td>${det.sea_consumption || 'N/A'}</td>
+                        <td>${det.eca_fuel || 'N/A'}</td>
+                        <td>${det.eca_consumption || 'N/A'}</td>
+                        <td>${det.port_fuel || 'N/A'}</td>
+                        <td>${det.port_consumption || 'N/A'}</td>
+                        <td>${det.ets_sum }</td>
+                        <td>${det.compliance_balance_sum || 'N/A'}</td>
+                        <td>${det.AER }</td>
+                        <td>${det.CII }</td>
+                    </tr>
+                `).join('')}
+            </tbody>
+        </table>
+    </td>
+`;
 
                                 // Yeni detay satırını, tıklanan satırın altına ekliyoruz
                                 parentRow.insertAdjacentElement('afterend', detailRow);
