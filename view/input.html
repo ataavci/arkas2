@@ -122,91 +122,91 @@
             </a>
         </div>
 
-      <h2>Sefer Bilgileri Girişi</h2>
-      <form id="seferForm" class="container">
-        <div class="form-group row">
-          <label for="vessel_name" class="col-sm-2 col-form-label form-label">Vessel Name:</label>
-          <div class="col-sm-4">
-            <input type="text" id="vessel_name" name="vessel_name" class="form-control" required>
-          </div>
-        </div>
-
-        <div class="form-group row">
-          <label for="start_date" class="col-sm-2 col-form-label form-label">Start Date:</label>
-          <div class="col-sm-4">
-            <input type="date" id="start_date" name="start_date" class="form-control" required>
-          </div>
-        </div>
-
-        <div id="ayakInputs">
-          <!-- İlk ayak için form inputları -->
-          <div class="ayakInput row" id="ayak_1">
-            <div class="col-sm-6">
-              <label for="from_1" class="form-label">From Ayak 1:</label>
-              <select id="from_1" name="from_1" class="form-control" required></select>
-            </div>
-            <div class="col-sm-6">
-              <label for="to_1" class="form-label">To Ayak 1:</label>
-              <select id="to_1" name="to_1" class="form-control" required></select>
-            </div>
-            <div class="col-sm-6">
-              <label for="distance_1" class="form-label">Distance Ayak 1 (km):</label>
-              <input type="number" id="distance_1" name="distance_1" class="form-control" step="any" required>
-            </div>
-            <div class="col-sm-6">
-              <label for="distance_eca_1" class="form-label">Distance ECA Ayak 1 (km):</label>
-              <input type="number" id="distance_eca_1" name="distance_eca_1" class="form-control" step="any" required>
-            </div>
-            <div class="col-sm-6">
-              <label for="port_day_1" class="form-label">Port Day Ayak 1 (gün):</label>
-              <input type="number" id="port_day_1" name="port_day_1" class="form-control" step="any" required>
-            </div>
-            <div class="col-sm-6">
-              <label for="port_fuel_1" class="form-label">Port Yakıt Ayak 1:</label>
-              <select id="port_fuel_1" name="port_fuel_1" class="form-control" required></select>
-            </div>
-            <div class="col-sm-6">
-              <label for="sea_fuel_1" class="form-label">Sea Yakıt Ayak 1:</label>
-              <select id="sea_fuel_1" name="sea_fuel_1" class="form-control" required></select>
-            </div>
-            <div class="col-sm-6">
-              <label for="eca_fuel_1" class="form-label">ECA Sea Yakıt Ayak 1:</label>
-              <select id="eca_fuel_1" name="eca_fuel_1" class="form-control" required></select>
+        <h2>Log Voyage</h2>
+        <form id="seferForm" class="container">
+          <div class="form-group row">
+            <label for="vessel_name" class="col-sm-2 col-form-label form-label">Vessel Name:</label>
+            <div class="col-sm-4">
+              <input type="text" id="vessel_name" name="vessel_name" class="form-control" required>
             </div>
           </div>
-        </div>
-
-        <div class="form-group">
-          <button type="button" class="btn btn-secondary" onclick="addAyak()">Add Ayak</button>
-        </div>
-
-        <div class="form-group row">
-          <label for="speed" class="col-sm-2 col-form-label form-label">Hız (km/saat):</label>
-          <div class="col-sm-4">
-            <input type="number" id="speed" name="speed" class="form-control" step="any" required>
+  
+          <div class="form-group row">
+            <label for="start_date" class="col-sm-2 col-form-label form-label">Start Date:</label>
+            <div class="col-sm-4">
+              <input type="date" id="start_date" name="start_date" class="form-control" required>
+            </div>
           </div>
-        </div>
-
-        <div class="form-group row">
-          <label for="gunluk_tuketim_sea" class="col-sm-2 col-form-label form-label">Günlük Tüketim Sea (ton):</label>
-          <div class="col-sm-4">
-            <input type="number" id="gunluk_tuketim_sea" name="gunluk_tuketim_sea" class="form-control" step="any" required>
+  
+          <div id="ayakInputs">
+            <!-- İlk ayak için form inputları -->
+            <div class="ayakInput row" id="ayak_1">
+              <div class="col-sm-6">
+                <label for="from_1" class="form-label">From:</label>
+                <select id="from_1" name="from_1" class="form-control" required></select>
+              </div>
+              <div class="col-sm-6">
+                <label for="to_1" class="form-label">To:</label>
+                <select id="to_1" name="to_1" class="form-control" required></select>
+              </div>
+              <div class="col-sm-6">
+                <label for="distance_1" class="form-label">Distance (nm):</label>
+                <input type="number" id="distance_1" name="distance_1" class="form-control" step="any" required>
+              </div>
+              <div class="col-sm-6">
+                <label for="distance_eca_1" class="form-label">Distance ECA (nm):</label>
+                <input type="number" id="distance_eca_1" name="distance_eca_1" class="form-control" step="any" required>
+              </div>
+              <div class="col-sm-6">
+                <label for="port_day_1" class="form-label">Port Day :</label>
+                <input type="number" id="port_day_1" name="port_day_1" class="form-control" step="any" required>
+              </div>
+              <div class="col-sm-6">
+                <label for="port_fuel_1" class="form-label">Port Fuel (mt/24):</label>
+                <select id="port_fuel_1" name="port_fuel_1" class="form-control" required></select>
+              </div>
+              <div class="col-sm-6">
+                <label for="sea_fuel_1" class="form-label">Sea Fuel (mt/24):</label>
+                <select id="sea_fuel_1" name="sea_fuel_1" class="form-control" required></select>
+              </div>
+              <div class="col-sm-6">
+                <label for="eca_fuel_1" class="form-label">ECA Sea Fuel:</label>
+                <select id="eca_fuel_1" name="eca_fuel_1" class="form-control" required></select>
+              </div>
+            </div>
           </div>
-        </div>
-
-        <div class="form-group row">
-          <label for="gunluk_tuketim_port" class="col-sm-2 col-form-label form-label">Günlük Tüketim Port (ton):</label>
-          <div class="col-sm-4">
-            <input type="number" id="gunluk_tuketim_port" name="gunluk_tuketim_port" class="form-control" step="any" required>
+  
+          <div class="form-group">
+            <button type="button" class="btn btn-secondary" onclick="addAyak()">Add</button>
           </div>
-        </div>
-
-        <div class="form-group row">
-          <label for="DWT" class="col-sm-2 col-form-label form-label">DWT:</label>
-          <div class="col-sm-4">
-            <input type="number" id="DWT" name="DWT" class="form-control" step="any" required>
+  
+          <div class="form-group row">
+            <label for="speed" class="col-sm-2 col-form-label form-label">Speed (kts):</label>
+            <div class="col-sm-4">
+              <input type="number" id="speed" name="speed" class="form-control" step="any" required>
+            </div>
           </div>
-        </div>
+  
+          <div class="form-group row">
+            <label for="gunluk_tuketim_sea" class="col-sm-2 col-form-label form-label">Daily Consumption Sea (mt):</label>
+            <div class="col-sm-4">
+              <input type="number" id="gunluk_tuketim_sea" name="gunluk_tuketim_sea" class="form-control" step="any" required>
+            </div>
+          </div>
+  
+          <div class="form-group row">
+            <label for="gunluk_tuketim_port" class="col-sm-2 col-form-label form-label">Daily Consumption (mt):</label>
+            <div class="col-sm-4">
+              <input type="number" id="gunluk_tuketim_port" name="gunluk_tuketim_port" class="form-control" step="any" required>
+            </div>
+          </div>
+  
+          <div class="form-group row">
+            <label for="DWT" class="col-sm-2 col-form-label form-label">DWT:</label>
+            <div class="col-sm-4">
+              <input type="number" id="DWT" name="DWT" class="form-control" step="any" required>
+            </div>
+          </div>
 
         <button type="submit" class="btn btn-primary">Seferi Kaydet</button>
       </form>
