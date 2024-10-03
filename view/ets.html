@@ -301,39 +301,39 @@
             resultCard.classList.remove('d-none');
         }
         document.addEventListener('DOMContentLoaded', () => {
-            const tableBody = document.querySelector("#vesselTable tbody");
+    const tableBody = document.querySelector("#vesselTable tbody");
 
-            // Tüm satırlara tıklama olayı ekle
-            tableBody.addEventListener('click', (event) => {
-                const target = event.target;
+    // Tüm satırlara tıklama olayı ekle
+    tableBody.addEventListener('click', (event) => {
+        const target = event.target;
 
-                // Eğer tıklanan hücre 'Vessel Name' sütunundaysa (td.vessel-name)
-                if (target.classList.contains('vessel-name')) {
-                    const vesselName = target.innerText;
+        // Eğer tıklanan hücre 'Vessel Name' sütunundaysa (td.vessel-name)
+        if (target.classList.contains('vessel-name')) {
+            const vesselName = target.innerText;
 
-                    // Satırın hemen altına detay tablosunu eklemek için satırın referansını alıyoruz
-                    const parentRow = target.parentNode;
+            // Satırın hemen altına detay tablosunu eklemek için satırın referansını alıyoruz
+            const parentRow = target.parentNode;
 
-                    // Eğer detay tablosu zaten varsa (aynı gemi için), yeniden ekleme
-                    if (parentRow.nextElementSibling && parentRow.nextElementSibling.classList.contains('details-row')) {
-                        parentRow.nextElementSibling.remove(); // Mevcut tabloyu kaldır
-                    } else {
-                        // API çağrısı ile detay verilerini getiriyoruz
-                        fetch(`/api/get-vessel-detail?vessel_name=${vesselName}`)
-                            .then(response => response.json())
-                            .then(detailData => {
-                                // Detay verilerle yeni bir satır oluşturuyoruz
-                                const detailRow = document.createElement('tr');
-                                detailRow.classList.add('details-row'); // Detay satırı için özel bir sınıf
+            // Eğer detay tablosu zaten varsa (aynı gemi için), yeniden ekleme
+            if (parentRow.nextElementSibling && parentRow.nextElementSibling.classList.contains('details-row')) {
+                parentRow.nextElementSibling.remove(); // Mevcut tabloyu kaldır
+            } else {
+                // API çağrısı ile detay verilerini getiriyoruz
+                fetch(`/api/get-vessel-detail?vessel_name=${vesselName}`)
+                    .then(response => response.json())
+                    .then(detailData => {
+                        // Detay verilerle yeni bir satır oluşturuyoruz
+                        const detailRow = document.createElement('tr');
+                        detailRow.classList.add('details-row'); // Detay satırı için özel bir sınıf
 
-                                // Detay tablosunun hücresini oluştur
-                                detailRow.innerHTML = `
+                        // Detay tablosunun hücresini oluştur
+                        detailRow.innerHTML = `
     <td colspan="19">
         <table class="table table-bordered">
             <thead class="table-dark">
                 <tr>
                     <th>Select</th> <!-- Checkbox için başlık ekleniyor -->
-                    <th>Leg</th> <!-- Vessel Name yerine Leg -->
+                    <th>From - To</th> <!-- Vessel Name yerine From - To -->
                     <th>DWT</th>
                     <th>Start Date</th>
                     <th>End Date</th>
@@ -354,13 +354,13 @@
                 </tr>
             </thead>
             <tbody>
-                ${detailData.map((det, index) => `
+                ${detailData.map((det) => `
                     <tr>
                         <td><input type="checkbox" class="select-row"></td> <!-- Checkbox -->
-                        <td>Leg ${index + 1}</td> <!-- Vessel Name yerine Leg 1, Leg 2, ... -->
+                        <td>${det.from_liman} - ${det.to_liman}</td> <!-- From - To -->
                         <td>${det.dwt}</td>
-                        <td>${det.start_date_ }</td>
-                        <td>${det.end_date_ }</td>
+                        <td>${det.start_date_}</td>
+                        <td>${det.end_date_}</td>
                         <td>${det.distance_sum || 'N/A'}</td>
                         <td>${det.distance_eca_sum || 'N/A'}</td>
                         <td>${det.speed_avg || 'N/A'}</td>
@@ -371,10 +371,10 @@
                         <td>${det.eca_consumption || 'N/A'}</td>
                         <td>${det.port_fuel || 'N/A'}</td>
                         <td>${det.port_consumption || 'N/A'}</td>
-                        <td>${det.ets_sum }</td>
+                        <td>${det.ets_sum}</td>
                         <td>${det.compliance_balance_sum || 'N/A'}</td>
-                        <td>${det.AER }</td>
-                        <td>${det.CII }</td>
+                        <td>${det.AER}</td>
+                        <td>${det.CII}</td>
                     </tr>
                 `).join('')}
             </tbody>
@@ -382,14 +382,15 @@
     </td>
 `;
 
-                                // Yeni detay satırını, tıklanan satırın altına ekliyoruz
-                                parentRow.insertAdjacentElement('afterend', detailRow);
-                            })
-                            .catch(error => console.error('Detay verisi getirilemedi:', error));
-                    }
-                }
-            });
-        });
+                        // Yeni detay satırını, tıklanan satırın altına ekliyoruz
+                        parentRow.insertAdjacentElement('afterend', detailRow);
+                    })
+                    .catch(error => console.error('Detay verisi getirilemedi:', error));
+            }
+        }
+    });
+});
+
     </script>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.3.1/jspdf.umd.min.js"></script>
