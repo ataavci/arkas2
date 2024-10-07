@@ -186,130 +186,207 @@
     </section>
 
     <script>
-        let originalData = []; // To store the original data
+       let originalData = []; // To store the original data
 
-        // Fetch vessel data initially
-        fetch('/api/get-vessel-data')
-            .then(response => response.json())
-            .then(data => {
-                originalData = data; // Store original data
-                populateTable(data);
-                populateModalWithVessels(data);
-            })
-            .catch(error => console.error('Error fetching vessel data:', error));
+// Fetch vessel data initially
+fetch('/api/get-vessel-data')
+    .then(response => response.json())
+    .then(data => {
+        originalData = data; // Store original data
+        populateTable(data);
+        populateModalWithVessels(data);
+    })
+    .catch(error => console.error('Error fetching vessel data:', error));
 
-        // Modal açma ve kapama işlemleri
-        const modal = document.getElementById("vesselModal");
-        const showSelectedVesselBtn = document.getElementById("showSelectedVessel");
-        const closeModalBtn = document.querySelector(".close");
+// Modal açma ve kapama işlemleri
+const modal = document.getElementById("vesselModal");
+const showSelectedVesselBtn = document.getElementById("showSelectedVessel");
+const closeModalBtn = document.querySelector(".close");
 
-        showSelectedVesselBtn.onclick = () => {
-            modal.style.display = "block";
-            document.getElementById('step1').style.display = 'block'; // Show Step 1
-            document.getElementById('step2').style.display = 'none'; // Hide Step 2
-        };
+showSelectedVesselBtn.onclick = () => {
+    modal.style.display = "block";
+    document.getElementById('step1').style.display = 'block'; // Show Step 1
+    document.getElementById('step2').style.display = 'none'; // Hide Step 2
+};
 
-        closeModalBtn.onclick = () => modal.style.display = "none";
-        window.onclick = (event) => {
-            if (event.target === modal) {
-                modal.style.display = "none";
-            }
-        };
+closeModalBtn.onclick = () => modal.style.display = "none";
+window.onclick = (event) => {
+    if (event.target === modal) {
+        modal.style.display = "none";
+    }
+};
 
-        // Handle 'Next' button click
-        document.getElementById('nextStep').addEventListener('click', () => {
-            document.getElementById('step1').style.display = 'none';
-            document.getElementById('step2').style.display = 'block';
-        });
+// Handle 'Next' button click
+document.getElementById('nextStep').addEventListener('click', () => {
+    document.getElementById('step1').style.display = 'none';
+    document.getElementById('step2').style.display = 'block';
+});
 
-        // Handle 'Show' button click - Apply selected filters
-        document.getElementById('showData').addEventListener('click', () => {
-            // Get selected vessels
-            const selectedVessels = Array.from(document.querySelectorAll('#vesselCheckboxes input:checked')).map(checkbox => checkbox.value);
+// Handle 'Show' button click - Apply selected filters
+document.getElementById('showData').addEventListener('click', () => {
+    // Get selected vessels
+    const selectedVessels = Array.from(document.querySelectorAll('#vesselCheckboxes input:checked')).map(checkbox => checkbox.value);
 
-            // Get selected columns
-            const selectedColumns = Array.from(document.querySelectorAll('#columnCheckboxes input:checked')).map(checkbox => checkbox.value);
+    // Get selected columns
+    const selectedColumns = Array.from(document.querySelectorAll('#columnCheckboxes input:checked')).map(checkbox => checkbox.value);
 
-            // Filter data based on selected vessels
-            const filteredData = selectedVessels.length > 0 ? originalData.filter(row => selectedVessels.includes(row.vessel_name)) : originalData;
+    // Filter data based on selected vessels
+    const filteredData = selectedVessels.length > 0 ? originalData.filter(row => selectedVessels.includes(row.vessel_name)) : originalData;
 
-            // Populate table with filtered data
-            populateTable(filteredData);
+    // Populate table with filtered data
+    populateTable(filteredData);
 
-            // Show only selected columns
-            document.querySelectorAll('#vesselTable th, #vesselTable td').forEach(cell => {
-                const columnClass = cell.className;
-                if (selectedColumns.includes(columnClass) || columnClass === 'vessel-name') {
-                    cell.style.display = ''; // Show selected columns
-                } else {
-                    cell.style.display = 'none'; // Hide unselected columns
-                }
-            });
-
-            // Close modal after showing data
-            modal.style.display = 'none';
-
-            // Show back button
-            document.getElementById('backToMainTable').style.display = 'inline-block';
-        });
-
-        // Back to main table functionality
-        document.getElementById('backToMainTable').addEventListener('click', () => {
-            // Repopulate table with original data
-            populateTable(originalData);
-
-            // Reset column visibility to show all columns
-            document.querySelectorAll('#vesselTable th, #vesselTable td').forEach(cell => {
-                cell.style.display = ''; // Show all columns
-            });
-
-            // Hide back button
-            document.getElementById('backToMainTable').style.display = 'none';
-        });
-
-        // Modalda vessel isimlerini dinamik olarak eklemek için fonksiyon
-        function populateModalWithVessels(data) {
-            const vesselCheckboxes = document.getElementById('vesselCheckboxes');
-            vesselCheckboxes.innerHTML = '';
-
-            const uniqueVesselNames = [...new Set(data.map(row => row.vessel_name))];
-
-            uniqueVesselNames.forEach(name => {
-                const label = document.createElement('label');
-                label.innerHTML = `<input type="checkbox" value="${name}"> ${name}<br>`;
-                vesselCheckboxes.appendChild(label);
-            });
+    // Show only selected columns
+    document.querySelectorAll('#vesselTable th, #vesselTable td').forEach(cell => {
+        const columnClass = cell.className;
+        if (selectedColumns.includes(columnClass) || columnClass === 'vessel-name') {
+            cell.style.display = ''; // Show selected columns
+        } else {
+            cell.style.display = 'none'; // Hide unselected columns
         }
+    });
 
-        // Tabloyu dinamik verilerle doldurmak için fonksiyon
-        function populateTable(data) {
-            const tableBody = document.querySelector("#vesselTable tbody");
-            tableBody.innerHTML = '';
+    // Close modal after showing data
+    modal.style.display = 'none';
 
-            if (data.length === 0) {
-                tableBody.innerHTML = '<tr><td colspan="12">No data available</td></tr>';
-                return;
+    // Show back button
+    document.getElementById('backToMainTable').style.display = 'inline-block';
+});
+
+// Back to main table functionality
+document.getElementById('backToMainTable').addEventListener('click', () => {
+    // Repopulate table with original data
+    populateTable(originalData);
+
+    // Reset column visibility to show all columns
+    document.querySelectorAll('#vesselTable th, #vesselTable td').forEach(cell => {
+        cell.style.display = ''; // Show all columns
+    });
+
+    // Hide back button
+    document.getElementById('backToMainTable').style.display = 'none';
+});
+
+// Modalda vessel isimlerini dinamik olarak eklemek için fonksiyon
+function populateModalWithVessels(data) {
+    const vesselCheckboxes = document.getElementById('vesselCheckboxes');
+    vesselCheckboxes.innerHTML = '';
+
+    const uniqueVesselNames = [...new Set(data.map(row => row.vessel_name))];
+
+    uniqueVesselNames.forEach(name => {
+        const label = document.createElement('label');
+        label.innerHTML = `<input type="checkbox" value="${name}"> ${name}<br>`;
+        vesselCheckboxes.appendChild(label);
+    });
+
+    // Select All functionality
+    document.getElementById('selectAllVessels').addEventListener('change', function() {
+        const vesselCheckboxes = document.querySelectorAll('#vesselCheckboxes input[type="checkbox"]');
+        vesselCheckboxes.forEach(checkbox => {
+            checkbox.checked = this.checked;
+        });
+    });
+}
+
+// Tabloyu dinamik verilerle doldurmak için fonksiyon
+function populateTable(data) {
+    const tableBody = document.querySelector("#vesselTable tbody");
+    tableBody.innerHTML = '';
+
+    if (data.length === 0) {
+        tableBody.innerHTML = '<tr><td colspan="12">No data available</td></tr>';
+        return;
+    }
+
+    data.forEach(row => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td class="vessel-name">${row.vessel_name}</td>
+            <td class="distance">${row.distance_sum || 'N/A'}</td>
+            <td class="eca_distance">${row.distance_eca_sum || 'N/A'}</td>
+            <td class="speed">${row.speed_avg || 'N/A'}</td>
+            <td class="total_days">${row.total_days || 'N/A'}</td>
+            <td class="sea_fuel">${row.sea_fuel || 'N/A'}</td>
+            <td class="sea_consumption">${row.sea_consumption || 'N/A'}</td>
+            <td class="eca_fuel">${row.eca_fuel || 'N/A'}</td>
+            <td class="eca_consumption">${row.eca_consumption || 'N/A'}</td>
+            <td class="port_fuel">${row.port_fuel || 'N/A'}</td>
+            <td class="port_consumption">${row.port_consumption || 'N/A'}</td>
+            <td class="ets">${row.ets_sum || 'N/A'}</td>
+        `;
+        tableBody.appendChild(tr);
+    });
+
+    // Add click event listener to each row for showing detailed data
+    tableBody.addEventListener('click', function(event) {
+        const target = event.target;
+        if (target.classList.contains('vessel-name')) {
+            const vesselName = target.innerText;
+            const parentRow = target.parentNode;
+
+            // Eğer detay satırı varsa, onu kaldır (kapatma)
+            if (parentRow.nextElementSibling && parentRow.nextElementSibling.classList.contains('details-row')) {
+                parentRow.nextElementSibling.remove();
+            } else {
+                // Fetch detail data and show in a new row below the selected vessel
+                fetch(`/api/get-vessel-detail?vessel_name=${vesselName}`)
+                    .then(response => response.json())
+                    .then(detailData => {
+                        const detailRow = document.createElement('tr');
+                        detailRow.classList.add('details-row');
+
+                        // Detay tablosunu oluşturuyoruz
+                        detailRow.innerHTML = `
+                            <td colspan="12">
+                                <table class="table table-bordered">
+                                    <thead class="table-dark">
+                                        <tr>
+                                            <th>From - To</th>
+                                            <th>Total Distance</th>
+                                            <th>Total ECA Distance</th>
+                                            <th>Average Speed</th>
+                                            <th>Total Days</th>
+                                            <th>Sea Fuel</th>
+                                            <th>Sea Consumption</th>
+                                            <th>ECA Fuel</th>
+                                            <th>ECA Consumption</th>
+                                            <th>Port Fuel</th>
+                                            <th>Port Consumption</th>
+                                            <th>ETS</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        ${detailData.map(det => `
+                                            <tr>
+                                                <td>${det.from_liman} - ${det.to_liman}</td>
+                                                <td>${det.distance_sum || 'N/A'}</td>
+                                                <td>${det.distance_eca_sum || 'N/A'}</td>
+                                                <td>${det.speed_avg || 'N/A'}</td>
+                                                <td>${det.total_days || 'N/A'}</td>
+                                                <td>${det.sea_fuel || 'N/A'}</td>
+                                                <td>${det.sea_consumption || 'N/A'}</td>
+                                                <td>${det.eca_fuel || 'N/A'}</td>
+                                                <td>${det.eca_consumption || 'N/A'}</td>
+                                                <td>${det.port_fuel || 'N/A'}</td>
+                                                <td>${det.port_consumption || 'N/A'}</td>
+                                                <td>${det.ets_sum || 'N/A'}</td>
+                                            </tr>
+                                        `).join('')}
+                                    </tbody>
+                                </table>
+                            </td>
+                        `;
+
+                        // Yeni detay satırını, tıklanan satırın altına ekliyoruz
+                        parentRow.insertAdjacentElement('afterend', detailRow);
+                    })
+                    .catch(error => console.error('Error fetching detail data:', error));
             }
-
-            data.forEach(row => {
-                const tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td class="vessel-name">${row.vessel_name}</td>
-                    <td class="distance">${row.distance_sum || 'N/A'}</td>
-                    <td class="eca_distance">${row.distance_eca_sum || 'N/A'}</td>
-                    <td class="speed">${row.speed_avg || 'N/A'}</td>
-                    <td class="total_days">${row.total_days || 'N/A'}</td>
-                    <td class="sea_fuel">${row.sea_fuel || 'N/A'}</td>
-                    <td class="sea_consumption">${row.sea_consumption || 'N/A'}</td>
-                    <td class="eca_fuel">${row.eca_fuel || 'N/A'}</td>
-                    <td class="eca_consumption">${row.eca_consumption || 'N/A'}</td>
-                    <td class="port_fuel">${row.port_fuel || 'N/A'}</td>
-                    <td class="port_consumption">${row.port_consumption || 'N/A'}</td>
-                    <td class="ets">${row.ets_sum || 'N/A'}</td>
-                `;
-                tableBody.appendChild(tr);
-            });
         }
+    });
+}
+
 
     </script>
 
