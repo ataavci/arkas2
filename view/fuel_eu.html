@@ -135,7 +135,7 @@
             <div class="table-responsive">
                 <table id="vesselTable" class="table table-bordered">
                     <thead class="table-dark">
-                        <tr>
+                        <tr id="tableHeaders">
                             <th class="vessel-name">Vessel Name</th>
                             <th class="duration">Duration</th>
                             <th class="intra_eu">Intra EU</th>
@@ -231,7 +231,7 @@
                     const selectedVessels = Array.from(document.querySelectorAll('#vesselCheckboxes input:checked')).map(checkbox => checkbox.value);
 
                     // Get selected columns
-                    const selectedColumns = Array.from(document.querySelectorAll('#columnCheckboxes input:checked')).map(checkbox => checkbox.value);
+                    const selectedColumns = Array.from(document.querySelectorAll('#step2 input:checked')).map(checkbox => checkbox.value);
 
                     // Filter data based on selected vessels
                     const filteredData = selectedVessels.length > 0 ? originalData.filter(row => selectedVessels.includes(row.vessel_name)) : originalData;
@@ -239,15 +239,8 @@
                     // Populate table with filtered data
                     populateTable(filteredData);
 
-                    // Show only selected columns
-                    document.querySelectorAll('#vesselTable th, #vesselTable td').forEach(cell => {
-                        const columnClass = cell.className;
-                        if (selectedColumns.includes(columnClass) || columnClass === 'vessel-name') {
-                            cell.style.display = ''; // Show selected columns
-                        } else {
-                            cell.style.display = 'none'; // Hide unselected columns
-                        }
-                    });
+                    // Update table headers and rows to show only selected columns
+                    updateVisibleColumns(selectedColumns);
 
                     // Close modal after showing data
                     document.getElementById('vesselModal').style.display = 'none';
@@ -269,6 +262,33 @@
                     // Hide back button
                     document.getElementById('backToMainTable').style.display = 'none';
                 });
+
+                // Update the visibility of columns based on selected columns
+                function updateVisibleColumns(selectedColumns) {
+                    // Hide or show table headers
+                    const headers = document.querySelectorAll('#tableHeaders th');
+                    headers.forEach(header => {
+                        const columnClass = header.className;
+                        if (selectedColumns.includes(columnClass) || columnClass === 'vessel-name') {
+                            header.style.display = ''; // Show selected columns
+                        } else {
+                            header.style.display = 'none'; // Hide unselected columns
+                        }
+                    });
+
+                    // Hide or show table cells
+                    const rows = document.querySelectorAll('#vesselTable tbody tr');
+                    rows.forEach(row => {
+                        row.querySelectorAll('td').forEach(cell => {
+                            const columnClass = cell.className;
+                            if (selectedColumns.includes(columnClass) || columnClass === 'vessel-name') {
+                                cell.style.display = ''; // Show selected columns
+                            } else {
+                                cell.style.display = 'none'; // Hide unselected columns
+                            }
+                        });
+                    });
+                }
 
                 // Handle click event to fetch and display detailed data when a vessel name is clicked
                 document.addEventListener('DOMContentLoaded', () => {

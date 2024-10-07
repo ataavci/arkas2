@@ -12,6 +12,19 @@
             background-color: #d4edda; /* Yeşil renk */
             cursor: pointer;
         }
+        /* Modal styling */
+        
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+        .close:hover, .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
@@ -104,6 +117,41 @@
 
             <h1>CII Data Table</h1>
 
+            <!-- Show Modal Button -->
+            <button id="showModalBtn" class="btn btn-primary">Filter Vessels</button>
+
+            <!-- Modal Structure -->
+            <div id="vesselModal" class="modal">
+                <div class="modal-content">
+                    <span class="close">&times;</span>
+                    
+                    <!-- Step 1: Vessel Selection -->
+                    <div id="step1">
+                        <h2>Select Vessels</h2>
+                        <div id="vesselCheckboxes"></div>
+                        <label><input type="checkbox" id="selectAllVessels"> Select All Vessels</label><br><br>
+                        <button id="nextStep" class="btn btn-secondary">Next</button>
+                    </div>
+
+                    <!-- Step 2: Column Selection -->
+                    <div id="step2" style="display:none;">
+                        <h2>Select Columns</h2>
+                        <div id="columnCheckboxes">
+                            <label><input type="checkbox" value="cii" checked> CII</label><br>
+                            <label><input type="checkbox" value="aer" checked> AER</label><br>
+                            <label><input type="checkbox" value="distance" checked> Distance</label><br>
+                            <label><input type="checkbox" value="sea_fuel" checked> Sea Fuel</label><br>
+                            <label><input type="checkbox" value="sea_consumption" checked> Sea Consumption</label><br>
+                            <label><input type="checkbox" value="eca_fuel" checked> ECA Fuel</label><br>
+                            <label><input type="checkbox" value="eca_consumption" checked> ECA Consumption</label><br>
+                            <label><input type="checkbox" value="port_fuel" checked> Port Fuel</label><br>
+                            <label><input type="checkbox" value="port_consumption" checked> Port Consumption</label><br>
+                        </div>
+                        <button id="showData" class="btn btn-success">Show Data</button>
+                    </div>
+                </div>
+            </div>
+
             <div class="table-responsive">
                 <table id="vesselTablecii" class="table table-bordered">
                     <thead class="table-dark">
@@ -120,8 +168,6 @@
                             <th>ECA Consumption</th>
                             <th>Port Fuel</th>
                             <th>Port Consumption</th>
-                            
-                            
                         </tr>
                     </thead>
                     <tbody>
@@ -129,80 +175,148 @@
                     </tbody>
                 </table>
             </div>
+
+            <button id="backToMainTable" class="btn btn-warning" style="display:none;">Back to Main Table</button>
         </main>
     </section>
-    
 
     <script>
-        // CII değerine göre renk sınıfı döndüren fonksiyon
-        function getCIIClass(CII) {
-            switch (CII) {
-                case 'A': return 'cii-a'; // Yeşil
-                case 'B': return 'cii-b'; // Açık yeşil
-                case 'C': return 'cii-c'; // Sarı
-                case 'D': return 'cii-d'; // Turuncu
-                case 'E': return 'cii-e'; // Kırmızı
-                default: return ''; // Eğer CII değeri geçerli değilse sınıf eklenmez
+        let originalData = []; // To store the original data
+
+        // Fetch vessel data initially
+        fetch('/api/get-cii-data')
+            .then(response => response.json())
+            .then(data => {
+                originalData = data; // Store original data
+                populateTable(data);
+                populateModalWithVessels(data);
+            })
+            .catch(error => console.error('Error fetching vessel data:', error));
+
+        // Modal açma ve kapama işlemleri
+        const modal = document.getElementById("vesselModal");
+        const showModalBtn = document.getElementById("showModalBtn");
+        const closeModalBtn = document.querySelector(".close");
+
+        showModalBtn.onclick = () => {
+            modal.style.display = "block";
+            document.getElementById('step1').style.display = 'block'; // Show Step 1
+            document.getElementById('step2').style.display = 'none'; // Hide Step 2
+        };
+
+        closeModalBtn.onclick = () => modal.style.display = "none";
+        window.onclick = (event) => {
+            if (event.target === modal) {
+                modal.style.display = "none";
             }
+        };
+
+        // Handle 'Next' button click
+        document.getElementById('nextStep').addEventListener('click', () => {
+            document.getElementById('step1').style.display = 'none';
+            document.getElementById('step2').style.display = 'block';
+        });
+
+        // Handle 'Show' button click - Apply selected filters
+        document.getElementById('showData').addEventListener('click', () => {
+            // Get selected vessels
+            const selectedVessels = Array.from(document.querySelectorAll('#vesselCheckboxes input:checked')).map(checkbox => checkbox.value);
+
+            // Get selected columns
+            const selectedColumns = Array.from(document.querySelectorAll('#columnCheckboxes input:checked')).map(checkbox => checkbox.value);
+
+            // Filter data based on selected vessels
+            const filteredData = selectedVessels.length > 0 ? originalData.filter(row => selectedVessels.includes(row.vessel_name)) : originalData;
+
+            // Populate table with filtered data
+            populateTable(filteredData);
+
+            // Show only selected columns
+            document.querySelectorAll('#vesselTablecii th, #vesselTablecii td').forEach(cell => {
+                const columnClass = cell.className;
+                if (selectedColumns.includes(columnClass) || columnClass === 'vessel-name') {
+                    cell.style.display = ''; // Show selected columns
+                } else {
+                    cell.style.display = 'none'; // Hide unselected columns
+                }
+            });
+
+            // Close modal after showing data
+            modal.style.display = 'none';
+
+            // Show back button
+            document.getElementById('backToMainTable').style.display = 'inline-block';
+        });
+
+        // Back to main table functionality
+        document.getElementById('backToMainTable').addEventListener('click', () => {
+            // Repopulate table with original data
+            populateTable(originalData);
+
+            // Reset column visibility to show all columns
+            document.querySelectorAll('#vesselTablecii th, #vesselTablecii td').forEach(cell => {
+                cell.style.display = ''; // Show all columns
+            });
+
+            // Hide back button
+            document.getElementById('backToMainTable').style.display = 'none';
+        });
+
+        // Modalda vessel isimlerini dinamik olarak eklemek için fonksiyon
+        function populateModalWithVessels(data) {
+            const vesselCheckboxes = document.getElementById('vesselCheckboxes');
+            vesselCheckboxes.innerHTML = '';
+
+            const uniqueVesselNames = [...new Set(data.map(row => row.vessel_name))];
+
+            uniqueVesselNames.forEach(name => {
+                const label = document.createElement('label');
+                label.innerHTML = `<input type="checkbox" value="${name}"> ${name}<br>`;
+                vesselCheckboxes.appendChild(label);
+            });
+
+            // Select All functionality
+            document.getElementById('selectAllVessels').addEventListener('change', function() {
+                const vesselCheckboxes = document.querySelectorAll('#vesselCheckboxes input[type="checkbox"]');
+                vesselCheckboxes.forEach(checkbox => {
+                    checkbox.checked = this.checked;
+                });
+            });
         }
 
-        // Fetch ile veriyi çekip tabloya ekleme işlemi
-        fetch('/api/get-cii-data')
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                return response.json();
-            })
-            .then(data => {
-                console.log('Fetched data:', data); // Gelen veriyi konsola yazdır
+        // Tabloyu dinamik verilerle doldurmak için fonksiyon
+        function populateTable(data) {
+            const tableBody = document.querySelector("#vesselTablecii tbody");
+            tableBody.innerHTML = '';
 
-                const tableBody = document.querySelector("#vesselTablecii tbody"); // ID düzeltilmiş
-                tableBody.innerHTML = ''; // Tabloyu temizler, mevcut satırları kaldırır.
+            if (data.length === 0) {
+                tableBody.innerHTML = '<tr><td colspan="12">No data available</td></tr>';
+                return;
+            }
 
-                if (data.length === 0) {
-                    console.log('No data found.');
-                    tableBody.innerHTML = '<tr><td colspan="18">No data available</td></tr>';
-                    return;
-                }
-
-                data.forEach(row => {
-                    const tr = document.createElement('tr');
-                    tr.classList.add('vessel-row');
-
-                    tr.innerHTML = `
-                        <td><input type="checkbox" class="select-row"></td> <!-- Checkbox eklendi -->
-                        <td class="vessel-name">${row.vessel_name}</td>
-                        <td class="cii">${row.CII}</td>
-                        <td>${row.AER}</td>
-                        <td>${row.dwt}</td>
-                        <td>${row.distance}</td>
-                        <td>${row.sea_fuel}</td>
-                        <td>${row.sea_consumption}</td>
-                        <td>${row.eca_fuel}</td>
-                        <td>${row.eca_consumption}</td>
-                        <td>${row.port_fuel}</td>
-                        <td>${row.port_consumption}</td>
-                        
-                       
-                    `;
-
-                    // CII hücresine sınıf ekleme
-                    const ciiCell = tr.querySelector('.cii');
-                    const ciiClass = getCIIClass(row.CII);
-                    if (ciiClass) {
-                        ciiCell.classList.add(ciiClass);
-                    }
-
-                    tableBody.appendChild(tr); // Satırı tabloya ekler
-                });
-
-                // Tablodaki her bir satıra tıklama olayını ekle
-                addRowClickEvents();
-            })
-            .catch(error => {
-                console.error('Error fetching vessel data:', error);
+            data.forEach(row => {
+                const tr = document.createElement('tr');
+                tr.classList.add('vessel-row');
+                tr.innerHTML = `
+                    <td><input type="checkbox" class="select-row"></td>
+                    <td class="vessel-name">${row.vessel_name}</td>
+                    <td class="cii">${row.CII}</td>
+                    <td class="aer">${row.AER}</td>
+                    <td>${row.dwt}</td>
+                    <td class="distance">${row.distance}</td>
+                    <td class="sea_fuel">${row.sea_fuel}</td>
+                    <td class="sea_consumption">${row.sea_consumption}</td>
+                    <td class="eca_fuel">${row.eca_fuel}</td>
+                    <td class="eca_consumption">${row.eca_consumption}</td>
+                    <td class="port_fuel">${row.port_fuel}</td>
+                    <td class="port_consumption">${row.port_consumption}</td>
+                `;
+                tableBody.appendChild(tr);
             });
+
+            // Add click event listener to each row for showing detailed data
+            addRowClickEvents();
+        }
 
         function addRowClickEvents() {
             const rows = document.querySelectorAll(".vessel-row");
@@ -221,13 +335,14 @@
                                 const detailRow = document.createElement('tr');
                                 detailRow.classList.add('details-row');
                                 const detailHtml = `
-                                    <td colspan="14">
+                                    <td colspan="12">
                                         <table class="table table-bordered">
                                             <thead class="table-dark">
                                                 <tr>
-                                                    <th>From - To</th> <!-- Vessel Name yerine From - To -->
+                                                    <th>From - To</th>
                                                     <th>CII</th>
                                                     <th>AER</th>
+                                                    <th>DWT</th>
                                                     <th>DISTANCE</th>
                                                     <th>Sea Fuel</th>
                                                     <th>Sea Consumption</th>
@@ -235,16 +350,15 @@
                                                     <th>ECA Consumption</th>
                                                     <th>Port Fuel</th>
                                                     <th>Port Consumption</th>
-                                                    
-                                                    
                                                 </tr>
                                             </thead>
                                             <tbody>
                                                 ${detailData.map(detail => `
                                                     <tr>
-                                                        <td>${detail.from_liman} - ${detail.to_liman}</td> <!-- From - To -->
+                                                        <td>${detail.from_liman} - ${detail.to_liman}</td>
                                                         <td>${detail.CII}</td>
                                                         <td>${detail.AER}</td>
+                                                        <td>${detail.dwt}</td>
                                                         <td>${detail.distance}</td>
                                                         <td>${detail.sea_fuel}</td>
                                                         <td>${detail.sea_consumption}</td>
@@ -252,8 +366,6 @@
                                                         <td>${detail.eca_consumption}</td>
                                                         <td>${detail.port_fuel}</td>
                                                         <td>${detail.port_consumption}</td>
-                                                       
-                                                        
                                                     </tr>
                                                 `).join('')}
                                             </tbody>
@@ -270,16 +382,6 @@
                                 console.error('Error fetching vessel detail:', error);
                             });
                     }
-                });
-
-                // Satır hover edildiğinde yeşil olacak
-                row.addEventListener('mouseenter', function() {
-                    this.style.backgroundColor = '#d4edda'; // Yeşil renk
-                });
-                
-                // Mouse çıkınca rengini geri döndür
-                row.addEventListener('mouseleave', function() {
-                    this.style.backgroundColor = ''; // Varsayılan rengi geri döndür
                 });
             });
         }
