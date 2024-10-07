@@ -112,9 +112,9 @@
                         <tr>
                             <th>Select</th>
                             <th>Vessel Name</th>
-                            <th>DWT</th>
-                            <th>Start Date</th>
-                            <th>End Date</th>
+                            
+                            
+                            
                             <th>Total Distance</th>
                             <th>Total ECA Distance</th>
                             <th>Average Speed</th>
@@ -126,9 +126,9 @@
                             <th>Port Fuel</th>
                             <th>Port Consumption</th>
                             <th>ETS</th>
-                            <th>Compliance Balance</th>
-                            <th>AER(gCO2/t*nm)</th>
-                            <th>CII</th>
+                            
+                            
+                            
                         </tr>
                     </thead>
                     <tbody>
@@ -161,6 +161,7 @@
     </section>
 
     <script>
+        
         // CII sınıf ekleme fonksiyonu
         function getCIIClass(CII) {
             switch (CII) {
@@ -193,9 +194,9 @@
                     tr.innerHTML = `
                         <td><input type="checkbox" class="select-row"></td>
                         <td class="vessel-name">${row.vessel_name}</td>
-                        <td>${row.DWT}</td>
-                        <td>${row.start_date_}</td>
-                        <td>${row.end_date_}</td>
+                       
+                       
+                        
                         <td>${row.distance_sum}</td>
                         <td>${row.distance_eca_sum}</td>
                         <td>${row.speed_avg}</td>
@@ -207,9 +208,9 @@
                         <td>${row.port_fuel}</td>
                         <td>${row.port_consumption}</td>
                         <td>${row.ets_sum}</td>
-                        <td class="compliance-balance">${row.compliance_balance_sum}</td>
-                        <td>${row.AER}</td>
-                        <td class="cii">${row.CII}</td>
+                        
+                        
+                      
                     `;
                     const ciiCell = tr.querySelector('.cii');
                     const ciiClass = getCIIClass(row.CII);
@@ -334,9 +335,9 @@
                 <tr>
                     <th>Select</th> <!-- Checkbox için başlık ekleniyor -->
                     <th>From - To</th> <!-- Vessel Name yerine From - To -->
-                    <th>DWT</th>
-                    <th>Start Date</th>
-                    <th>End Date</th>
+                  
+                    
+                    
                     <th>Total Distance</th>
                     <th>Total ECA Distance</th>
                     <th>Average Speed</th>
@@ -348,9 +349,9 @@
                     <th>Port Fuel</th>
                     <th>Port Consumption</th>
                     <th>ETS</th>
-                    <th>Compliance Balance</th>
-                    <th>AER(gCO2/t*nm)</th>
-                    <th>CII</th>
+                    
+                    
+                    
                 </tr>
             </thead>
             <tbody>
@@ -358,9 +359,9 @@
                     <tr>
                         <td><input type="checkbox" class="select-row"></td> <!-- Checkbox -->
                         <td>${det.from_liman} - ${det.to_liman}</td> <!-- From - To -->
-                        <td>${det.dwt}</td>
-                        <td>${det.start_date_}</td>
-                        <td>${det.end_date_}</td>
+                        
+                        
+                        
                         <td>${det.distance_sum || 'N/A'}</td>
                         <td>${det.distance_eca_sum || 'N/A'}</td>
                         <td>${det.speed_avg || 'N/A'}</td>
@@ -372,9 +373,9 @@
                         <td>${det.port_fuel || 'N/A'}</td>
                         <td>${det.port_consumption || 'N/A'}</td>
                         <td>${det.ets_sum}</td>
-                        <td>${det.compliance_balance_sum || 'N/A'}</td>
-                        <td>${det.AER}</td>
-                        <td>${det.CII}</td>
+                        
+                        
+                        
                     </tr>
                 `).join('')}
             </tbody>

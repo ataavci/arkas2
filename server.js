@@ -518,6 +518,7 @@ app.get('/api/get-vessel-data', (req, res) => {
 });
 
 });
+
 app.get('/api/get-cii-data', (req, res) => {
   const sql = 'CALL cii()'; // cii prosedürünü çağırır
   db.query(sql, (err, result) => {
@@ -585,6 +586,7 @@ app.get('/api/get-fuel_eu-data', (req, res) => {
     res.json(formattedData3);
   });
 });
+
 app.get('/api/get-vessel-data', (req, res) => {
   const query = 'SELECT * FROM sefer_7'; // vessel_data tablonuzun adını buraya yazın
   db.query(query, (error, results) => {
@@ -602,6 +604,20 @@ app.get('/api/get-vessel-detail', (req, res) => {
   const vesselName = req.query.vessel_name;
 
   const query = `CALL ets_detay(?)`; // ets_detay prosedürü için query
+  db.query(query, [vesselName], (error, results) => {
+      if (error) {
+          console.error('Error fetching ETS detail:', error);
+          res.status(500).json({ error: 'Database error' });
+      } else {
+          console.log('Query Results:', results); // Gelen sonuçları kontrol ediyoruz
+          res.json(results[0]); // Tüm sonuç setini döndür
+      }
+  });
+});
+app.get('/api/get-fuel-detay', (req, res) => {
+  const vesselName = req.query.vessel_name;
+
+  const query = `CALL fuel_eu_detay(?)`; 
   db.query(query, [vesselName], (error, results) => {
       if (error) {
           console.error('Error fetching ETS detail:', error);

@@ -110,8 +110,8 @@
                         <tr>
                             <th>Select</th>
                             <th>Vessel Name</th>
-                            <th>START DATE (UTC) </th>
-                            <th>END DATE (UTC) </th>
+                            <th>CII</th>
+                            <th>AER(gCO2/t*nm)</th>
                             <th>DEADWEIGHT</th>
                             <th>DISTANCE (nm)</th>
                             <th>Sea Fuel</th>
@@ -120,8 +120,8 @@
                             <th>ECA Consumption</th>
                             <th>Port Fuel</th>
                             <th>Port Consumption</th>
-                            <th>AER(gCO2/t*nm)</th>
-                            <th>CII</th>
+                            
+                            
                         </tr>
                     </thead>
                     <tbody>
@@ -173,8 +173,8 @@
                     tr.innerHTML = `
                         <td><input type="checkbox" class="select-row"></td> <!-- Checkbox eklendi -->
                         <td class="vessel-name">${row.vessel_name}</td>
-                        <td>${row.start_date_}</td>
-                        <td>${row.end_date_}</td>
+                        <td class="cii">${row.CII}</td>
+                        <td>${row.AER}</td>
                         <td>${row.dwt}</td>
                         <td>${row.distance}</td>
                         <td>${row.sea_fuel}</td>
@@ -183,8 +183,8 @@
                         <td>${row.eca_consumption}</td>
                         <td>${row.port_fuel}</td>
                         <td>${row.port_consumption}</td>
-                        <td>${row.AER}</td>
-                        <td class="cii">${row.CII}</td>
+                        
+                       
                     `;
 
                     // CII hücresine sınıf ekleme
@@ -225,9 +225,9 @@
                                         <table class="table table-bordered">
                                             <thead class="table-dark">
                                                 <tr>
-                                                    <th>VESSEL</th>
-                                                    <th>START DATE (UTC)</th>
-                                                    <th>END DATE (UTC)</th>
+                                                    <th>From - To</th> <!-- Vessel Name yerine From - To -->
+                                                    <th>CII</th>
+                                                    <th>AER</th>
                                                     <th>DISTANCE</th>
                                                     <th>Sea Fuel</th>
                                                     <th>Sea Consumption</th>
@@ -235,16 +235,16 @@
                                                     <th>ECA Consumption</th>
                                                     <th>Port Fuel</th>
                                                     <th>Port Consumption</th>
-                                                    <th>AER</th>
-                                                    <th>CII</th>
+                                                    
+                                                    
                                                 </tr>
                                             </thead>
                                             <tbody>
                                                 ${detailData.map(detail => `
                                                     <tr>
-                                                        <td>${detail.vessel_name}</td>
-                                                        <td>${detail.start_date_}</td>
-                                                        <td>${detail.end_date_}</td>
+                                                        <td>${detail.from_liman} - ${detail.to_liman}</td> <!-- From - To -->
+                                                        <td>${detail.CII}</td>
+                                                        <td>${detail.AER}</td>
                                                         <td>${detail.distance}</td>
                                                         <td>${detail.sea_fuel}</td>
                                                         <td>${detail.sea_consumption}</td>
@@ -252,8 +252,8 @@
                                                         <td>${detail.eca_consumption}</td>
                                                         <td>${detail.port_fuel}</td>
                                                         <td>${detail.port_consumption}</td>
-                                                        <td>${detail.AER}</td>
-                                                        <td>${detail.CII}</td>
+                                                       
+                                                        
                                                     </tr>
                                                 `).join('')}
                                             </tbody>

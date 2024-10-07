@@ -94,35 +94,162 @@
                     <span class="text">Download PDF</span>
                 </a>
             </div>
+            
+            
+                <button id="showSelectedVessel" class="btn btn-primary">Show Selected Vessel</button>
 
-            <h1>FUEL EU Data Table</h1>
+<!-- Modal Structure -->
+<div id="vesselModal" class="modal">
+    <div class="modal-content">
+        <!-- Modal Step 1: Select Vessels -->
+        <div id="step1" class="modal-step">
+            <h2>Select Vessels</h2>
+            <div id="vesselCheckboxes"></div>
+            <button id="nextStep" class="btn btn-secondary">Next</button>
+        </div>
 
-            <div class="table-responsive">
-                <table id="vesselTable" class="table table-bordered">
-                    <thead class="table-dark">
-                        <tr>
-                            <th>vessel_name</th>
-                            <th>min_start_date</th>
-                            <th>max_end_date</th>
-                            <th>duration</th>
-                            <th>intra_eu</th>
-                            <th>extra_eu</th>
-                            <th>ghg_intensity</th>
-                            <th>ghg_target</th>
-                            <th>compliance_balance</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <!-- Dinamik veri buraya fetch ile yüklenecek -->
-                    </tbody>
-                </table>
+        <!-- Modal Step 2: Select Columns -->
+        <div id="step2" class="modal-step" style="display:none;">
+            <h2>Select Columns</h2>
+            <div id="columnCheckboxes">
+                <label><input type="checkbox" value="duration" checked> Duration</label><br>
+                <label><input type="checkbox" value="intra_eu" checked> Intra EU</label><br>
+                <label><input type="checkbox" value="extra_eu" checked> Extra EU</label><br>
+                <label><input type="checkbox" value="ghg_intensity" checked> GHG Intensity</label><br>
+                <label><input type="checkbox" value="ghg_target" checked> GHG Target</label><br>
+                <label><input type="checkbox" value="compliance_balance" checked> Compliance Balance</label>
             </div>
-        </main>
-    </section>
+            <button id="showData" class="btn btn-primary">Show</button>
+        </div>
+    </div>
+</div>
 
-    <script>
-        // API'den veriyi çekmek ve tabloya doldurmak için fetch fonksiyonunu kullanıyoruz
+<div class="table-responsive">
+    <table id="vesselTable" class="table table-bordered">
+        <thead class="table-dark">
+            <tr>
+                <th class="vessel-name">Vessel Name</th>
+                <th class="duration">Duration</th>
+                <th class="intra_eu">Intra EU</th>
+                <th class="extra_eu">Extra EU</th>
+                <th class="ghg_intensity">GHG Intensity</th>
+                <th class="ghg_target">GHG Target</th>
+                <th class="compliance_balance">Compliance Balance</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Dynamic data will be loaded here -->
+        </tbody>
+    </table>
+</div>
+            
+            <script>
+            let originalData = [];
+let selectedVessels = [];
+let selectedColumns = [];
+
 // Fetch and populate the main table with vessel data
+fetch('/api/get-fuel_eu-data')
+    .then(response => response.json())
+    .then(data => {
+        originalData = data; // Store original data for future use
+        populateVesselNames(data); // Populate vessel filter dropdown
+        populateTable(data); // Initially populate the table with all data
+    })
+    .catch(error => {
+        console.error('Error processing the data:', error);
+    });
+
+// Function to populate vessel checkboxes in the modal
+function populateVesselNames(data) {
+    const vesselCheckboxes = document.getElementById('vesselCheckboxes');
+    const uniqueVesselNames = [...new Set(data.map(row => row.vessel_name))];
+
+    uniqueVesselNames.forEach(name => {
+        const label = document.createElement('label');
+        label.innerHTML = `<input type="checkbox" value="${name}"> ${name}<br>`;
+        vesselCheckboxes.appendChild(label);
+    });
+}
+
+// Function to populate the table based on selected vessels and columns
+function populateTable(data) {
+    const tableBody = document.querySelector('#vesselTable tbody');
+    tableBody.innerHTML = ''; // Clear existing rows
+
+    data.forEach(row => {
+        const tableRow = document.createElement('tr');
+
+        const intraEU = row.intra_eu.split(', ');
+        const extraEU = row.extra_eu.split(', ');
+
+        const intraFuelTypes = intraEU.filter((_, index) => index % 2 === 0).join(', ');
+        const intraFuelAmounts = intraEU.filter((_, index) => index % 2 !== 0).join(', ');
+
+        const extraFuelTypes = extraEU.filter((_, index) => index % 2 === 0).join(', ');
+        const extraFuelAmounts = extraEU.filter((_, index) => index % 2 !== 0).join(', ');
+
+        tableRow.innerHTML = `
+            <td class="vessel-name">${row.vessel_name}</td>
+            <td class="duration">${row.duration}</td>
+            <td class="intra_eu">
+                <div><strong>Fuel Types:</strong> ${intraFuelTypes}</div>
+                <div><strong>Amounts:</strong> ${intraFuelAmounts}</div>
+            </td>
+            <td class="extra_eu">
+                <div><strong>Fuel Types:</strong> ${extraFuelTypes}</div>
+                <div><strong>Amounts:</strong> ${extraFuelAmounts}</div>
+            </td>
+            <td class="ghg_intensity">${row.ghg_intensity}</td>
+            <td class="ghg_target">${row.ghg_target}</td>
+            <td class="compliance_balance">${row.compliance_balance}</td>
+        `;
+
+        tableBody.appendChild(tableRow);
+    });
+}
+
+// Show modal when 'Show Selected Vessel' button is clicked
+document.getElementById('showSelectedVessel').addEventListener('click', () => {
+    document.getElementById('vesselModal').style.display = 'block';
+    document.getElementById('step1').style.display = 'block'; // Show Step 1
+    document.getElementById('step2').style.display = 'none'; // Hide Step 2
+});
+
+// Handle 'Next' button click
+document.getElementById('nextStep').addEventListener('click', () => {
+    // Get selected vessels
+    selectedVessels = Array.from(document.querySelectorAll('#vesselCheckboxes input:checked')).map(checkbox => checkbox.value);
+
+    // Go to Step 2
+    document.getElementById('step1').style.display = 'none'; 
+    document.getElementById('step2').style.display = 'block';
+});
+
+// Handle 'Show' button click
+document.getElementById('showData').addEventListener('click', () => {
+    // Get selected columns
+    selectedColumns = Array.from(document.querySelectorAll('#columnCheckboxes input:checked')).map(checkbox => checkbox.value);
+
+    // Filter data based on selected vessels and columns
+    let filteredData = originalData.filter(row => selectedVessels.includes(row.vessel_name));
+
+    // Populate table with filtered data
+    populateTable(filteredData);
+
+    // Show only selected columns
+    document.querySelectorAll('#vesselTable th, #vesselTable td').forEach(cell => {
+        const columnClass = cell.className;
+        if (selectedColumns.includes(columnClass) || columnClass === 'vessel-name') {
+            cell.style.display = ''; // Show selected columns
+        } else {
+            cell.style.display = 'none'; // Hide unselected columns
+        }
+    });
+
+    // Close modal
+    document.getElementById('vesselModal').style.display = 'none';
+});
 fetch('/api/get-fuel_eu-data')
     .then(response => response.json())
     .then(data => {
@@ -145,8 +272,8 @@ fetch('/api/get-fuel_eu-data')
             // Construct table row with vessel data
             tableRow.innerHTML = `
                 <td class="vessel-name">${row.vessel_name}</td> <!-- Vessel Name'e sınıf ekledik -->
-                <td>${row.min_start_date}</td>
-                <td>${row.max_end_date}</td>
+                
+                
                 <td>${row.duration}</td>
                 <td>
                     <div><strong>Fuel Types:</strong> ${intraFuelTypes}</div>
@@ -203,8 +330,8 @@ document.addEventListener('DOMContentLoaded', () => {
                                         <tr>
                                             <th>Select</th>
                                             <th>Vessel Name</th>
-                                            <th>Min Start Date</th>
-                                            <th>Max End Date</th>
+                                            
+                                            
                                             <th>Duration</th>
                                             <th>Intra EU Fuel Types</th>
                                             
@@ -220,8 +347,8 @@ document.addEventListener('DOMContentLoaded', () => {
                                             <tr>
                                                 <td><input type="checkbox" class="select-row"></td>
                                                 <td>${det.vessel_name}</td>
-                                                <td>${det.min_start_date}</td>
-                                                <td>${det.max_end_date}</td>
+                                                
+                                                
                                                 <td>${det.duration}</td>
                                                 <td>${det.intra_fuel_types}</td>
                                                 
@@ -245,6 +372,83 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 });
+// Sayfa yüklendiğinde, tabloya click event listener ekle
+document.addEventListener('DOMContentLoaded', () => {
+    const tableBody = document.querySelector("#vesselTable tbody");
+
+    // Tablo gövdesine tıklama olayını dinle
+    tableBody.addEventListener('click', (event) => {
+        const target = event.target;
+
+        // Eğer tıklanan hücre 'vessel-name' sınıfına sahipse
+        if (target.classList.contains('vessel-name')) {
+            const vesselName = target.innerText;
+
+            // Tıklanan hücrenin ait olduğu satırı al
+            const parentRow = target.parentNode;
+
+            // Detay satırının var olup olmadığını kontrol et
+            const nextRow = parentRow.nextElementSibling;
+            if (nextRow && nextRow.classList.contains('details-row')) {
+                // Eğer detay satırı varsa, onu kaldır (kapat)
+                nextRow.remove();
+            } else {
+                // Eğer detay satırı yoksa, daha önce açılmış olanı kaldır (varsa)
+                const existingDetailsRow = document.querySelector('.details-row');
+                if (existingDetailsRow) {
+                    existingDetailsRow.remove();
+                }
+
+                // Yeni detay verilerini getirmek için API'yi çağır
+                fetch(`/api/get-fuel-detay?vessel_name=${vesselName}`)
+                    .then(response => response.json())
+                    .then(detailData => {
+                        const detailRow = document.createElement('tr');
+                        detailRow.classList.add('details-row'); // Detay satırına özel bir sınıf ekle
+
+                        // Gelen verilerle yeni bir satır oluştur
+                        detailRow.innerHTML = `
+                            <td colspan="12">
+                                <table class="table table-bordered">
+                                    <thead class="table-dark">
+                                        <tr>
+                                            <th>From Liman</th>
+                                            <th>To Liman</th>
+                                            <th>Duration</th>
+                                            <th>Intra EU Fuel Types</th>
+                                            <th>Extra EU Fuel Types</th>
+                                            <th>GHG Intensity</th>
+                                            <th>GHG Target</th>
+                                            <th>Compliance Balance</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        ${detailData.map(det => `
+                                            <tr>
+                                                <td>${det.from_liman}</td>
+                                                <td>${det.to_liman}</td>
+                                                <td>${det.duration}</td>
+                                                <td>${det.intra_fuel_types}</td>
+                                                <td>${det.extra_fuel_types}</td>
+                                                <td>${det.ghg_intensity}</td>
+                                                <td>${det.ghg_target}</td>
+                                                <td>${det.compliance_balance}</td>
+                                            </tr>
+                                        `).join('')}
+                                    </tbody>
+                                </table>
+                            </td>
+                        `;
+
+                        // Yeni detay satırını tıklanan satırın hemen altına ekle
+                        parentRow.insertAdjacentElement('afterend', detailRow);
+                    })
+                    .catch(error => console.error('Detay verileri alınırken hata oluştu:', error));
+            }
+        }
+    });
+});
+
 </script>
 </body>
 </html>
