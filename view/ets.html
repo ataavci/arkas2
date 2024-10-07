@@ -14,6 +14,20 @@
             color: white;
             cursor: pointer;
         }
+
+        /* Modal styling */
+        
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+        .close:hover, .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
@@ -106,29 +120,59 @@
 
             <h1>ETS Data Table</h1>
 
+            <!-- Modal button -->
+            <button id="showSelectedVessel" class="btn btn-primary">Show Selected Vessel</button>
+
+            <!-- Modal Structure -->
+            <div id="vesselModal" class="modal">
+                <div class="modal-content">
+                    <span class="close">&times;</span>
+                    
+                    <!-- Step 1: Vessel Selection -->
+                    <div id="step1">
+                        <h2>Select Vessels</h2>
+                        <div id="vesselCheckboxes"></div>
+                        <label><input type="checkbox" id="selectAllVessels"> Select All Vessels</label><br><br>
+                        <button id="nextStep" class="btn btn-secondary">Next</button>
+                    </div>
+
+                    <!-- Step 2: Column Selection -->
+                    <div id="step2" style="display:none;">
+                        <h2>Select Columns</h2>
+                        <div id="columnCheckboxes">
+                            <label><input type="checkbox" value="distance" checked> Total Distance</label><br>
+                            <label><input type="checkbox" value="eca_distance" checked> Total ECA Distance</label><br>
+                            <label><input type="checkbox" value="speed" checked> Average Speed</label><br>
+                            <label><input type="checkbox" value="total_days" checked> Total Days</label><br>
+                            <label><input type="checkbox" value="sea_fuel" checked> Sea Fuel</label><br>
+                            <label><input type="checkbox" value="sea_consumption" checked> Sea Consumption</label><br>
+                            <label><input type="checkbox" value="eca_fuel" checked> ECA Fuel</label><br>
+                            <label><input type="checkbox" value="eca_consumption" checked> ECA Consumption</label><br>
+                            <label><input type="checkbox" value="port_fuel" checked> Port Fuel</label><br>
+                            <label><input type="checkbox" value="port_consumption" checked> Port Consumption</label><br>
+                            <label><input type="checkbox" value="ets" checked> ETS</label><br>
+                        </div>
+                        <button id="showData" class="btn btn-success">Show Data</button>
+                    </div>
+                </div>
+            </div>
+
             <div class="table-responsive">
                 <table id="vesselTable" class="table table-bordered">
                     <thead class="table-dark">
                         <tr>
-                            <th>Select</th>
-                            <th>Vessel Name</th>
-                            
-                            
-                            
-                            <th>Total Distance</th>
-                            <th>Total ECA Distance</th>
-                            <th>Average Speed</th>
-                            <th>Total Days</th>
-                            <th>Sea Fuel</th>
-                            <th>Sea Consumption</th>
-                            <th>ECA Fuel</th>
-                            <th>ECA Consumption</th>
-                            <th>Port Fuel</th>
-                            <th>Port Consumption</th>
-                            <th>ETS</th>
-                            
-                            
-                            
+                            <th class="vessel-name">Vessel Name</th>
+                            <th class="distance">Total Distance</th>
+                            <th class="eca_distance">Total ECA Distance</th>
+                            <th class="speed">Average Speed</th>
+                            <th class="total_days">Total Days</th>
+                            <th class="sea_fuel">Sea Fuel</th>
+                            <th class="sea_consumption">Sea Consumption</th>
+                            <th class="eca_fuel">ECA Fuel</th>
+                            <th class="eca_consumption">ECA Consumption</th>
+                            <th class="port_fuel">Port Fuel</th>
+                            <th class="port_consumption">Port Consumption</th>
+                            <th class="ets">ETS</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -136,266 +180,138 @@
                     </tbody>
                 </table>
             </div>
-            
-            <!-- Reset Button -->
-            <button id="reset-compliance-btn" class="btn btn-primary mt-3">Reset Compliance Balance for Selected Vessels</button>
 
-            <!-- Result Card -->
-            <div id="result-card" class="card d-none">
-                <div class="card-body">
-                    <h5 class="card-title">Compliance Balance Adjustment Results</h5>
-                    <ul id="result-list" class="list-group">
-                        <!-- Sonuçlar burada gösterilecek -->
-                    </ul>
-                </div>
-            </div>
-
-            <!-- Total Compliance Balance Display -->
-            <div class="card mt-3">
-                <div class="card-body">
-                    <h5 class="card-title">Total Compliance Balance</h5>
-                    <p id="total-compliance-balance">Total: 0</p>
-                </div>
-            </div>
+            <button id="backToMainTable" class="btn btn-warning" style="display:none;">Back to Main Table</button>
         </main>
     </section>
 
     <script>
-        
-        // CII sınıf ekleme fonksiyonu
-        function getCIIClass(CII) {
-            switch (CII) {
-                case 'A': return 'cii-a';
-                case 'B': return 'cii-b';
-                case 'C': return 'cii-c';
-                case 'D': return 'cii-d';
-                case 'E': return 'cii-e';
-                default: return '';
-            }
-        }
+        let originalData = []; // To store the original data
 
-        // Fetch ile veriyi çekip tabloya ekleme işlemi
+        // Fetch vessel data initially
         fetch('/api/get-vessel-data')
-            .then(response => {
-                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-                return response.json();
-            })
+            .then(response => response.json())
             .then(data => {
-                const tableBody = document.querySelector("#vesselTable tbody");
-                tableBody.innerHTML = '';
-
-                if (data.length === 0) {
-                    tableBody.innerHTML = '<tr><td colspan="19">No data available</td></tr>';
-                    return;
-                }
-
-                data.forEach(row => {
-                    const tr = document.createElement('tr');
-                    tr.innerHTML = `
-                        <td><input type="checkbox" class="select-row"></td>
-                        <td class="vessel-name">${row.vessel_name}</td>
-                       
-                       
-                        
-                        <td>${row.distance_sum}</td>
-                        <td>${row.distance_eca_sum}</td>
-                        <td>${row.speed_avg}</td>
-                        <td>${row.total_days}</td>
-                        <td>${row.sea_fuel}</td>
-                        <td>${row.sea_consumption}</td>
-                        <td>${row.eca_fuel}</td>
-                        <td>${row.eca_consumption}</td>
-                        <td>${row.port_fuel}</td>
-                        <td>${row.port_consumption}</td>
-                        <td>${row.ets_sum}</td>
-                        
-                        
-                      
-                    `;
-                    const ciiCell = tr.querySelector('.cii');
-                    const ciiClass = getCIIClass(row.CII);
-                    if (ciiClass) ciiCell.classList.add(ciiClass);
-                    tableBody.appendChild(tr);
-                });
+                originalData = data; // Store original data
+                populateTable(data);
+                populateModalWithVessels(data);
             })
             .catch(error => console.error('Error fetching vessel data:', error));
 
-        // Compliance Balance Reset İşlemi
-        document.getElementById('reset-compliance-btn').addEventListener('click', () => {
-            const selectedRows = document.querySelectorAll('#vesselTable tbody tr input.select-row:checked');
-            let totalComplianceBalance = 0;
-            const negativeBalances = [];
-            const positiveBalances = [];
-            const balanceResults = [];
+        // Modal açma ve kapama işlemleri
+        const modal = document.getElementById("vesselModal");
+        const showSelectedVesselBtn = document.getElementById("showSelectedVessel");
+        const closeModalBtn = document.querySelector(".close");
 
-            selectedRows.forEach(row => {
-                const rowElement = row.closest('tr');
-                const balanceCell = rowElement.querySelector('.compliance-balance');
-                const currentBalance = parseFloat(balanceCell.innerText);
+        showSelectedVesselBtn.onclick = () => {
+            modal.style.display = "block";
+            document.getElementById('step1').style.display = 'block'; // Show Step 1
+            document.getElementById('step2').style.display = 'none'; // Hide Step 2
+        };
 
-                totalComplianceBalance += currentBalance;
+        closeModalBtn.onclick = () => modal.style.display = "none";
+        window.onclick = (event) => {
+            if (event.target === modal) {
+                modal.style.display = "none";
+            }
+        };
 
-                if (currentBalance < 0) {
-                    negativeBalances.push({
-                        vesselName: rowElement.querySelector('.vessel-name').innerText,
-                        balance: currentBalance
-                    });
-                } else if (currentBalance > 0) {
-                    positiveBalances.push({
-                        vesselName: rowElement.querySelector('.vessel-name').innerText,
-                        balance: currentBalance
-                    });
+        // Handle 'Next' button click
+        document.getElementById('nextStep').addEventListener('click', () => {
+            document.getElementById('step1').style.display = 'none';
+            document.getElementById('step2').style.display = 'block';
+        });
+
+        // Handle 'Show' button click - Apply selected filters
+        document.getElementById('showData').addEventListener('click', () => {
+            // Get selected vessels
+            const selectedVessels = Array.from(document.querySelectorAll('#vesselCheckboxes input:checked')).map(checkbox => checkbox.value);
+
+            // Get selected columns
+            const selectedColumns = Array.from(document.querySelectorAll('#columnCheckboxes input:checked')).map(checkbox => checkbox.value);
+
+            // Filter data based on selected vessels
+            const filteredData = selectedVessels.length > 0 ? originalData.filter(row => selectedVessels.includes(row.vessel_name)) : originalData;
+
+            // Populate table with filtered data
+            populateTable(filteredData);
+
+            // Show only selected columns
+            document.querySelectorAll('#vesselTable th, #vesselTable td').forEach(cell => {
+                const columnClass = cell.className;
+                if (selectedColumns.includes(columnClass) || columnClass === 'vessel-name') {
+                    cell.style.display = ''; // Show selected columns
+                } else {
+                    cell.style.display = 'none'; // Hide unselected columns
                 }
             });
 
-            // Negatif gemileri pozitif gemilerle dengele
-            negativeBalances.forEach(negVessel => {
-                positiveBalances.forEach(posVessel => {
-                    if (negVessel.balance !== 0 && posVessel.balance !== 0) {
-                        const amountToTransfer = Math.min(Math.abs(negVessel.balance), posVessel.balance);
+            // Close modal after showing data
+            modal.style.display = 'none';
 
-                        balanceResults.push({
-                            negativeVessel: negVessel.vesselName,
-                            positiveVessel: posVessel.vesselName,
-                            amount: amountToTransfer
-                        });
-
-                        negVessel.balance += amountToTransfer;
-                        posVessel.balance -= amountToTransfer;
-                    }
-                });
-            });
-
-            const remainingBalances = [...negativeBalances, ...positiveBalances].filter(vessel => vessel.balance !== 0);
-
-            document.getElementById('total-compliance-balance').innerText = `Total: ${totalComplianceBalance.toFixed(2)}`;
-
-            showAdjustmentResults(balanceResults, remainingBalances);
+            // Show back button
+            document.getElementById('backToMainTable').style.display = 'inline-block';
         });
 
-        // Sonuçları gösterme fonksiyonu
-        function showAdjustmentResults(results, remaining) {
-            const resultCard = document.getElementById('result-card');
-            const resultList = document.getElementById('result-list');
-            resultList.innerHTML = '';
+        // Back to main table functionality
+        document.getElementById('backToMainTable').addEventListener('click', () => {
+            // Repopulate table with original data
+            populateTable(originalData);
 
-            results.forEach(result => {
-                const listItem = document.createElement('li');
-                listItem.classList.add('list-group-item');
-                listItem.innerHTML = `<strong>${result.negativeVessel}</strong> ${result.amount} kadar dengelemek için <strong>${result.positiveVessel}</strong> ile eşleşti.`;
-                resultList.appendChild(listItem);
+            // Reset column visibility to show all columns
+            document.querySelectorAll('#vesselTable th, #vesselTable td').forEach(cell => {
+                cell.style.display = ''; // Show all columns
             });
 
-            if (remaining.length > 0) {
-                const remainingHeader = document.createElement('h6');
-                remainingHeader.textContent = "Kalan Balances:";
-                resultList.appendChild(remainingHeader);
+            // Hide back button
+            document.getElementById('backToMainTable').style.display = 'none';
+        });
 
-                remaining.forEach(vessel => {
-                    const listItem = document.createElement('li');
-                    listItem.classList.add('list-group-item');
-                    listItem.innerHTML = `<strong>${vessel.vesselName}</strong>: Kalan Balance: ${vessel.balance.toFixed(2)}`;
-                    resultList.appendChild(listItem);
-                });
+        // Modalda vessel isimlerini dinamik olarak eklemek için fonksiyon
+        function populateModalWithVessels(data) {
+            const vesselCheckboxes = document.getElementById('vesselCheckboxes');
+            vesselCheckboxes.innerHTML = '';
+
+            const uniqueVesselNames = [...new Set(data.map(row => row.vessel_name))];
+
+            uniqueVesselNames.forEach(name => {
+                const label = document.createElement('label');
+                label.innerHTML = `<input type="checkbox" value="${name}"> ${name}<br>`;
+                vesselCheckboxes.appendChild(label);
+            });
+        }
+
+        // Tabloyu dinamik verilerle doldurmak için fonksiyon
+        function populateTable(data) {
+            const tableBody = document.querySelector("#vesselTable tbody");
+            tableBody.innerHTML = '';
+
+            if (data.length === 0) {
+                tableBody.innerHTML = '<tr><td colspan="12">No data available</td></tr>';
+                return;
             }
 
-            resultCard.classList.remove('d-none');
+            data.forEach(row => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td class="vessel-name">${row.vessel_name}</td>
+                    <td class="distance">${row.distance_sum || 'N/A'}</td>
+                    <td class="eca_distance">${row.distance_eca_sum || 'N/A'}</td>
+                    <td class="speed">${row.speed_avg || 'N/A'}</td>
+                    <td class="total_days">${row.total_days || 'N/A'}</td>
+                    <td class="sea_fuel">${row.sea_fuel || 'N/A'}</td>
+                    <td class="sea_consumption">${row.sea_consumption || 'N/A'}</td>
+                    <td class="eca_fuel">${row.eca_fuel || 'N/A'}</td>
+                    <td class="eca_consumption">${row.eca_consumption || 'N/A'}</td>
+                    <td class="port_fuel">${row.port_fuel || 'N/A'}</td>
+                    <td class="port_consumption">${row.port_consumption || 'N/A'}</td>
+                    <td class="ets">${row.ets_sum || 'N/A'}</td>
+                `;
+                tableBody.appendChild(tr);
+            });
         }
-        document.addEventListener('DOMContentLoaded', () => {
-    const tableBody = document.querySelector("#vesselTable tbody");
-
-    // Tüm satırlara tıklama olayı ekle
-    tableBody.addEventListener('click', (event) => {
-        const target = event.target;
-
-        // Eğer tıklanan hücre 'Vessel Name' sütunundaysa (td.vessel-name)
-        if (target.classList.contains('vessel-name')) {
-            const vesselName = target.innerText;
-
-            // Satırın hemen altına detay tablosunu eklemek için satırın referansını alıyoruz
-            const parentRow = target.parentNode;
-
-            // Eğer detay tablosu zaten varsa (aynı gemi için), yeniden ekleme
-            if (parentRow.nextElementSibling && parentRow.nextElementSibling.classList.contains('details-row')) {
-                parentRow.nextElementSibling.remove(); // Mevcut tabloyu kaldır
-            } else {
-                // API çağrısı ile detay verilerini getiriyoruz
-                fetch(`/api/get-vessel-detail?vessel_name=${vesselName}`)
-                    .then(response => response.json())
-                    .then(detailData => {
-                        // Detay verilerle yeni bir satır oluşturuyoruz
-                        const detailRow = document.createElement('tr');
-                        detailRow.classList.add('details-row'); // Detay satırı için özel bir sınıf
-
-                        // Detay tablosunun hücresini oluştur
-                        detailRow.innerHTML = `
-    <td colspan="19">
-        <table class="table table-bordered">
-            <thead class="table-dark">
-                <tr>
-                    <th>Select</th> <!-- Checkbox için başlık ekleniyor -->
-                    <th>From - To</th> <!-- Vessel Name yerine From - To -->
-                  
-                    
-                    
-                    <th>Total Distance</th>
-                    <th>Total ECA Distance</th>
-                    <th>Average Speed</th>
-                    <th>Total Days</th>
-                    <th>Sea Fuel</th>
-                    <th>Sea Consumption</th>
-                    <th>ECA Fuel</th>
-                    <th>ECA Consumption</th>
-                    <th>Port Fuel</th>
-                    <th>Port Consumption</th>
-                    <th>ETS</th>
-                    
-                    
-                    
-                </tr>
-            </thead>
-            <tbody>
-                ${detailData.map((det) => `
-                    <tr>
-                        <td><input type="checkbox" class="select-row"></td> <!-- Checkbox -->
-                        <td>${det.from_liman} - ${det.to_liman}</td> <!-- From - To -->
-                        
-                        
-                        
-                        <td>${det.distance_sum || 'N/A'}</td>
-                        <td>${det.distance_eca_sum || 'N/A'}</td>
-                        <td>${det.speed_avg || 'N/A'}</td>
-                        <td>${det.total_days || 'N/A'}</td>
-                        <td>${det.sea_fuel || 'N/A'}</td>
-                        <td>${det.sea_consumption || 'N/A'}</td>
-                        <td>${det.eca_fuel || 'N/A'}</td>
-                        <td>${det.eca_consumption || 'N/A'}</td>
-                        <td>${det.port_fuel || 'N/A'}</td>
-                        <td>${det.port_consumption || 'N/A'}</td>
-                        <td>${det.ets_sum}</td>
-                        
-                        
-                        
-                    </tr>
-                `).join('')}
-            </tbody>
-        </table>
-    </td>
-`;
-
-                        // Yeni detay satırını, tıklanan satırın altına ekliyoruz
-                        parentRow.insertAdjacentElement('afterend', detailRow);
-                    })
-                    .catch(error => console.error('Detay verisi getirilemedi:', error));
-            }
-        }
-    });
-});
 
     </script>
-
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.3.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.4.1/html2canvas.min.js"></script>
 
 </body>
 </html>
