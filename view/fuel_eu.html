@@ -113,6 +113,7 @@
                     <!-- Modal Step 1: Select Vessels -->
                     <div id="step1" class="modal-step">
                         <h2>Select Vessels</h2>
+                        <label><input type="checkbox" id="selectAllVessels"> Show All</label><br>
                         <div id="vesselCheckboxes"></div>
                         <button id="nextStep" class="btn btn-secondary">Next</button>
                     </div>
@@ -120,14 +121,12 @@
                     <!-- Modal Step 2: Select Columns -->
                     <div id="step2" class="modal-step">
                         <h2>Select Columns</h2>
-                        <div id="columnCheckboxes">
-                            <label><input type="checkbox" value="duration" checked> Duration</label><br>
-                            <label><input type="checkbox" value="intra_eu" checked> Intra EU</label><br>
-                            <label><input type="checkbox" value="extra_eu" checked> Extra EU</label><br>
-                            <label><input type="checkbox" value="ghg_intensity" checked> GHG Intensity</label><br>
-                            <label><input type="checkbox" value="ghg_target" checked> GHG Target</label><br>
-                            <label><input type="checkbox" value="compliance_balance" checked> Compliance Balance</label>
-                        </div>
+                        <label><input type="checkbox" value="duration" checked> Duration</label><br>
+                        <label><input type="checkbox" value="intra_eu" checked> Intra EU</label><br>
+                        <label><input type="checkbox" value="extra_eu" checked> Extra EU</label><br>
+                        <label><input type="checkbox" value="ghg_intensity" checked> GHG Intensity</label><br>
+                        <label><input type="checkbox" value="ghg_target" checked> GHG Target</label><br>
+                        <label><input type="checkbox" value="compliance_balance" checked> Compliance Balance</label>
                         <button id="showData" class="btn btn-primary">Show</button>
                     </div>
                 </div>
@@ -151,6 +150,8 @@
                     </tbody>
                 </table>
             </div>
+
+            <button id="backToMainTable" class="btn btn-secondary" style="display:none;">Back</button> <!-- Back Button -->
 
             <script>
                 let originalData = [];
@@ -176,8 +177,16 @@
 
                     uniqueVesselNames.forEach(name => {
                         const label = document.createElement('label');
-                        label.innerHTML = `<input type="checkbox" value="${name}"> ${name}<br>`;
+                        label.innerHTML = `<input type="checkbox" value="${name}" class="vessel-checkbox"> ${name}<br>`;
                         vesselCheckboxes.appendChild(label);
+                    });
+
+                    // Show All event listener
+                    document.getElementById('selectAllVessels').addEventListener('change', function() {
+                        const checkboxes = document.querySelectorAll('.vessel-checkbox');
+                        checkboxes.forEach(checkbox => {
+                            checkbox.checked = this.checked;
+                        });
                     });
                 }
 
@@ -225,7 +234,7 @@
                     const selectedColumns = Array.from(document.querySelectorAll('#columnCheckboxes input:checked')).map(checkbox => checkbox.value);
 
                     // Filter data based on selected vessels
-                    const filteredData = originalData.filter(row => selectedVessels.includes(row.vessel_name));
+                    const filteredData = selectedVessels.length > 0 ? originalData.filter(row => selectedVessels.includes(row.vessel_name)) : originalData;
 
                     // Populate table with filtered data
                     populateTable(filteredData);
@@ -242,6 +251,23 @@
 
                     // Close modal after showing data
                     document.getElementById('vesselModal').style.display = 'none';
+
+                    // Show back button
+                    document.getElementById('backToMainTable').style.display = 'inline-block';
+                });
+
+                // Back to main table functionality
+                document.getElementById('backToMainTable').addEventListener('click', () => {
+                    // Repopulate table with original data
+                    populateTable(originalData);
+
+                    // Reset column visibility to show all columns
+                    document.querySelectorAll('#vesselTable th, #vesselTable td').forEach(cell => {
+                        cell.style.display = ''; // Show all columns
+                    });
+
+                    // Hide back button
+                    document.getElementById('backToMainTable').style.display = 'none';
                 });
 
                 // Handle click event to fetch and display detailed data when a vessel name is clicked
