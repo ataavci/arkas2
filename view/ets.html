@@ -8,6 +8,40 @@
     <link rel="stylesheet" href="/static/css/style2.css">
 
     <style>
+        .modal {
+    display: none; 
+    position: fixed; 
+    z-index: 1; 
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    
+    
+}
+
+.modal-content {
+    background-color: white;
+    margin: 15% auto;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 60%;
+}
+
+.modal-step {
+    display: block;
+}
+
+.modal-step h2 {
+    margin-bottom: 20px;
+}
+
+.btn {
+    padding: 10px 20px;
+    margin-top: 20px;
+}
+
         /* CSS for hover effect on Vessel Name */
         #vesselTable tbody tr td.vessel-name:hover {
             background-color: green;
