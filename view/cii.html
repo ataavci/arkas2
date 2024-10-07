@@ -232,14 +232,32 @@
             populateTable(filteredData);
 
             // Show only selected columns
-            document.querySelectorAll('#vesselTablecii th, #vesselTablecii td').forEach(cell => {
-                const columnClass = cell.className;
-                if (selectedColumns.includes(columnClass) || columnClass === 'vessel-name') {
-                    cell.style.display = ''; // Show selected columns
-                } else {
-                    cell.style.display = 'none'; // Hide unselected columns
+            function updateVisibleColumns(selectedColumns) {
+                    // Hide or show table headers
+                    const headers = document.querySelectorAll('#tableHeaders th');
+                    headers.forEach(header => {
+                        const columnClass = header.className;
+                        if (selectedColumns.includes(columnClass) || columnClass === 'vessel-name') {
+                            header.style.display = ''; // Show selected columns
+                        } else {
+                            header.style.display = 'none'; // Hide unselected columns
+                        }
+                    });
+
+                    // Hide or show table cells
+                    const rows = document.querySelectorAll('#vesselTable tbody tr');
+                    rows.forEach(row => {
+                        row.querySelectorAll('td').forEach(cell => {
+                            const columnClass = cell.className;
+                            if (selectedColumns.includes(columnClass) || columnClass === 'vessel-name') {
+                                cell.style.display = ''; // Show selected columns
+                            } else {
+                                cell.style.display = 'none'; // Hide unselected columns
+                            }
+                        });
+                    });
                 }
-            });
+
 
             // Close modal after showing data
             modal.style.display = 'none';

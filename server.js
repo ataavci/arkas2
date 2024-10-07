@@ -156,6 +156,9 @@ app.use("/static", express.static(path.join(__dirname, "public")));
 app.get("/", (req, res) =>
   res.sendFile(path.join(__dirname, "view", "dashboard.html"))
 );
+app.get("/pool.html", (req, res) =>{
+  res.sendFile(path.join(__dirname, "view", "pool.html"))
+});
 app.get("/ets.html", (req, res) => {
   res.sendFile(path.join(__dirname, "/view", "ets.html"));
 });
@@ -754,4 +757,26 @@ app.get('/api/get-vessel-data2', (req, res) => {
       }
       res.json(results);
   });
+});
+app.get('/api/vessel-report', async (req, res) => {
+  const { startDate, endDate, vessels } = req.query;
+
+  // Gelen vessel isimlerini virgül ile ayırıp bir diziye dönüştürüyoruz
+  const vesselArray = vessels.split(',').map(vessel => vessel.trim()); 
+
+  try {
+    // Tüm gemiler için stored procedure'ü çağırıyoruz (sadece startDate ve endDate kullanıyoruz)
+    const [rows] = await db.promise().execute(
+      'CALL GetConsumptionAndETS(?, ?)', [startDate, endDate]
+    );
+
+    // Sonuçları yalnızca seçilen vessel'lara göre filtreliyoruz
+    const filteredResults = rows[0].filter(row => vesselArray.includes(row.vessel_name));
+
+    // Filtrelenmiş sonuçları JSON formatında geri döndürüyoruz
+    res.json(filteredResults);
+  } catch (error) {
+    console.error('MySQL Hatası:', error);
+    res.status(500).json({ error: 'Veri çekilirken bir hata oluştu' });
+  }
 });
