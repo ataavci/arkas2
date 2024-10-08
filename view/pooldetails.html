@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <link rel="icon" href="/static/image/favicon-16x16.png" type="image/x-icon">
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/style2.css">
+</head>
+<body>
+    <!-- SIDEBAR -->
+    <section id="sidebar" class="sidebar bg-light">
+        <a href="#" class="brand">
+            <i class='bx bxs-smile'></i>
+            <span class="text">Dashboard</span>
+        </a>
+        <ul class="side-menu top">
+            <li class="active">
+                <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    Optimizasyon
+                </a>
+                <ul class="dropdown-menu">
+                    <li><a class="dropdown-item" href="./dashboard.html">DASHBOARD</a></li>
+                    <li><a class="dropdown-item" href="./ets.html">ETS</a></li>
+                    <li><a class="dropdown-item" href="./cii.html">CII</a></li>
+                    <li><a class="dropdown-item" href="./fuel_eu.html">FUEL EU</a></li>
+                    <li><a class="dropdown-item" href="./input.html">ADD VESSEL</a></li>
+                    <li><a class="dropdown-item" href="./pool.html">Pool</a></li>
+                    <li><a class="dropdown-item" href="./pooldetails.html">Pool Details</a></li>
+                </ul>
+            </li>
+        </ul>
+    </section>
+    <!-- SIDEBAR -->
+
+    <!-- CONTENT -->
+    <section id="content-dashboard" class="content">
+        <main>
+            <div class="head-title">
+                <h1>Dashboard</h1>
+                <ul class="breadcrumb">
+                    <li><a href="#">Dashboard</a></li>
+                    <li><i class='bx bx-chevron-right'></i></li>
+                </ul>
+                <a href="/export-excel" class="btn btn-success">Export to Excel</a>
+            </div>
+            <div class="head-title">
+                <h1>Pool Details</h1>
+            </div>
+
+            <div class="table-responsive mt-4">
+                <table id="poolTable" class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Pool Name</th>
+                            <th>Total Compliance Balance</th>
+                            <th>Action</th> <!-- Delete button for action -->
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Dynamic content will be inserted here by JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="table-responsive mt-4">
+                <table id="poolDetailTable" class="table table-striped" style="display:none;">
+                    <thead>
+                        <tr>
+                            <th>Vessel Name</th>
+                            <th>Sefer Tekrar Sayısı</th>
+                            <th>Leg Durumu</th>
+                            <th>Current Leg</th>
+                            <th>Total Distance</th>
+                            <th>ECA Distance</th>
+                            <th>Sea Fuel Consumption</th>
+                            <th>ECA Fuel Consumption</th>
+                            <th>Port Fuel Consumption</th>
+                            <th>ETS</th>
+                            <th>Compliance Balance</th>
+                            <th>Created At</th>
+                        </tr>
+                    </thead>
+                    <tbody id="poolDetailBody">
+                        <!-- Pool details will be dynamically inserted here -->
+                    </tbody>
+                </table>
+            </div>
+        </main>
+    </section>
+
+    <!-- JavaScript Section -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let currentPoolName = null;  // Toggle for showing/hiding pool details
+
+        // Fetch and display pool summary
+        async function fetchPoolSummary() {
+            try {
+                const response = await fetch('/get-pool-summary');
+                const data = await response.json();
+
+                const tableBody = document.querySelector('#poolTable tbody');
+                tableBody.innerHTML = '';  // Clear previous table data
+
+                data.forEach(pool => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td class="pool-name" data-pool="${pool.pool_name}" style="cursor:pointer">${pool.pool_name}</td>
+                        <td>${pool.total_compliance_balance}</td>
+                        <td>
+                            <button class="btn btn-danger delete-btn" data-pool="${pool.pool_name}">Delete</button>
+                        </td>
+                    `;
+                    tableBody.appendChild(tr);
+                });
+
+                // Event listeners for showing details and deleting pools
+                addEventListeners();
+            } catch (error) {
+                console.error('Error fetching pool summary:', error);
+            }
+        }
+
+        // Add event listeners for showing details and deleting pools
+        function addEventListeners() {
+            // Toggle showing/hiding pool details
+            const poolNames = document.querySelectorAll('.pool-name');
+            poolNames.forEach(poolNameElement => {
+                poolNameElement.addEventListener('click', async function() {
+                    const poolName = this.getAttribute('data-pool');
+                    if (currentPoolName === poolName) {
+                        // Eğer aynı pool tıklanırsa tabloyu gizle
+                        document.getElementById('poolDetailTable').style.display = 'none';
+                        currentPoolName = null;
+                    } else {
+                        await fetchPoolDetails(poolName);
+                        currentPoolName = poolName;
+                    }
+                });
+            });
+
+            // Delete functionality
+            const deleteButtons = document.querySelectorAll('.delete-btn');
+            deleteButtons.forEach(deleteButton => {
+                deleteButton.addEventListener('click', async function() {
+                    const poolName = this.getAttribute('data-pool');
+                    if (confirm(`Are you sure you want to delete pool "${poolName}"?`)) {
+                        try {
+                            const deleteResponse = await fetch(`/delete-pool/${poolName}`, { method: 'DELETE' });
+                            if (deleteResponse.ok) {
+                                alert('Pool deleted successfully');
+                                fetchPoolSummary();  // Refresh the table after deletion
+                            } else {
+                                alert('Failed to delete pool');
+                            }
+                        } catch (error) {
+                            console.error('Error deleting pool:', error);
+                            alert('An error occurred while deleting the pool');
+                        }
+                    }
+                });
+            });
+        }
+
+        // Fetch and display pool details for a specific pool name
+        async function fetchPoolDetails(poolName) {
+            try {
+                const response = await fetch(`/get-pool-details/${poolName}`);
+                const data = await response.json();
+
+                const tableBody = document.querySelector('#poolDetailBody');
+                tableBody.innerHTML = '';  // Clear previous details
+
+                data.forEach(detail => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td>${detail.vessel_name}</td>
+                        <td>${detail.sefer_tekrar_sayisi}</td>
+                        <td>${detail.leg_durumu}</td>
+                        <td>${detail.current_leg}</td>
+                        <td>${detail.total_distance}</td>
+                        <td>${detail.eca_distance}</td>
+                        <td>${detail.sea_fuel_consumption}</td>
+                        <td>${detail.eca_fuel_consumption}</td>
+                        <td>${detail.port_fuel_consumption}</td>
+                        <td>${detail.ets}</td>
+                        <td>${detail.compliance_balance}</td>
+                        <td>${detail.created_at}</td>
+                    `;
+                    tableBody.appendChild(tr);
+                });
+
+                // Show pool detail table
+                document.getElementById('poolDetailTable').style.display = 'table';
+            } catch (error) {
+                console.error('Error fetching pool details:', error);
+            }
+        }
+
+        // Fetch pool summary on page load
+        window.onload = fetchPoolSummary;
+
+            </script>
+</body>
+</html>

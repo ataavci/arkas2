@@ -152,10 +152,7 @@
                         <li><i class='bx bx-chevron-right'></i></li>
                     </ul>
                 </div>
-                <a href="#" id="btn-download-pdf" class="btn-download">
-                    <i class='bx bxs-cloud-download'></i>
-                    <span class="text">Download PDF</span>
-                </a>
+                <button id="exportExcel" class="btn btn-success">Export to Excel</button>
             </div>
 
             <h1>ETS Data Table</h1>
@@ -426,6 +423,17 @@ function populateTable(data) {
         }
     });
 }
+fetch('/api/get-vessel-data')
+            .then(response => response.json())
+            .then(data => {
+                populateTable(data);  // Tabloyu doldur
+            })
+            .catch(error => console.error('Error fetching vessel data:', error));
+
+        // Excel Export butonuna tıklandığında
+        document.getElementById('exportExcel').addEventListener('click', () => {
+            window.location.href = '/export-excel2'; // Excel dosyasını indirme isteği gönder
+        });
 
 
     </script>

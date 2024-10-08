@@ -17,38 +17,36 @@
         }
         
         .modal {
-    display: none; 
-    position: fixed; 
-    z-index: 1; 
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    overflow: auto;
-    
-    
-}
+            display: none; 
+            position: fixed; 
+            z-index: 1; 
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+        }
 
-.modal-content {
-    background-color: white;
-    margin: 15% auto;
-    padding: 20px;
-    border: 1px solid #888;
-    width: 60%;
-}
+        .modal-content {
+            background-color: white;
+            margin: 15% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 60%;
+        }
 
-.modal-step {
-    display: block;
-}
+        .modal-step {
+            display: block;
+        }
 
-.modal-step h2 {
-    margin-bottom: 20px;
-}
+        .modal-step h2 {
+            margin-bottom: 20px;
+        }
 
-.btn {
-    padding: 10px 20px;
-    margin-top: 20px;
-}
+        .btn {
+            padding: 10px 20px;
+            margin-top: 20px;
+        }
 
         /* CSS for hover effect on Vessel Name */
         #vesselTable tbody tr td.vessel-name:hover {
@@ -58,7 +56,6 @@
         }
 
         /* Modal styling */
-        
         .close {
             color: #aaa;
             float: right;
@@ -160,10 +157,7 @@
                         <li><i class='bx bx-chevron-right'></i></li>
                     </ul>
                 </div>
-                <a href="#" class="btn-download">
-                    <i class='bx bxs-cloud-download'></i>
-                    <span class="text">Download PDF</span>
-                </a>
+                <a href="#" id="exportSelected" class="btn btn-success">Export Selected to Excel</a>
             </div>
 
             <button id="showSelectedVessel" class="btn btn-primary">Show Selected Vessel</button>
@@ -171,24 +165,25 @@
             <!-- Modal Structure -->
             <div id="vesselModal" class="modal">
                 <div class="modal-content">
-                    <!-- Modal Step 1: Select Vessels -->
+                    <span class="close">&times;</span>
                     <div id="step1" class="modal-step">
                         <h2>Select Vessels</h2>
-                        <label><input type="checkbox" id="selectAllVessels"> Show All</label><br>
                         <div id="vesselCheckboxes"></div>
+                        <label><input type="checkbox" id="selectAllVessels"> Select All Vessels</label><br><br>
                         <button id="nextStep" class="btn btn-secondary">Next</button>
                     </div>
 
-                    <!-- Modal Step 2: Select Columns -->
-                    <div id="step2" class="modal-step">
+                    <div id="step2" class="modal-step" style="display:none;">
                         <h2>Select Columns</h2>
-                        <label><input type="checkbox" value="duration" checked> Duration</label><br>
-                        <label><input type="checkbox" value="intra_eu" checked> Intra EU</label><br>
-                        <label><input type="checkbox" value="extra_eu" checked> Extra EU</label><br>
-                        <label><input type="checkbox" value="ghg_intensity" checked> GHG Intensity</label><br>
-                        <label><input type="checkbox" value="ghg_target" checked> GHG Target</label><br>
-                        <label><input type="checkbox" value="compliance_balance" checked> Compliance Balance</label>
-                        <button id="showData" class="btn btn-primary">Show</button>
+                        <div id="columnCheckboxes">
+                            <label><input type="checkbox" value="duration" checked> Duration</label><br>
+                            <label><input type="checkbox" value="intra_eu" checked> Intra EU</label><br>
+                            <label><input type="checkbox" value="extra_eu" checked> Extra EU</label><br>
+                            <label><input type="checkbox" value="ghg_intensity" checked> GHG Intensity</label><br>
+                            <label><input type="checkbox" value="ghg_target" checked> GHG Target</label><br>
+                            <label><input type="checkbox" value="compliance_balance" checked> Compliance Balance</label>
+                        </div>
+                        <button id="showData" class="btn btn-success">Show Data</button>
                     </div>
                 </div>
             </div>
@@ -207,226 +202,190 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <!-- Dynamic data will be loaded here -->
+                        <!-- Dinamik veri buraya fetch ile yüklenecek -->
                     </tbody>
                 </table>
             </div>
 
-            <button id="backToMainTable" class="btn btn-secondary" style="display:none;">Back</button> <!-- Back Button -->
-
-            <script>
-                let originalData = [];
-
-                // Fetch and populate the main table with vessel data
-                fetch('/api/get-fuel_eu-data')
-                    .then(response => response.json())
-                    .then(data => {
-                        originalData = data; // Store original data for future use
-                        populateTable(data); // Initially populate the table with all data
-                        populateVesselNames(data); // Populate vessel names in modal
-                    })
-                    .catch(error => {
-                        console.error('Error processing the data:', error);
-                    });
-
-                // Function to populate vessel checkboxes in the modal
-                function populateVesselNames(data) {
-                    const vesselCheckboxes = document.getElementById('vesselCheckboxes');
-                    vesselCheckboxes.innerHTML = ''; // Clear existing options
-
-                    const uniqueVesselNames = [...new Set(data.map(row => row.vessel_name))]; // Get unique vessel names
-
-                    uniqueVesselNames.forEach(name => {
-                        const label = document.createElement('label');
-                        label.innerHTML = `<input type="checkbox" value="${name}" class="vessel-checkbox"> ${name}<br>`;
-                        vesselCheckboxes.appendChild(label);
-                    });
-
-                    // Show All event listener
-                    document.getElementById('selectAllVessels').addEventListener('change', function() {
-                        const checkboxes = document.querySelectorAll('.vessel-checkbox');
-                        checkboxes.forEach(checkbox => {
-                            checkbox.checked = this.checked;
-                        });
-                    });
-                }
-
-                // Function to populate the table based on the data
-                function populateTable(data) {
-                    const tableBody = document.querySelector('#vesselTable tbody');
-                    tableBody.innerHTML = ''; // Clear existing rows
-
-                    data.forEach(row => {
-                        const tableRow = document.createElement('tr');
-
-                        tableRow.innerHTML = `
-                            <td class="vessel-name">${row.vessel_name}</td>
-                            <td class="duration">${row.duration}</td>
-                            <td class="intra_eu">${row.intra_eu}</td>
-                            <td class="extra_eu">${row.extra_eu}</td>
-                            <td class="ghg_intensity">${row.ghg_intensity}</td>
-                            <td class="ghg_target">${row.ghg_target}</td>
-                            <td class="compliance_balance">${row.compliance_balance}</td>
-                        `;
-
-                        tableBody.appendChild(tableRow);
-                    });
-                }
-
-                // Show modal when 'Show Selected Vessel' button is clicked
-                document.getElementById('showSelectedVessel').addEventListener('click', () => {
-                    document.getElementById('vesselModal').style.display = 'block';
-                    document.getElementById('step1').style.display = 'block'; // Show Step 1
-                    document.getElementById('step2').style.display = 'none'; // Hide Step 2
-                });
-
-                // Handle 'Next' button click
-                document.getElementById('nextStep').addEventListener('click', () => {
-                    document.getElementById('step1').style.display = 'none';
-                    document.getElementById('step2').style.display = 'block';
-                });
-
-                // Handle 'Show' button click - Apply selected filters
-                document.getElementById('showData').addEventListener('click', () => {
-                    // Get selected vessels
-                    const selectedVessels = Array.from(document.querySelectorAll('#vesselCheckboxes input:checked')).map(checkbox => checkbox.value);
-
-                    // Get selected columns
-                    const selectedColumns = Array.from(document.querySelectorAll('#step2 input:checked')).map(checkbox => checkbox.value);
-
-                    // Filter data based on selected vessels
-                    const filteredData = selectedVessels.length > 0 ? originalData.filter(row => selectedVessels.includes(row.vessel_name)) : originalData;
-
-                    // Populate table with filtered data
-                    populateTable(filteredData);
-
-                    // Update table headers and rows to show only selected columns
-                    updateVisibleColumns(selectedColumns);
-
-                    // Close modal after showing data
-                    document.getElementById('vesselModal').style.display = 'none';
-
-                    // Show back button
-                    document.getElementById('backToMainTable').style.display = 'inline-block';
-                });
-
-                // Back to main table functionality
-                document.getElementById('backToMainTable').addEventListener('click', () => {
-                    // Repopulate table with original data
-                    populateTable(originalData);
-
-                    // Reset column visibility to show all columns
-                    document.querySelectorAll('#vesselTable th, #vesselTable td').forEach(cell => {
-                        cell.style.display = ''; // Show all columns
-                    });
-
-                    // Hide back button
-                    document.getElementById('backToMainTable').style.display = 'none';
-                });
-
-                // Update the visibility of columns based on selected columns
-                function updateVisibleColumns(selectedColumns) {
-                    // Hide or show table headers
-                    const headers = document.querySelectorAll('#tableHeaders th');
-                    headers.forEach(header => {
-                        const columnClass = header.className;
-                        if (selectedColumns.includes(columnClass) || columnClass === 'vessel-name') {
-                            header.style.display = ''; // Show selected columns
-                        } else {
-                            header.style.display = 'none'; // Hide unselected columns
-                        }
-                    });
-
-                    // Hide or show table cells
-                    const rows = document.querySelectorAll('#vesselTable tbody tr');
-                    rows.forEach(row => {
-                        row.querySelectorAll('td').forEach(cell => {
-                            const columnClass = cell.className;
-                            if (selectedColumns.includes(columnClass) || columnClass === 'vessel-name') {
-                                cell.style.display = ''; // Show selected columns
-                            } else {
-                                cell.style.display = 'none'; // Hide unselected columns
-                            }
-                        });
-                    });
-                }
-
-                // Handle click event to fetch and display detailed data when a vessel name is clicked
-                document.addEventListener('DOMContentLoaded', () => {
-                    const tableBody = document.querySelector("#vesselTable tbody");
-
-                    // Add click event listener to the table body
-                    tableBody.addEventListener('click', (event) => {
-                        const target = event.target;
-
-                        // If the clicked element is in the 'Vessel Name' column
-                        if (target.classList.contains('vessel-name')) {
-                            const vesselName = target.innerText;
-
-                            // Get the parent row of the clicked cell
-                            const parentRow = target.parentNode;
-
-                            // If a detail row already exists, remove it
-                            if (parentRow.nextElementSibling && parentRow.nextElementSibling.classList.contains('details-row')) {
-                                parentRow.nextElementSibling.remove();
-                            } else {
-                                // Remove any other existing detail rows
-                                const existingDetailsRow = document.querySelector('.details-row');
-                                if (existingDetailsRow) {
-                                    existingDetailsRow.remove();
-                                }
-
-                                // Fetch and display the detailed data for the selected vessel
-                                fetch(`/api/get-fuel-detay?vessel_name=${vesselName}`)
-                                    .then(response => response.json())
-                                    .then(detailData => {
-                                        const detailRow = document.createElement('tr');
-                                        detailRow.classList.add('details-row'); // Add a class for the detail row
-
-                                        // Create detail table within the new row
-                                        detailRow.innerHTML = `
-                                            <td colspan="12">
-                                                <table class="table table-bordered">
-                                                    <thead class="table-dark">
-                                                        <tr>
-                                                            <th>From Liman</th>
-                                                            <th>To Liman</th>
-                                                            <th>Duration</th>
-                                                            <th>Intra EU Fuel Types</th>
-                                                            <th>Extra EU Fuel Types</th>
-                                                            <th>GHG Intensity</th>
-                                                            <th>GHG Target</th>
-                                                            <th>Compliance Balance</th>
-                                                        </tr>
-                                                    </thead>
-                                                    <tbody>
-                                                        ${detailData.map(det => `
-                                                            <tr>
-                                                                <td>${det.from_liman}</td>
-                                                                <td>${det.to_liman}</td>
-                                                                <td>${det.duration}</td>
-                                                                <td>${det.intra_fuel_types}</td>
-                                                                <td>${det.extra_fuel_types}</td>
-                                                                <td>${det.ghg_intensity}</td>
-                                                                <td>${det.ghg_target}</td>
-                                                                <td>${det.compliance_balance}</td>
-                                                            </tr>
-                                                        `).join('')}
-                                                    </tbody>
-                                                </table>
-                                            </td>
-                                        `;
-
-                                        // Insert the new detail row right below the clicked row
-                                        parentRow.insertAdjacentElement('afterend', detailRow);
-                                    })
-                                    .catch(error => console.error('Error fetching detail data:', error));
-                            }
-                        }
-                    });
-                });
-            </script>
+            <button id="backToMainTable" class="btn btn-warning" style="display:none;">Back to Main Table</button>
         </main>
     </section>
+
+    <script>
+        let originalData = [];
+
+// Fetch vessel data initially
+fetch('/api/get-fuel_eu-data')
+    .then(response => response.json())
+    .then(data => {
+        originalData = data; // Store original data
+        populateTable(data);
+        populateModalWithVessels(data);
+    })
+    .catch(error => console.error('Error fetching vessel data:', error));
+
+// Modal açma ve kapama işlemleri
+const modal = document.getElementById("vesselModal");
+const showSelectedVesselBtn = document.getElementById("showSelectedVessel");
+const closeModalBtn = document.querySelector(".close");
+
+showSelectedVesselBtn.onclick = () => {
+    modal.style.display = "block";
+    document.getElementById('step1').style.display = 'block'; // Show Step 1
+    document.getElementById('step2').style.display = 'none'; // Hide Step 2
+};
+
+closeModalBtn.onclick = () => modal.style.display = "none";
+window.onclick = (event) => {
+    if (event.target === modal) {
+        modal.style.display = "none";
+    }
+};
+
+// Handle 'Next' button click
+document.getElementById('nextStep').addEventListener('click', () => {
+    document.getElementById('step1').style.display = 'none';
+    document.getElementById('step2').style.display = 'block';
+});
+
+// Handle 'Show' button click - Apply selected filters
+document.getElementById('showData').addEventListener('click', () => {
+    // Get selected vessels
+    const selectedVessels = Array.from(document.querySelectorAll('#vesselCheckboxes input:checked')).map(checkbox => checkbox.value);
+
+    // Get selected columns
+    const selectedColumns = Array.from(document.querySelectorAll('#columnCheckboxes input:checked')).map(checkbox => checkbox.value);
+
+    // Filter data based on selected vessels
+    const filteredData = selectedVessels.length > 0 ? originalData.filter(row => selectedVessels.includes(row.vessel_name)) : originalData;
+
+    // Populate table with filtered data
+    populateTable(filteredData);
+
+    // Show only selected columns
+    document.querySelectorAll('#vesselTable th, #vesselTable td').forEach(cell => {
+        const columnClass = cell.className;
+        if (selectedColumns.includes(columnClass) || columnClass === 'vessel-name') {
+            cell.style.display = ''; // Show selected columns
+        } else {
+            cell.style.display = 'none'; // Hide unselected columns
+        }
+    });
+
+    // Close modal after showing data
+    modal.style.display = 'none';
+
+    // Show back button
+    document.getElementById('backToMainTable').style.display = 'inline-block';
+});
+
+// Back to main table functionality
+document.getElementById('backToMainTable').addEventListener('click', () => {
+    // Repopulate table with original data
+    populateTable(originalData);
+
+    // Reset column visibility to show all columns
+    document.querySelectorAll('#vesselTable th, #vesselTable td').forEach(cell => {
+        cell.style.display = ''; // Show all columns
+    });
+
+    // Hide back button
+    document.getElementById('backToMainTable').style.display = 'none';
+});
+
+// Modalda vessel isimlerini dinamik olarak eklemek için fonksiyon
+function populateModalWithVessels(data) {
+    const vesselCheckboxes = document.getElementById('vesselCheckboxes');
+    vesselCheckboxes.innerHTML = '';
+
+    const uniqueVesselNames = [...new Set(data.map(row => row.vessel_name))];
+
+    uniqueVesselNames.forEach(name => {
+        const label = document.createElement('label');
+        label.innerHTML = `<input type="checkbox" value="${name}"> ${name}<br>`;
+        vesselCheckboxes.appendChild(label);
+    });
+
+    // Select All functionality
+    document.getElementById('selectAllVessels').addEventListener('change', function() {
+        const vesselCheckboxes = document.querySelectorAll('#vesselCheckboxes input[type="checkbox"]');
+        vesselCheckboxes.forEach(checkbox => {
+            checkbox.checked = this.checked;
+        });
+    });
+}
+
+// Tabloyu dinamik verilerle doldurmak için fonksiyon
+function populateTable(data) {
+    const tableBody = document.querySelector("#vesselTable tbody");
+    tableBody.innerHTML = '';
+
+    if (data.length === 0) {
+        tableBody.innerHTML = '<tr><td colspan="12">No data available</td></tr>';
+        return;
+    }
+
+    data.forEach(row => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td class="vessel-name">${row.vessel_name}</td>
+            <td class="duration">${row.duration || 'N/A'}</td>
+            <td class="intra_eu">${row.intra_eu || 'N/A'}</td>
+            <td class="extra_eu">${row.extra_eu || 'N/A'}</td>
+            <td class="ghg_intensity">${row.ghg_intensity || 'N/A'}</td>
+            <td class="ghg_target">${row.ghg_target || 'N/A'}</td>
+            <td class="compliance_balance">${row.compliance_balance || 'N/A'}</td>
+        `;
+        tableBody.appendChild(tr);
+    });
+}
+
+// Export selected rows to Excel
+document.getElementById('exportSelected').addEventListener('click', function() {
+    // Gather selected vessels from the table
+    const selectedRows = [];
+    document.querySelectorAll('#vesselTable tbody tr').forEach(row => {
+        if (row.style.display !== 'none') {  // Only export visible rows
+            const rowData = {
+                vessel_name: row.querySelector('.vessel-name').innerText,
+                duration: row.querySelector('.duration').innerText,
+                intra_eu: row.querySelector('.intra_eu').innerText,
+                extra_eu: row.querySelector('.extra_eu').innerText,
+                ghg_intensity: row.querySelector('.ghg_intensity').innerText,
+                ghg_target: row.querySelector('.ghg_target').innerText,
+                compliance_balance: row.querySelector('.compliance_balance').innerText
+            };
+            selectedRows.push(rowData);
+        }
+    });
+
+    if (selectedRows.length === 0) {
+        alert('Please select at least one row to export.');
+        return;
+    }
+
+    fetch('/export-selected', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ selectedRows })
+    })
+    .then(response => response.blob())
+    .then(blob => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'selected_vessels.xlsx';
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+    })
+    .catch(error => {
+        console.error('Error exporting data:', error);
+    });
+});
+
+    </script>
 </body>
 </html>

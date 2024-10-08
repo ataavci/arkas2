@@ -159,6 +159,9 @@ app.get("/", (req, res) =>
 app.get("/pool.html", (req, res) =>{
   res.sendFile(path.join(__dirname, "view", "pool.html"))
 });
+app.get("/pooldetails.html", (req, res) =>{
+  res.sendFile(path.join(__dirname, "view", "pooldetails.html"))
+});
 app.get("/ets.html", (req, res) => {
   res.sendFile(path.join(__dirname, "/view", "ets.html"));
 });
@@ -778,5 +781,208 @@ app.get('/api/vessel-report', async (req, res) => {
   } catch (error) {
     console.error('MySQL Hatası:', error);
     res.status(500).json({ error: 'Veri çekilirken bir hata oluştu' });
+  }
+});
+app.post('/save-pool', (req, res) => {
+  const { poolName, tableData } = req.body;
+
+  if (!poolName || !tableData || !tableData.length) {
+      return res.status(400).json({ error: 'Invalid pool name or data' });
+  }
+
+  // `pool_details` tablosuna verileri kaydetme
+  const insertDataQuery = `
+      INSERT INTO pool_details 
+      (pool_name, vessel_name, sefer_tekrar_sayisi, leg_durumu, current_leg, total_distance, eca_distance, sea_fuel_consumption, eca_fuel_consumption, port_fuel_consumption, ets, compliance_balance) 
+      VALUES ?
+  `;
+
+  // Tablo verilerini dizi haline getiriyoruz
+  const values = tableData.map(row => [
+      poolName,                             // Pool ismi
+      row.vessel_name,                      // Gemi adı
+      row.sefer_tekrar_sayisi,              // Sefer tekrar sayısı
+      row.leg_durumu,                       // Leg durumu
+      row.current_leg,                      // Şu anki leg
+      row.total_distance,                   // Toplam mesafe
+      row.eca_distance,                     // ECA mesafesi
+      row.sea_fuel_consumption,             // Deniz yakıt tüketimi
+      row.eca_fuel_consumption,             // ECA yakıt tüketimi
+      row.port_fuel_consumption,            // Liman yakıt tüketimi
+      row.ets,                              // ETS
+      row.compliance_balance                // Uyum bakiyesi
+  ]);
+
+  // Veritabanına verileri ekliyoruz
+  db.query(insertDataQuery, [values], (err, results) => {
+      if (err) {
+          console.error('Error inserting pool details:', err);
+          return res.status(500).json({ error: 'Failed to save pool details' });
+      }
+
+      res.status(200).json({ success: true });
+  });
+});
+app.get('/get-pool-summary', (req, res) => {
+  const query = `
+      SELECT pool_name, SUM(compliance_balance) AS total_compliance_balance 
+      FROM pool_details 
+      GROUP BY pool_name
+  `;
+
+  db.query(query, (err, results) => {
+      if (err) {
+          console.error('Error fetching pool summary:', err);
+          return res.status(500).json({ error: 'Failed to fetch pool summary' });
+      }
+
+      res.status(200).json(results);
+  });
+});
+
+// Pool Details Endpoint (to fetch specific pool details)
+app.get('/get-pool-details/:poolName', (req, res) => {
+  const poolName = req.params.poolName;
+
+  const query = `
+      SELECT * FROM pool_details WHERE pool_name = ?
+  `;
+
+  db.query(query, [poolName], (err, results) => {
+      if (err) {
+          console.error('Error fetching pool details:', err);
+          return res.status(500).json({ error: 'Failed to fetch pool details' });
+      }
+
+      res.status(200).json(results);
+  });
+});
+
+
+// Delete Pool Endpoint
+app.delete('/delete-pool/:poolName', (req, res) => {
+  const poolName = req.params.poolName;
+
+  const deleteQuery = 'DELETE FROM pool_details WHERE pool_name = ?';
+
+  db.query(deleteQuery, [poolName], (err, results) => {
+      if (err) {
+          console.error('Error deleting pool:', err);
+          return res.status(500).json({ error: 'Failed to delete pool' });
+      }
+
+      res.status(200).json({ success: true });
+  });
+});
+app.get('/export-excel', (req, res) => {
+  const query = `
+      SELECT pool_name, SUM(compliance_balance) AS total_compliance_balance 
+      FROM pool_details 
+      GROUP BY pool_name
+  `;
+
+  db.query(query, (err, results) => {
+      if (err) {
+          console.error('Error fetching pool details:', err);
+          return res.status(500).json({ error: 'Failed to fetch pool details' });
+      }
+
+      // Veritabanı sonuçlarını Excel dosyasına çevir
+      const worksheet = XLSX.utils.json_to_sheet(results);
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, "Pool Details");
+
+      // Excel dosyasını kaydet
+      const filePath = 'pool_details.xlsx';
+      XLSX.writeFile(workbook, filePath);
+
+      // Dosyayı frontend'e gönder
+      res.download(filePath, (err) => {
+          if (err) {
+              console.error('Error downloading the Excel file:', err);
+          }
+
+          // Dosyayı indirdikten sonra sunucudan sil
+          fs.unlinkSync(filePath);
+      });
+  });
+});
+app.get('/export-excel2', (req, res) => {
+  const sqlQuery = `
+    SELECT 
+      sefer_7.vessel_name, 
+      MIN(sefer_7.start_date) AS start_date_, 
+      MAX(sefer_7.end_date) AS end_date_, 
+      SUM(sefer_7.distance) AS distance_sum,
+      SUM(sefer_7.distance_eca) AS distance_eca_sum, 
+      AVG(sefer_7.speed) AS speed_avg,
+      ROUND(SUM(sefer_7.port_day + sefer_7.denizde_kalinan_sure),2) AS total_days,
+      SUM(sefer_7.sea_fuel) AS sea_fuel, 
+      SUM(sefer_7.sea_consumption) AS sea_consumption, 
+      SUM(sefer_7.eca_fuel) AS eca_fuel, 
+      SUM(sefer_7.eca_consumption) AS eca_consumption, 
+      SUM(sefer_7.port_fuel) AS port_fuel, 
+      SUM(sefer_7.port_consumption) AS port_consumption,
+      ROUND(SUM(sefer_7.ets),2) AS ets_sum
+    FROM sefer_7
+    GROUP BY sefer_7.vessel_name
+  `; 
+
+  db.query(sqlQuery, (err, results) => {
+      if (err) {
+          console.error('Error fetching data:', err);
+          return res.status(500).json({ error: 'Error fetching data from database' });
+      }
+
+      // Veritabanı sonuçlarını Excel formatına çevir
+      const worksheet = xlsx.utils.json_to_sheet(results);
+      const workbook = xlsx.utils.book_new();
+      xlsx.utils.book_append_sheet(workbook, worksheet, 'Vessel Data');
+
+      // Excel dosyasını kaydet
+      const filePath = path.join(__dirname, 'vessel_data.xlsx');
+      xlsx.writeFile(workbook, filePath);
+
+      // Dosyayı frontend'e gönder
+      res.download(filePath, (err) => {
+          if (err) {
+              console.error('Error sending the Excel file:', err);
+          }
+
+          // Dosyayı indirdikten sonra sunucudan sil
+          fs.unlinkSync(filePath);
+      });
+  });
+});
+app.post('/export-selected', (req, res) => {
+  const { selectedRows } = req.body;
+
+  if (!selectedRows || selectedRows.length === 0) {
+      return res.status(400).json({ error: 'No rows selected for export.' });
+  }
+
+  try {
+      // Verileri Excel formatına dönüştür
+      const worksheet = xlsx.utils.json_to_sheet(selectedRows);
+      const workbook = xlsx.utils.book_new();
+      xlsx.utils.book_append_sheet(workbook, worksheet, 'Selected Vessels');
+
+      // Excel dosyasını kaydet
+      const filePath = path.join(__dirname, 'selected_vessels.xlsx');
+      xlsx.writeFile(workbook, filePath);
+
+      // Dosyayı frontend'e gönder
+      res.download(filePath, (err) => {
+          if (err) {
+              console.error('Error sending the Excel file:', err);
+              return res.status(500).json({ error: 'Failed to send the file.' });
+          }
+
+          // Dosyayı indirdikten sonra sunucudan sil
+          fs.unlinkSync(filePath);
+      });
+  } catch (error) {
+      console.error('Error creating Excel file:', error);
+      res.status(500).json({ error: 'Failed to create Excel file.' });
   }
 });

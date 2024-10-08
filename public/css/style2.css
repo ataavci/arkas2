@@ -1070,5 +1070,33 @@ input[type="date"]:focus {
 .chart-box {
   width: 48%;
 }
+.text-zero {
+  color: #00FF00 !important; /* Tam yeşil */
+}
 
+/* Compliance Balance pozitifse */
+.text-positive {
+  color: #7FFF00 !important; /* Açık yeşil */
+}
 
+/* Compliance Balance negatifse */
+.text-negative {
+  color: #FF0000 !important; /* Kırmızı */
+}
+.modal-dialog {
+  max-width: 70%; /* Modal genişliğini yüzdeye göre ayarladık */
+  width: auto; /* İçeriğe göre genişlik */
+}
+
+/* Tabloyu modal içine sığdırmak */
+.modal-body {
+  overflow-x: auto; /* Tablo genişse yatay kaydırma */
+}
+
+.table-striped {
+  width: 100%; /* Tablo genişliğini yüzde 100 yaparak sığmasını sağla */
+}
+.pool-name {
+  cursor: pointer;
+  color: blue;
+}
