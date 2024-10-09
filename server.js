@@ -762,27 +762,32 @@ app.get('/api/get-vessel-data2', (req, res) => {
   });
 });
 app.get('/api/vessel-report', async (req, res) => {
-  const { startDate, endDate, vessels } = req.query;
-
-  // Gelen vessel isimlerini virgül ile ayırıp bir diziye dönüştürüyoruz
-  const vesselArray = vessels.split(',').map(vessel => vessel.trim()); 
+  let { startDate, endDate, vessels } = req.query;
+  startDate = startDate || null;
+  endDate = endDate || null;
+  const vesselArray = vessels ? vessels.split(',').map(vessel => vessel.trim()) : [];
 
   try {
-    // Tüm gemiler için stored procedure'ü çağırıyoruz (sadece startDate ve endDate kullanıyoruz)
     const [rows] = await db.promise().execute(
       'CALL GetConsumptionAndETS(?, ?)', [startDate, endDate]
     );
 
-    // Sonuçları yalnızca seçilen vessel'lara göre filtreliyoruz
-    const filteredResults = rows[0].filter(row => vesselArray.includes(row.vessel_name));
+    console.log('Stored procedure results:', rows[0]);
 
-    // Filtrelenmiş sonuçları JSON formatında geri döndürüyoruz
+    const filteredResults = vesselArray.length > 0
+      ? rows[0].filter(row => vesselArray.includes(row.vessel_name))
+      : rows[0];
+
+    console.log('Filtered results:', filteredResults);
+
     res.json(filteredResults);
   } catch (error) {
-    console.error('MySQL Hatası:', error);
-    res.status(500).json({ error: 'Veri çekilirken bir hata oluştu' });
+    console.error('MySQL Hatası:', error.message);
+    res.status(500).json({ error: 'Veri çekilirken bir hata oluştu', details: error.message });
   }
 });
+
+
 app.post('/save-pool', (req, res) => {
   const { poolName, tableData } = req.body;
 
