@@ -3,7 +3,7 @@ const path = require("path");
 const bodyParser = require("body-parser");
 const xlsx = require("xlsx");
 const moment = require('moment');
-
+const excelJS = require('exceljs');
 const db = require("./data/db"); // Veritabanı bağlantısı
 const cors = require("cors");
 const fileUpload = require("express-fileupload");
@@ -990,4 +990,70 @@ app.post('/export-selected', (req, res) => {
       console.error('Error creating Excel file:', error);
       res.status(500).json({ error: 'Failed to create Excel file.' });
   }
+});
+
+app.get('/export-excel3', (req, res) => {
+  const sqlQuery = `
+    SELECT 
+    sefer_7.vessel_name,
+   
+   
+   ROUND( SUM(sefer_7.port_day + sefer_7.denizde_kalinan_sure),2) AS duration,
+    
+    CONCAT(
+        sefer_7.sea_fuel, ', ',
+        sefer_7.consumption_100_sea, ', ',
+        sefer_7.eca_fuel, ', ',
+        sefer_7.consumption_100_eca, ', ',
+        sefer_7.port_fuel, ', ',
+        sefer_7.consumption_100_port
+    ) AS intra_eu,
+    
+    CONCAT(
+        sefer_7.sea_fuel, ', ',
+        sefer_7.consumption_50_sea, ', ',
+        sefer_7.eca_fuel, ', ',
+        sefer_7.consumption_50_eca, ', ',
+        sefer_7.port_fuel, ', ',
+        sefer_7.consumption_0_port
+    ) AS extra_eu,
+    
+    SUM(sefer_7.TTW + sefer_7.WTT) AS ghg_intensity,
+    89.34 AS ghg_target, 
+    SUM(sefer_7.COMPLIANCE_BALANCE) AS compliance_balance,
+    (ABS(SUM(sefer_7.COMPLIANCE_BALANCE))/SUM(sefer_7.TTW + sefer_7.WTT)*41000)*2400 as penalty
+
+FROM 
+    sefer_7
+
+   
+GROUP BY 
+    sefer_7.vessel_name
+  `; 
+
+  db.query(sqlQuery, (err, results) => {
+      if (err) {
+          console.error('Error fetching data:', err);
+          return res.status(500).json({ error: 'Error fetching data from database' });
+      }
+
+      // Veritabanı sonuçlarını Excel formatına çevir
+      const worksheet = xlsx.utils.json_to_sheet(results);
+      const workbook = xlsx.utils.book_new();
+      xlsx.utils.book_append_sheet(workbook, worksheet, 'Vessel Data CII');
+
+      // Excel dosyasını kaydet
+      const filePath = path.join(__dirname, 'vessel_data_cii.xlsx');
+      xlsx.writeFile(workbook, filePath);
+
+      // Dosyayı frontend'e gönder
+      res.download(filePath, (err) => {
+          if (err) {
+              console.error('Error sending the Excel file:', err);
+          }
+
+          // Dosyayı indirdikten sonra sunucudan sil
+          fs.unlinkSync(filePath);
+      });
+  });
 });
