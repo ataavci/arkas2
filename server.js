@@ -912,53 +912,39 @@ app.get('/export-excel', (req, res) => {
       });
   });
 });
-app.get('/export-excel2', (req, res) => {
-  const sqlQuery = `
-    SELECT 
-      sefer_7.vessel_name, 
-      MIN(sefer_7.start_date) AS start_date_, 
-      MAX(sefer_7.end_date) AS end_date_, 
-      SUM(sefer_7.distance) AS distance_sum,
-      SUM(sefer_7.distance_eca) AS distance_eca_sum, 
-      AVG(sefer_7.speed) AS speed_avg,
-      ROUND(SUM(sefer_7.port_day + sefer_7.denizde_kalinan_sure),2) AS total_days,
-      SUM(sefer_7.sea_fuel) AS sea_fuel, 
-      SUM(sefer_7.sea_consumption) AS sea_consumption, 
-      SUM(sefer_7.eca_fuel) AS eca_fuel, 
-      SUM(sefer_7.eca_consumption) AS eca_consumption, 
-      SUM(sefer_7.port_fuel) AS port_fuel, 
-      SUM(sefer_7.port_consumption) AS port_consumption,
-      ROUND(SUM(sefer_7.ets),2) AS ets_sum
-    FROM sefer_7
-    GROUP BY sefer_7.vessel_name
-  `; 
+app.post('/export-excel2', (req, res) => {
+  const { selectedRows } = req.body;
 
-  db.query(sqlQuery, (err, results) => {
-      if (err) {
-          console.error('Error fetching data:', err);
-          return res.status(500).json({ error: 'Error fetching data from database' });
-      }
+  if (!selectedRows || selectedRows.length === 0) {
+      return res.status(400).json({ error: 'No rows selected for export.' });
+  }
 
-      // Veritabanı sonuçlarını Excel formatına çevir
-      const worksheet = xlsx.utils.json_to_sheet(results);
+  try {
+      // Verileri Excel formatına dönüştür
+      const worksheet = xlsx.utils.json_to_sheet(selectedRows);
       const workbook = xlsx.utils.book_new();
-      xlsx.utils.book_append_sheet(workbook, worksheet, 'Vessel Data');
+      xlsx.utils.book_append_sheet(workbook, worksheet, 'Selected Vessels');
 
-      // Excel dosyasını kaydet
-      const filePath = path.join(__dirname, 'vessel_data.xlsx');
+      // Excel dosyasını oluştur
+      const filePath = path.join(__dirname, 'selected_vessels.xlsx');
       xlsx.writeFile(workbook, filePath);
 
       // Dosyayı frontend'e gönder
       res.download(filePath, (err) => {
           if (err) {
               console.error('Error sending the Excel file:', err);
+              return res.status(500).json({ error: 'Failed to send the file.' });
           }
 
           // Dosyayı indirdikten sonra sunucudan sil
           fs.unlinkSync(filePath);
       });
-  });
+  } catch (error) {
+      console.error('Error creating Excel file:', error);
+      res.status(500).json({ error: 'Failed to create Excel file.' });
+  }
 });
+
 app.post('/export-selected', (req, res) => {
   const { selectedRows } = req.body;
 

@@ -73,8 +73,9 @@
                         <h2 class="h2 fw-bold mx-sm-3 mx-xl-4 my-3">ETS Data Table</h2>
                     </div>
                     <div class="downland-pdf-button-div">
-                        <button class="btn btn-outline-success">Export to Excel</button>
+                        <button id="exportExcel" class="btn btn-outline-success">Export to Excel</button>
                     </div>
+                    
                 </div>
 
 
@@ -353,8 +354,52 @@ document.querySelector("#vesselTable tbody").addEventListener('click', function 
 
 // Excel dosyasını indirme işlemi
 document.getElementById('exportExcel').addEventListener('click', () => {
-    window.location.href = '/export-excel2'; // Excel dosyasını indir
+    const selectedRows = [];
+    const tableHeaders = [];
+
+    // Tablodaki sütun başlıklarını al
+    document.querySelectorAll('#vesselTable thead th').forEach((header, index) => {
+        tableHeaders.push(header.innerText); // Sütun başlıklarını diziye ekliyoruz
+    });
+
+    // Tablodaki verileri al (sadece görünür olanları)
+    document.querySelectorAll('#vesselTable tbody tr').forEach(row => {
+        const rowData = {};
+        row.querySelectorAll('td').forEach((cell, index) => {
+            rowData[tableHeaders[index]] = cell.innerText; // Her hücreyi ilgili sütun başlığıyla eşleştiriyoruz
+        });
+        selectedRows.push(rowData); // Satırı listeye ekliyoruz
+    });
+
+    // Verileri sunucuya gönder
+    fetch('/export-excel2', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ selectedRows }) // Seçilen satırları JSON formatında gönderiyoruz
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Excel dosyası indirme hatası');
+        }
+        return response.blob(); // Excel dosyasını blob olarak alıyoruz
+    })
+    .then(blob => {
+        // Excel dosyasını indirmek için URL oluşturuyoruz
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'selected_vessels.xlsx';
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+    })
+    .catch(error => {
+        console.error('Excel export hatası:', error);
+    });
 });
+
 
 
                 </script>
