@@ -1057,3 +1057,74 @@ GROUP BY
       });
   });
 });
+app.get('/api/vessel-ets', (req, res) => {
+  const sqlQuery = `
+    SELECT vessel_name, SUM(ets) AS monthly_ets 
+    FROM sefer_7 
+    GROUP BY vessel_name 
+    ORDER BY vessel_name;
+  `;
+
+  db.query(sqlQuery, (err, result) => {
+    if (err) throw err;
+    res.json(result); // Send the result as JSON
+  });
+});
+
+app.get('/api/monthly-ets', (req, res) => {
+  const sqlQuery = `
+    SELECT 
+      DATE_FORMAT(start_date, '%Y-%m') AS month, -- Extracting the month in 'YYYY-MM' format
+      ROUND(SUM(ets), 2) AS monthly_ets          -- Calculating monthly ETS
+    FROM 
+      sefer_7
+    GROUP BY 
+      DATE_FORMAT(start_date, '%Y-%m') -- Grouping by month
+    ORDER BY 
+      month;
+  `;
+
+  db.query(sqlQuery, (err, result) => {
+    if (err) throw err;
+    res.json(result); // Send the result as JSON
+  });
+});
+app.get('/api/monthly-fuel-consumption', (req, res) => {
+  const sqlQuery = `
+    SELECT 
+      DATE_FORMAT(start_date, '%Y-%m') AS month, -- Extracting the month in 'YYYY-MM' format
+      ROUND(SUM(Fuel_Consumption_Total), 2) AS fuel_total -- Calculating total fuel consumption for each month
+    FROM 
+      sefer_7
+    GROUP BY 
+      DATE_FORMAT(start_date, '%Y-%m') -- Grouping by month
+    ORDER BY 
+      month;
+  `;
+
+  db.query(sqlQuery, (err, result) => {
+    if (err) throw err;
+    res.json(result); // Send the result as JSON
+  });
+});
+app.get('/api/monthly-fuel-vessels', (req, res) => {
+  const sqlQuery = `
+    SELECT 
+      vessel_name,
+      DATE_FORMAT(start_date, '%Y-%m') AS month, -- Extracting the month in 'YYYY-MM' format
+      ROUND(SUM(Fuel_Consumption_Total), 2) AS fuel_total -- Calculating total fuel consumption for each vessel in a given month
+    FROM 
+      sefer_7
+    GROUP BY 
+      vessel_name,                               -- Grouping by vessel name
+      DATE_FORMAT(start_date, '%Y-%m')           -- Grouping by month
+    ORDER BY 
+      month,                                     -- Ordering by month
+      vessel_name;                               -- Then by vessel name
+  `;
+
+  db.query(sqlQuery, (err, result) => {
+    if (err) throw err;
+    res.json(result); // Send the result as JSON
+  });
+});
