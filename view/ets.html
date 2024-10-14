@@ -1,239 +1,165 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vessel Dashboard</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
-    <link rel="stylesheet" href="/static/css/style2.css">
 
-    <style>
-        .modal {
-    display: none; 
-    position: fixed; 
-    z-index: 1; 
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    overflow: auto;
-    
-    
-}
+    <link rel="stylesheet" href="/static/css/dashboard.css">
 
-.modal-content {
-    background-color: white;
-    margin: 15% auto;
-    padding: 20px;
-    border: 1px solid #888;
-    width: 60%;
-}
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Montserrat">
 
-.modal-step {
-    display: block;
-}
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
 
-.modal-step h2 {
-    margin-bottom: 20px;
-}
-
-.btn {
-    padding: 10px 20px;
-    margin-top: 20px;
-}
-
-        /* CSS for hover effect on Vessel Name */
-        #vesselTable tbody tr td.vessel-name:hover {
-            background-color: green;
-            color: white;
-            cursor: pointer;
-        }
-
-        /* Modal styling */
-        
-        .close {
-            color: #aaa;
-            float: right;
-            font-size: 28px;
-            font-weight: bold;
-        }
-        .close:hover, .close:focus {
-            color: black;
-            text-decoration: none;
-            cursor: pointer;
-        }
-    </style>
+    <title>Erkport</title>
 </head>
+
 <body>
-    <!-- SIDEBAR -->
-    <section id="sidebar">
-        <a href="#" class="brand">
-            <i class='bx bxs-smile'></i>
-            <span class="text">Dashboard</span>
-        </a>
-        <ul class="side-menu top">
-            <li class="active">
-                <a href="./">
-                    <i class='bx bxs-dashboard'></i>
-                    <span class="text">DASHBOARD</span>
-                </a>
-            </li>
-            <li>
-                <a href="./ets.html">
-                    <i class='bx bxs-shopping-bag-alt'></i>
-                    <span class="text">ETS</span>
-                </a>
-            </li>
-            <li>
-                <a href="./cii.html">
-                    <i class='bx bxs-shopping-bag-alt'></i>
-                    <span class="text">CII</span>
-                </a>
-            </li>
-            <li>
-                <a href="./fuel_eu.html">
-                    <i class='bx bxs-doughnut-chart'></i>
-                    <span class="text">FUEL EU</span>
-                </a>
-            </li>
-            <li>
-                <a href="./input.html">
-                    <i class='bx bxs-message-dots'></i>
-                    <span class="text">INPUT</span>
-                </a>
-            </li>
-            <li>
-                <a href="./pool.html">
-                    <i class='bx bxs-message-dots'></i>
-                    <span class="text">pool</span>
-                </a>
-            </li>
-        </ul>
-        <ul class="side-menu">
-            <li>
-                <a href="#" class="logout">
-                    <i class='bx bxs-log-out-circle'></i>
-                    <span class="text">Logout</span>
-                </a>
-            </li>
-        </ul>
-    </section>
-    <!-- SIDEBAR -->
 
-    <!-- CONTENT -->
-    <section id="content-dashboard">
-        <!-- NAVBAR -->
-        <nav>
-            <i class='bx bx-menu'></i>
-            <a href="#" class="nav-link">Search</a>
-            <form action="#">
-                <div class="form-input">
-                    <input type="search" placeholder="Search...">
-                    <button type="submit" class="search-btn"><i class='bx bx-search'></i></button>
-                </div>
-            </form>
-            <input type="checkbox" id="switch-mode" hidden>
-            <label for="switch-mode" class="switch-mode"></label>
-            <a href="#" class="notification">
-                <i class='bx bxs-bell'></i>
-            </a>
-        </nav>
-        <!-- NAVBAR -->
+    <div class="container-fluid py-2">
+        <div class="row d-flex">
 
-        <!-- MAIN -->
-        <main>
-            <div class="head-title">
-                <div class="left">
-                    <h1>Dashboard</h1>
-                    <ul class="breadcrumb">
-                        <li>
-                            <a href="#">Dashboard</a>
-                        </li>
-                        <li><i class='bx bx-chevron-right'></i></li>
-                    </ul>
-                </div>
-                <button id="exportExcel" class="btn btn-success">Export to Excel</button>
-            </div>
+            <div class="container col-sm-12 col-md-3 col-xl-2 mb-sm-5 nav-div">
 
-            <h1>ETS Data Table</h1>
-
-            <!-- Modal button -->
-            <button id="showSelectedVessel" class="btn btn-primary">Show Selected Vessel</button>
-
-            <!-- Modal Structure -->
-            <div id="vesselModal" class="modal">
-                <div class="modal-content">
-                    <span class="close">&times;</span>
-                    
-                    <!-- Step 1: Vessel Selection -->
-                    <div id="step1">
-                        <h2>Select Vessels</h2>
-                        <div id="vesselCheckboxes"></div>
-                        <label><input type="checkbox" id="selectAllVessels"> Select All Vessels</label><br><br>
-                        <button id="nextStep" class="btn btn-secondary">Next</button>
-                    </div>
-
-                    <!-- Step 2: Column Selection -->
-                    <div id="step2" style="display:none;">
-                        <h2>Select Columns</h2>
-                        <div id="columnCheckboxes">
-                            <label><input type="checkbox" value="distance" checked> Total Distance</label><br>
-                            <label><input type="checkbox" value="eca_distance" checked> Total ECA Distance</label><br>
-                            <label><input type="checkbox" value="speed" checked> Average Speed</label><br>
-                            <label><input type="checkbox" value="total_days" checked> Total Days</label><br>
-                            <label><input type="checkbox" value="sea_fuel" checked> Sea Fuel</label><br>
-                            <label><input type="checkbox" value="sea_consumption" checked> Sea Consumption</label><br>
-                            <label><input type="checkbox" value="eca_fuel" checked> ECA Fuel</label><br>
-                            <label><input type="checkbox" value="eca_consumption" checked> ECA Consumption</label><br>
-                            <label><input type="checkbox" value="port_fuel" checked> Port Fuel</label><br>
-                            <label><input type="checkbox" value="port_consumption" checked> Port Consumption</label><br>
-                            <label><input type="checkbox" value="ets" checked> ETS</label><br>
+                <nav>
+                    <div class="container-fluid">
+                        <div class="navbar-brand col-12">
+                            <img src="/static/image/erk.png" class="w-100" alt="arkas logo">
                         </div>
-                        <button id="showData" class="btn btn-success">Show Data</button>
+
+                        <hr>
+
+                        <div class="container-fluid">
+                            <ul class="menu-links my-2 p-2 col-12">
+                                <li class="nav-item">
+                                    <a class="nav-link" href="index.html">DASHBOARD</a>
+                                </li>
+
+                                <li class="nav-item">
+                                    <a class="nav-link" href="ets.html">ETS</a>
+                                </li>
+
+                                <li class="nav-item">
+                                    <a class="nav-link" href="#">CII</a>
+                                </li>
+
+                                <li class="nav-item">
+                                    <a class="nav-link" href="#">FUEL EU</a>
+                                </li>
+
+                                <li class="nav-item">
+                                    <a class="nav-link" href="#">INPUT</a>
+                                </li>
+
+                                <li class="nav-item">
+                                    <a class="nav-link" href="#">POOL</a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="logout-button-div">
+                        <button class="btn btn-danger logout-button fw-bold col-12">Logout</button>
+                    </div>
+
+                </nav>
+            </div>
+
+            <div class="container-fluid col-sm-12 col-md-9 col-xl-10 mt-sm-2 mt-md-2 pt-3 px-4">
+
+                <div class="container header-and-button">
+                    <div class="header">
+                        <h2 class="h2 fw-bold mx-sm-3 mx-xl-4 my-3">ETS Data Table</h2>
+                    </div>
+                    <div class="downland-pdf-button-div">
+                        <button class="btn btn-outline-success">Export to Excel</button>
                     </div>
                 </div>
-            </div>
 
-            <div class="table-responsive">
-                <table id="vesselTable" class="table table-bordered">
-                    <thead class="table-dark">
-                        <tr>
-                            <th class="vessel-name">Vessel Name</th>
-                            <th class="distance">Total Distance</th>
-                            <th class="eca_distance">Total ECA Distance</th>
-                            <th class="speed">Average Speed</th>
-                            <th class="total_days">Total Days</th>
-                            <th class="sea_fuel">Sea Fuel</th>
-                            <th class="sea_consumption">Sea Consumption</th>
-                            <th class="eca_fuel">ECA Fuel</th>
-                            <th class="eca_consumption">ECA Consumption</th>
-                            <th class="port_fuel">Port Fuel</th>
-                            <th class="port_consumption">Port Consumption</th>
-                            <th class="ets">ETS</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <!-- Dinamik veri buraya fetch ile yüklenecek -->
-                    </tbody>
-                </table>
-            </div>
 
-            <button id="backToMainTable" class="btn btn-warning" style="display:none;">Back to Main Table</button>
-        </main>
-    </section>
 
-    <script>
-       let originalData = []; // To store the original data
 
-// Fetch vessel data initially
+                <button id="showSelectedVessel" class="btn btn-warning mt-4 mb-3">Show Selected Vessel</button>
+
+                <!-- Modal Structure -->
+                <div id="vesselModal" class="modal">
+                    <div class="modal-content">
+                        <span class="close">&times;</span>
+
+                        <!-- Step 1: Vessel Selection -->
+                        <div id="step1">
+                            <h2>Select Vessels</h2>
+                            <div id="vesselCheckboxes"></div>
+                            <label><input type="checkbox" id="selectAllVessels"> Select All Vessels</label><br><br>
+                            <button id="nextStep" class="btn btn-dark">Next</button>
+                        </div>
+
+                        <!-- Step 2: Column Selection -->
+                        <div id="step2" style="display:none;">
+                            <h2>Select Columns</h2>
+                            <div id="columnCheckboxes">
+                                <label><input type="checkbox" value="distance" checked> Total Distance</label><br>
+                                <label><input type="checkbox" value="eca_distance" checked> Total ECA
+                                    Distance</label><br>
+                                <label><input type="checkbox" value="speed" checked> Average Speed</label><br>
+                                <label><input type="checkbox" value="total_days" checked> Total Days</label><br>
+                                <label><input type="checkbox" value="sea_fuel" checked> Sea Fuel</label><br>
+                                <label><input type="checkbox" value="sea_consumption" checked> Sea
+                                    Consumption</label><br>
+                                <label><input type="checkbox" value="eca_fuel" checked> ECA Fuel</label><br>
+                                <label><input type="checkbox" value="eca_consumption" checked> ECA
+                                    Consumption</label><br>
+                                <label><input type="checkbox" value="port_fuel" checked> Port Fuel</label><br>
+                                <label><input type="checkbox" value="port_consumption" checked> Port
+                                    Consumption</label><br>
+                                <label><input type="checkbox" value="ets" checked> ETS</label><br>
+                            </div>
+                            <button id="showData" class="btn btn-primary">Show Data</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="table-responsive">
+                    <table id="vesselTable" class="table table-responsive" style="max-height: 440px; overflow-y: auto;">
+                        <thead class="table-warning">
+                            <tr>
+                                <th class="vessel-name">Vessel Name</th>
+                                <th class="distance">Total Distance</th>
+                                <th class="eca_distance">Total ECA Distance</th>
+                                <th class="speed">Average Speed</th>
+                                <th class="total_days">Total Days</th>
+                                <th class="sea_fuel">Sea Fuel</th>
+                                <th class="sea_consumption">Sea Consumption</th>
+                                <th class="eca_fuel">ECA Fuel</th>
+                                <th class="eca_consumption">ECA Consumption</th>
+                                <th class="port_fuel">Port Fuel</th>
+                                <th class="port_consumption">Port Consumption</th>
+                                <th class="ets">ETS</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Dinamik veri buraya fetch ile yüklenecek -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <button id="backToMainTable" class="btn btn-warning" style="display:none;">Back to Main Table</button>
+                </main>
+                </section>
+
+                <script>
+                    let originalData = []; // Verilerin saklanacağı dizi
+
+// Gemi verilerini çekme işlemi
 fetch('/api/get-vessel-data')
     .then(response => response.json())
     .then(data => {
-        originalData = data; // Store original data
-        populateTable(data);
-        populateModalWithVessels(data);
+        originalData = data; // Verileri sakla
+        populateTable(data); // Tabloyu doldur
+        populateModalWithVessels(data); // Modal için gemileri doldur
     })
-    .catch(error => console.error('Error fetching vessel data:', error));
+    .catch(error => console.error('Gemi verileri alınırken hata oluştu:', error));
 
 // Modal açma ve kapama işlemleri
 const modal = document.getElementById("vesselModal");
@@ -242,8 +168,8 @@ const closeModalBtn = document.querySelector(".close");
 
 showSelectedVesselBtn.onclick = () => {
     modal.style.display = "block";
-    document.getElementById('step1').style.display = 'block'; // Show Step 1
-    document.getElementById('step2').style.display = 'none'; // Hide Step 2
+    document.getElementById('step1').style.display = 'block'; // Adım 1'i göster
+    document.getElementById('step2').style.display = 'none'; // Adım 2'yi gizle
 };
 
 closeModalBtn.onclick = () => modal.style.display = "none";
@@ -253,58 +179,58 @@ window.onclick = (event) => {
     }
 };
 
-// Handle 'Next' button click
+// 'Next' butonuna tıklanınca adımları değiştir
 document.getElementById('nextStep').addEventListener('click', () => {
     document.getElementById('step1').style.display = 'none';
     document.getElementById('step2').style.display = 'block';
 });
 
-// Handle 'Show' button click - Apply selected filters
+// Filtreleri uygulama işlemi
 document.getElementById('showData').addEventListener('click', () => {
-    // Get selected vessels
+    // Seçilen gemileri al
     const selectedVessels = Array.from(document.querySelectorAll('#vesselCheckboxes input:checked')).map(checkbox => checkbox.value);
 
-    // Get selected columns
+    // Seçilen sütunları al
     const selectedColumns = Array.from(document.querySelectorAll('#columnCheckboxes input:checked')).map(checkbox => checkbox.value);
 
-    // Filter data based on selected vessels
+    // Seçilen gemilere göre veriyi filtrele
     const filteredData = selectedVessels.length > 0 ? originalData.filter(row => selectedVessels.includes(row.vessel_name)) : originalData;
 
-    // Populate table with filtered data
+    // Filtrelenmiş tabloyu doldur
     populateTable(filteredData);
 
-    // Show only selected columns
+    // Yalnızca seçilen sütunları göster
     document.querySelectorAll('#vesselTable th, #vesselTable td').forEach(cell => {
         const columnClass = cell.className;
         if (selectedColumns.includes(columnClass) || columnClass === 'vessel-name') {
-            cell.style.display = ''; // Show selected columns
+            cell.style.display = ''; // Seçilen sütunları göster
         } else {
-            cell.style.display = 'none'; // Hide unselected columns
+            cell.style.display = 'none'; // Seçilmeyen sütunları gizle
         }
     });
 
-    // Close modal after showing data
+    // Modalı kapat
     modal.style.display = 'none';
 
-    // Show back button
+    // Geri butonunu göster
     document.getElementById('backToMainTable').style.display = 'inline-block';
 });
 
-// Back to main table functionality
+// Geri butonu işlevi (orijinal tabloyu geri yükleme)
 document.getElementById('backToMainTable').addEventListener('click', () => {
-    // Repopulate table with original data
+    // Orijinal verilerle tabloyu doldur
     populateTable(originalData);
 
-    // Reset column visibility to show all columns
+    // Tüm sütunları göster
     document.querySelectorAll('#vesselTable th, #vesselTable td').forEach(cell => {
-        cell.style.display = ''; // Show all columns
+        cell.style.display = ''; // Tüm sütunları göster
     });
 
-    // Hide back button
+    // Geri butonunu gizle
     document.getElementById('backToMainTable').style.display = 'none';
 });
 
-// Modalda vessel isimlerini dinamik olarak eklemek için fonksiyon
+// Modalda gemi isimlerini dinamik olarak ekleme işlevi
 function populateModalWithVessels(data) {
     const vesselCheckboxes = document.getElementById('vesselCheckboxes');
     vesselCheckboxes.innerHTML = '';
@@ -317,8 +243,8 @@ function populateModalWithVessels(data) {
         vesselCheckboxes.appendChild(label);
     });
 
-    // Select All functionality
-    document.getElementById('selectAllVessels').addEventListener('change', function() {
+    // Select All işlevi
+    document.getElementById('selectAllVessels').addEventListener('change', function () {
         const vesselCheckboxes = document.querySelectorAll('#vesselCheckboxes input[type="checkbox"]');
         vesselCheckboxes.forEach(checkbox => {
             checkbox.checked = this.checked;
@@ -326,13 +252,13 @@ function populateModalWithVessels(data) {
     });
 }
 
-// Tabloyu dinamik verilerle doldurmak için fonksiyon
+// Tabloyu dinamik verilerle doldurmak için işlev
 function populateTable(data) {
     const tableBody = document.querySelector("#vesselTable tbody");
     tableBody.innerHTML = '';
 
     if (data.length === 0) {
-        tableBody.innerHTML = '<tr><td colspan="12">No data available</td></tr>';
+        tableBody.innerHTML = '<tr><td colspan="12">Veri yok</td></tr>';
         return;
     }
 
@@ -354,89 +280,95 @@ function populateTable(data) {
         `;
         tableBody.appendChild(tr);
     });
-
-    // Add click event listener to each row for showing detailed data
-    tableBody.addEventListener('click', function(event) {
-        const target = event.target;
-        if (target.classList.contains('vessel-name')) {
-            const vesselName = target.innerText;
-            const parentRow = target.parentNode;
-
-            // Eğer detay satırı varsa, onu kaldır (kapatma)
-            if (parentRow.nextElementSibling && parentRow.nextElementSibling.classList.contains('details-row')) {
-                parentRow.nextElementSibling.remove();
-            } else {
-                // Fetch detail data and show in a new row below the selected vessel
-                fetch(`/api/get-vessel-detail?vessel_name=${vesselName}`)
-                    .then(response => response.json())
-                    .then(detailData => {
-                        const detailRow = document.createElement('tr');
-                        detailRow.classList.add('details-row');
-
-                        // Detay tablosunu oluşturuyoruz
-                        detailRow.innerHTML = `
-                            <td colspan="12">
-                                <table class="table table-bordered">
-                                    <thead class="table-dark">
-                                        <tr>
-                                            <th>From - To</th>
-                                            <th>Total Distance</th>
-                                            <th>Total ECA Distance</th>
-                                            <th>Average Speed</th>
-                                            <th>Total Days</th>
-                                            <th>Sea Fuel</th>
-                                            <th>Sea Consumption</th>
-                                            <th>ECA Fuel</th>
-                                            <th>ECA Consumption</th>
-                                            <th>Port Fuel</th>
-                                            <th>Port Consumption</th>
-                                            <th>ETS</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        ${detailData.map(det => `
-                                            <tr>
-                                                <td>${det.from_liman} - ${det.to_liman}</td>
-                                                <td>${det.distance_sum || 'N/A'}</td>
-                                                <td>${det.distance_eca_sum || 'N/A'}</td>
-                                                <td>${det.speed_avg || 'N/A'}</td>
-                                                <td>${det.total_days || 'N/A'}</td>
-                                                <td>${det.sea_fuel || 'N/A'}</td>
-                                                <td>${det.sea_consumption || 'N/A'}</td>
-                                                <td>${det.eca_fuel || 'N/A'}</td>
-                                                <td>${det.eca_consumption || 'N/A'}</td>
-                                                <td>${det.port_fuel || 'N/A'}</td>
-                                                <td>${det.port_consumption || 'N/A'}</td>
-                                                <td>${det.ets_sum || 'N/A'}</td>
-                                            </tr>
-                                        `).join('')}
-                                    </tbody>
-                                </table>
-                            </td>
-                        `;
-
-                        // Yeni detay satırını, tıklanan satırın altına ekliyoruz
-                        parentRow.insertAdjacentElement('afterend', detailRow);
-                    })
-                    .catch(error => console.error('Error fetching detail data:', error));
-            }
-        }
-    });
 }
-fetch('/api/get-vessel-data')
-            .then(response => response.json())
-            .then(data => {
-                populateTable(data);  // Tabloyu doldur
-            })
-            .catch(error => console.error('Error fetching vessel data:', error));
 
-        // Excel Export butonuna tıklandığında
-        document.getElementById('exportExcel').addEventListener('click', () => {
-            window.location.href = '/export-excel2'; // Excel dosyasını indirme isteği gönder
-        });
+// Sadece bir kez tabloya tıklama olayını ekleyin (çift tıklama olaylarını önlemek için)
+document.querySelector("#vesselTable tbody").addEventListener('click', function (event) {
+    const target = event.target;
+
+    if (target.classList.contains('vessel-name')) {
+        const vesselName = target.innerText;
+        const parentRow = target.parentNode;
+
+        // Eğer bir detay satırı zaten varsa onu kaldır (kapat)
+        if (parentRow.nextElementSibling && parentRow.nextElementSibling.classList.contains('details-row')) {
+            parentRow.nextElementSibling.remove(); // Detay satırını kapat
+        } else {
+            // Mevcut tüm detay satırlarını kaldır (her tıklamada temizlenir)
+            document.querySelectorAll('.details-row').forEach(row => row.remove());
+
+            // Detay verilerini API'den çek ve göster
+            fetch(`/api/get-vessel-detail?vessel_name=${vesselName}`)
+                .then(response => response.json())
+                .then(detailData => {
+                    const detailRow = document.createElement('tr');
+                    detailRow.classList.add('details-row');
+
+                    detailRow.innerHTML = `
+                        <td colspan="12">
+                            <table class="table table-bordered">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th>From - To</th>
+                                        <th>Total Distance</th>
+                                        <th>Total ECA Distance</th>
+                                        <th>Average Speed</th>
+                                        <th>Total Days</th>
+                                        <th>Sea Fuel</th>
+                                        <th>Sea Consumption</th>
+                                        <th>ECA Fuel</th>
+                                        <th>ECA Consumption</th>
+                                        <th>Port Fuel</th>
+                                        <th>Port Consumption</th>
+                                        <th>ETS</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${detailData.map(det => `
+                                        <tr>
+                                            <td>${det.from_liman} - ${det.to_liman}</td>
+                                            <td>${det.distance_sum || 'N/A'}</td>
+                                            <td>${det.distance_eca_sum || 'N/A'}</td>
+                                            <td>${det.speed_avg || 'N/A'}</td>
+                                            <td>${det.total_days || 'N/A'}</td>
+                                            <td>${det.sea_fuel || 'N/A'}</td>
+                                            <td>${det.sea_consumption || 'N/A'}</td>
+                                            <td>${det.eca_fuel || 'N/A'}</td>
+                                            <td>${det.eca_consumption || 'N/A'}</td>
+                                            <td>${det.port_fuel || 'N/A'}</td>
+                                            <td>${det.port_consumption || 'N/A'}</td>
+                                            <td>${det.ets_sum || 'N/A'}</td>
+                                        </tr>
+                                    `).join('')}
+                                </tbody>
+                            </table>
+                        </td>
+                    `;
+                    parentRow.insertAdjacentElement('afterend', detailRow); // Detay satırını ekle
+                })
+                .catch(error => console.error('Detay verileri alınırken hata oluştu:', error));
+        }
+    }
+});
+
+// Excel dosyasını indirme işlemi
+document.getElementById('exportExcel').addEventListener('click', () => {
+    window.location.href = '/export-excel2'; // Excel dosyasını indir
+});
 
 
-    </script>
+                </script>
+
+
+
+
+
+                <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+                <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+                    integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+                    crossorigin="anonymous"></script>
+                <script src="charts.js"></script>
 
 </body>
+
 </html>
