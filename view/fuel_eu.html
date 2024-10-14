@@ -1,215 +1,137 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vessel Dashboard</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
-    <link rel="stylesheet" href="/static/css/style2.css"> <!-- CSS dosyanız burada yüklü -->
-    <style>
-        /* Fare işaretinin pointer olması için ekledim */
-        .vessel-name {
-            cursor: pointer;
-        }
 
-        .modal-step {
-            display: none;
-        }
-        
-        .modal {
-            display: none; 
-            position: fixed; 
-            z-index: 1; 
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            overflow: auto;
-        }
+    <link rel="stylesheet" href="/static/css/dashboard.css">
 
-        .modal-content {
-            background-color: white;
-            margin: 15% auto;
-            padding: 20px;
-            border: 1px solid #888;
-            width: 60%;
-        }
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Montserrat">
 
-        .modal-step {
-            display: block;
-        }
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
 
-        .modal-step h2 {
-            margin-bottom: 20px;
-        }
-
-        .btn {
-            padding: 10px 20px;
-            margin-top: 20px;
-        }
-
-        /* CSS for hover effect on Vessel Name */
-        #vesselTable tbody tr td.vessel-name:hover {
-            background-color: green;
-            color: white;
-            cursor: pointer;
-        }
-
-        /* Modal styling */
-        .close {
-            color: #aaa;
-            float: right;
-            font-size: 28px;
-            font-weight: bold;
-        }
-        .close:hover, .close:focus {
-            color: black;
-            text-decoration: none;
-            cursor: pointer;
-        }
-    </style>
+    <title>Erkport</title>
 </head>
+
 <body>
-    <!-- SIDEBAR -->
-    <section id="sidebar">
-        <a href="#" class="brand">
-            <i class='bx bxs-smile'></i>
-            <span class="text">Dashboard</span>
-        </a>
-        <ul class="side-menu top">
-            <li class="active">
-                <a href="./">
-                    <i class='bx bxs-dashboard'></i>
-                    <span class="text">DASHBOARD</span>
-                </a>
-            </li>
-            <li>
-                <a href="./ets.html">
-                    <i class='bx bxs-shopping-bag-alt'></i>
-                    <span class="text">ETS</span>
-                </a>
-            </li>
-            <li>
-                <a href="./cii.html">
-                    <i class='bx bxs-shopping-bag-alt'></i>
-                    <span class="text">CII</span>
-                </a>
-            </li>
-            <li>
-                <a href="./fuel_eu.html">
-                    <i class='bx bxs-doughnut-chart'></i>
-                    <span class="text">FUEL EU</span>
-                </a>
-            </li>
-            <li>
-                <a href="./input.html">
-                    <i class='bx bxs-message-dots'></i>
-                    <span class="text">INPUT</span>
-                </a>
-            </li>
-            <li>
-                <a href="./pool.html">
-                    <i class='bx bxs-message-dots'></i>
-                    <span class="text">pool</span>
-                </a>
-            </li>
-        </ul>
-        <ul class="side-menu">
-            <li>
-                <a href="#" class="logout">
-                    <i class='bx bxs-log-out-circle'></i>
-                    <span class="text">Logout</span>
-                </a>
-            </li>
-        </ul>
-    </section>
-    <!-- SIDEBAR -->
 
-    <!-- CONTENT -->
-    <section id="content-dashboard">
-        <!-- NAVBAR -->
-        <nav>
-            <i class='bx bx-menu'></i>
-            <a href="#" class="nav-link">Search</a>
-            <form action="#">
-                <div class="form-input">
-                    <input type="search" placeholder="Search...">
-                    <button type="submit" class="search-btn"><i class='bx bx-search'></i></button>
-                </div>
-            </form>
-            <input type="checkbox" id="switch-mode" hidden>
-            <label for="switch-mode" class="switch-mode"></label>
-            <a href="#" class="notification">
-                <i class='bx bxs-bell'></i>
-            </a>
-        </nav>
-        <!-- NAVBAR -->
+    <div class="container-fluid py-2">
+        <div class="row d-flex">
 
-        <!-- MAIN -->
-        <main>
-            <div class="head-title">
-                <div class="left">
-                    <h1>Dashboard</h1>
-                    <ul class="breadcrumb">
-                        <li>
-                            <a href="#">Dashboard</a>
-                        </li>
-                        <li><i class='bx bx-chevron-right'></i></li>
-                    </ul>
-                </div>
-                <a href="#" id="exportSelected" class="btn btn-success">Export Selected to Excel</a>
-            </div>
+            <div class="container col-sm-12 col-md-3 col-xl-2 mb-sm-5 nav-div">
 
-            <button id="showSelectedVessel" class="btn btn-primary">Show Selected Vessel</button>
-
-            <!-- Modal Structure -->
-            <div id="vesselModal" class="modal">
-                <div class="modal-content">
-                    <span class="close">&times;</span>
-                    <div id="step1" class="modal-step">
-                        <h2>Select Vessels</h2>
-                        <div id="vesselCheckboxes"></div>
-                        <label><input type="checkbox" id="selectAllVessels"> Select All Vessels</label><br><br>
-                        <button id="nextStep" class="btn btn-secondary">Next</button>
-                    </div>
-
-                    <div id="step2" class="modal-step" style="display:none;">
-                        <h2>Select Columns</h2>
-                        <div id="columnCheckboxes">
-                            <label><input type="checkbox" value="duration" checked> Duration</label><br>
-                            <label><input type="checkbox" value="intra_eu" checked> Intra EU</label><br>
-                            <label><input type="checkbox" value="extra_eu" checked> Extra EU</label><br>
-                            <label><input type="checkbox" value="ghg_intensity" checked> GHG Intensity</label><br>
-                            <label><input type="checkbox" value="ghg_target" checked> GHG Target</label><br>
-                            <label><input type="checkbox" value="compliance_balance" checked> Compliance Balance</label>
+                <nav>
+                    <div class="container-fluid">
+                        <div class="navbar-brand col-12">
+                            <img src="/static/image/erk.png" class="w-100" alt="arkas logo">
                         </div>
-                        <button id="showData" class="btn btn-success">Show Data</button>
+
+                        <hr>
+
+                        <div class="container-fluid">
+                            <ul class="menu-links my-2 p-2 col-12">
+                                <li class="nav-item">
+                                    <a class="nav-link" href="index.html">DASHBOARD</a>
+                                </li>
+
+                                <li class="nav-item">
+                                    <a class="nav-link" href="ets.html">ETS</a>
+                                </li>
+
+                                <li class="nav-item">
+                                    <a class="nav-link" href="cıı.html">CII</a>
+                                </li>
+
+                                <li class="nav-item">
+                                    <a class="nav-link" href="fuel-eu.html">FUEL EU</a>
+                                </li>
+
+                                <li class="nav-item">
+                                    <a class="nav-link" href="#">INPUT</a>
+                                </li>
+
+                                <li class="nav-item">
+                                    <a class="nav-link" href="#">POOL</a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="logout-button-div">
+                        <button class="btn btn-danger logout-button fw-bold col-12">Logout</button>
+                    </div>
+
+                </nav>
+            </div>
+
+            <div class="container-fluid col-sm-12 col-md-9 col-xl-10 mt-sm-2 mt-md-2 pt-3 px-4">
+
+                <div class="container header-and-button">
+                    <div class="header">
+                        <h2 class="h2 fw-bold mx-sm-3 mx-xl-4 my-3">Fuel EU Data Table</h2>
+                    </div>
+                    <div class="downland-pdf-button-div">
+                        <button id="exportExcel" class="btn btn-outline-success">Export to Excel</button>
+                    </div>
+                    
+                </div>
+
+
+
+
+                <button id="showModalBtn" class="btn btn-warning mt-4 mb-3">Show Selected Vessels</button>
+
+                <!-- Modal Structure -->
+                <div id="vesselModal" class="modal">
+                    <div class="modal-content">
+                        <span class="close">&times;</span>
+                        <div id="step1" class="modal-step">
+                            <h2>Select Vessels</h2>
+                            <div id="vesselCheckboxes"></div>
+                            <label><input type="checkbox" id="selectAllVessels"> Select All Vessels</label><br><br>
+                            <button id="nextStep" class="btn btn-secondary">Next</button>
+                        </div>
+
+                        <div id="step2" class="modal-step" style="display:none;">
+                            <h2>Select Columns</h2>
+                            <div id="columnCheckboxes">
+                                <label><input type="checkbox" value="duration" checked> Duration</label><br>
+                                <label><input type="checkbox" value="intra_eu" checked> Intra EU</label><br>
+                                <label><input type="checkbox" value="extra_eu" checked> Extra EU</label><br>
+                                <label><input type="checkbox" value="ghg_intensity" checked> GHG Intensity</label><br>
+                                <label><input type="checkbox" value="ghg_target" checked> GHG Target</label><br>
+                                <label><input type="checkbox" value="compliance_balance" checked> Compliance
+                                    Balance</label>
+                            </div>
+                            <button id="showData" class="btn btn-success">Show Data</button>
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            <div class="table-responsive">
-                <table id="vesselTable" class="table table-bordered">
-                    <thead class="table-dark">
-                        <tr id="tableHeaders">
-                            <th class="vessel-name">Vessel Name</th>
-                            <th class="duration">Duration</th>
-                            <th class="intra_eu">Intra EU</th>
-                            <th class="extra_eu">Extra EU</th>
-                            <th class="ghg_intensity">GHG Intensity</th>
-                            <th class="ghg_target">GHG Target</th>
-                            <th class="compliance_balance">Compliance Balance</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <!-- Dinamik veri buraya fetch ile yüklenecek -->
-                    </tbody>
-                </table>
-            </div>
+                <div class="table-responsive">
+                    <table id="vesselTable" class="table table-bordered">
+                        <thead class="table-warning">
+                            <tr id="tableHeaders">
+                                <th class="vessel-name">Vessel Name</th>
+                                <th class="duration">Duration</th>
+                                <th class="intra_eu">Intra EU</th>
+                                <th class="extra_eu">Extra EU</th>
+                                
+                                <th class="ghg_target">GHG Target</th>
+                                <th class="compliance_balance">Compliance Balance</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Dinamik veri buraya fetch ile yüklenecek -->
+                        </tbody>
+                    </table>
+                </div>
 
-            <button id="backToMainTable" class="btn btn-warning" style="display:none;">Back to Main Table</button>
-        </main>
-    </section>
+                <button id="backToMainTable" class="btn btn-warning" style="display:none;">Back to Main Table</button>
+                </main>
+                </section>
 
     <script>
         let originalData = [];
@@ -226,7 +148,7 @@ fetch('/api/get-fuel_eu-data')
 
 // Modal açma ve kapama işlemleri
 const modal = document.getElementById("vesselModal");
-const showSelectedVesselBtn = document.getElementById("showSelectedVessel");
+const showSelectedVesselBtn = document.getElementById("showModalBtn");
 const closeModalBtn = document.querySelector(".close");
 
 showSelectedVesselBtn.onclick = () => {
@@ -332,7 +254,7 @@ function populateTable(data) {
             <td class="duration">${row.duration || 'N/A'}</td>
             <td class="intra_eu">${row.intra_eu || 'N/A'}</td>
             <td class="extra_eu">${row.extra_eu || 'N/A'}</td>
-            <td class="ghg_intensity">${row.ghg_intensity || 'N/A'}</td>
+            
             <td class="ghg_target">${row.ghg_target || 'N/A'}</td>
             <td class="compliance_balance">${row.compliance_balance || 'N/A'}</td>
         `;
@@ -341,38 +263,40 @@ function populateTable(data) {
 }
 
 // Export selected rows to Excel
-document.getElementById('exportSelected').addEventListener('click', function() {
-    // Gather selected vessels from the table
+document.getElementById('exportExcel').addEventListener('click', () => {
     const selectedRows = [];
-    document.querySelectorAll('#vesselTable tbody tr').forEach(row => {
-        if (row.style.display !== 'none') {  // Only export visible rows
-            const rowData = {
-                vessel_name: row.querySelector('.vessel-name').innerText,
-                duration: row.querySelector('.duration').innerText,
-                intra_eu: row.querySelector('.intra_eu').innerText,
-                extra_eu: row.querySelector('.extra_eu').innerText,
-                ghg_intensity: row.querySelector('.ghg_intensity').innerText,
-                ghg_target: row.querySelector('.ghg_target').innerText,
-                compliance_balance: row.querySelector('.compliance_balance').innerText
-            };
-            selectedRows.push(rowData);
-        }
+    const tableHeaders = [];
+
+    // Tablodaki sütun başlıklarını al
+    document.querySelectorAll('#vesselTable thead th').forEach((header, index) => {
+        tableHeaders.push(header.innerText); // Sütun başlıklarını diziye ekliyoruz
     });
 
-    if (selectedRows.length === 0) {
-        alert('Please select at least one row to export.');
-        return;
-    }
+    // Tablodaki verileri al (sadece görünür olanları)
+    document.querySelectorAll('#vesselTable tbody tr').forEach(row => {
+        const rowData = {};
+        row.querySelectorAll('td').forEach((cell, index) => {
+            rowData[tableHeaders[index]] = cell.innerText; // Her hücreyi ilgili sütun başlığıyla eşleştiriyoruz
+        });
+        selectedRows.push(rowData); // Satırı listeye ekliyoruz
+    });
 
-    fetch('/export-selected', {
+    // Verileri sunucuya gönder
+    fetch('/export-selected2', {  // Endpoint doğru olarak ayarlandı
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ selectedRows })
+        body: JSON.stringify({ selectedRows }) // Seçilen satırları JSON formatında gönderiyoruz
     })
-    .then(response => response.blob())
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Excel dosyası indirme hatası');
+        }
+        return response.blob(); // Excel dosyasını blob olarak alıyoruz
+    })
     .then(blob => {
+        // Excel dosyasını indirmek için URL oluşturuyoruz
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
@@ -382,7 +306,7 @@ document.getElementById('exportSelected').addEventListener('click', function() {
         a.remove();
     })
     .catch(error => {
-        console.error('Error exporting data:', error);
+        console.error('Excel export hatası:', error);
     });
 });
 

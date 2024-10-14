@@ -945,7 +945,7 @@ app.post('/export-excel2', (req, res) => {
   }
 });
 
-app.post('/export-selected', (req, res) => {
+app.post('/export-selected2', (req, res) => {
   const { selectedRows } = req.body;
 
   if (!selectedRows || selectedRows.length === 0) {
