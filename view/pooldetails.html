@@ -1,96 +1,129 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard</title>
-    <link rel="icon" href="/static/image/favicon-16x16.png" type="image/x-icon">
-    
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="/static/css/style2.css">
+
+    <link rel="stylesheet" href="/static/css/dashboard.css">
+
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Montserrat">
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+
+    <title>Erkport</title>
 </head>
+
 <body>
-    <!-- SIDEBAR -->
-    <section id="sidebar" class="sidebar bg-light">
-        <a href="#" class="brand">
-            <i class='bx bxs-smile'></i>
-            <span class="text">Dashboard</span>
-        </a>
-        <ul class="side-menu top">
-            <li class="active">
-                <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                    Optimizasyon
-                </a>
-                <ul class="dropdown-menu">
-                    <li><a class="dropdown-item" href="./dashboard.html">DASHBOARD</a></li>
-                    <li><a class="dropdown-item" href="./ets.html">ETS</a></li>
-                    <li><a class="dropdown-item" href="./cii.html">CII</a></li>
-                    <li><a class="dropdown-item" href="./fuel_eu.html">FUEL EU</a></li>
-                    <li><a class="dropdown-item" href="./input.html">ADD VESSEL</a></li>
-                    <li><a class="dropdown-item" href="./pool.html">Pool</a></li>
-                    <li><a class="dropdown-item" href="./pooldetails.html">Pool Details</a></li>
-                </ul>
-            </li>
-        </ul>
-    </section>
-    <!-- SIDEBAR -->
 
-    <!-- CONTENT -->
-    <section id="content-dashboard" class="content">
-        <main>
-            <div class="head-title">
-                <h1>Dashboard</h1>
-                <ul class="breadcrumb">
-                    <li><a href="#">Dashboard</a></li>
-                    <li><i class='bx bx-chevron-right'></i></li>
-                </ul>
-                <a href="/export-excel" class="btn btn-success">Export to Excel</a>
-            </div>
-            <div class="head-title">
-                <h1>Pool Details</h1>
-            </div>
+    <div class="container-fluid py-2">
+        <div class="row d-flex">
 
-            <div class="table-responsive mt-4">
-                <table id="poolTable" class="table table-striped">
-                    <thead>
-                        <tr>
-                            <th>Pool Name</th>
-                            <th>Total Compliance Balance</th>
-                            <th>Action</th> <!-- Delete button for action -->
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <!-- Dynamic content will be inserted here by JavaScript -->
-                    </tbody>
-                </table>
+            <div class="container col-sm-12 col-md-3 col-xl-2 mb-sm-5 nav-div">
+
+                <nav>
+                    <div class="container-fluid">
+                        <div class="navbar-brand col-12">
+                            <img src="/static/image/erk.png" class="w-100" alt="arkas logo">
+                        </div>
+
+                        <hr>
+
+                        <div class="container-fluid">
+                            <ul class="menu-links my-2 p-2 col-12">
+                                <li class="nav-item">
+                                    <a class="nav-link" href="./">DASHBOARD</a>
+                                </li>
+
+                                <li class="nav-item">
+                                    <a class="nav-link" href="./ets.html">ETS</a>
+                                </li>
+
+                                <li class="nav-item">
+                                    <a class="nav-link" href="./cii.html">CII</a>
+                                </li>
+
+                                <li class="nav-item">
+                                    <a class="nav-link" href="./fuel_eu.html">FUEL EU</a>
+                                </li>
+
+                                <li class="nav-item">
+                                    <a class="nav-link" href="./input.html">INPUT</a>
+                                </li>
+
+                                <li class="nav-item">
+                                    <a class="nav-link" href="./pool.html">POOL</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" href="./pooldetails.html">POOL DETAILS</a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="logout-button-div">
+                        <button class="btn btn-danger logout-button fw-bold col-12">Logout</button>
+                    </div>
+
+                </nav>
             </div>
 
-            <div class="table-responsive mt-4">
-                <table id="poolDetailTable" class="table table-striped" style="display:none;">
-                    <thead>
-                        <tr>
-                            <th>Vessel Name</th>
-                            <th>Sefer Tekrar Sayısı</th>
-                            <th>Leg Durumu</th>
-                            <th>Current Leg</th>
-                            <th>Total Distance</th>
-                            <th>ECA Distance</th>
-                            <th>Sea Fuel Consumption</th>
-                            <th>ECA Fuel Consumption</th>
-                            <th>Port Fuel Consumption</th>
-                            <th>ETS</th>
-                            <th>Compliance Balance</th>
-                            <th>Created At</th>
-                        </tr>
-                    </thead>
-                    <tbody id="poolDetailBody">
-                        <!-- Pool details will be dynamically inserted here -->
-                    </tbody>
-                </table>
-            </div>
-        </main>
-    </section>
+            <div class="container-fluid col-sm-12 col-md-9 col-xl-10 mt-sm-2 mt-md-2 pt-3 px-4">
 
+                <div class="container header-and-button">
+                    <div class="header">
+                        <h2 class="h2 fw-bold mx-sm-3 mx-xl-4 my-3">Pool Details</h2>
+                    </div>
+                    <div class="downland-pdf-button-div">
+                        <button class="btn btn-outline-success">Export to Excel</button>
+                    </div>
+                </div>
+
+
+
+
+                <div class="table-responsive mt-4">
+                    <table id="poolTable" class="table table-warning">
+                        <thead>
+                            <tr>
+                                <th>Pool Name</th>
+                                <th>Total Compliance Balance</th>
+                                <th>Action</th> <!-- Delete button for action -->
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Dynamic content will be inserted here by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+    
+                <div class="table-responsive mt-4">
+                    <table id="poolDetailTable" class="table table-warning " style="display:none; max-height: 440px; overflow-y: auto;">
+                        <thead>
+                            <tr>
+                                <th>Vessel Name</th>
+                                <th>Voyage Repetition Count</th>
+                                <th>Leg Status</th>
+                                <th>Current Leg</th>
+                                <th>Total Distance</th>
+                                <th>ECA Distance</th>
+                                <th>Sea Fuel Consumption</th>
+                                <th>ECA Fuel Consumption</th>
+                                <th>Port Fuel Consumption</th>
+                                <th>ETS</th>
+                                <th>Compliance Balance</th>
+                                <th>Created At</th>
+                            </tr>
+                        </thead>
+                        <tbody id="poolDetailBody">
+                            <!-- Pool details will be dynamically inserted here -->
+                        </tbody>
+                    </table>
+                </div>
+            </main>
+        </section>
+    
     <!-- JavaScript Section -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
